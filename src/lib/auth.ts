@@ -98,6 +98,19 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       }
       return session;
     },
+    async redirect({ url, baseUrl }) {
+      if (url.startsWith("/")) return url;
+      try {
+        const parsed = new URL(url);
+        if (parsed.hostname === "localhost" || parsed.hostname === "127.0.0.1") {
+          return `${parsed.pathname}${parsed.search}`;
+        }
+        if (parsed.origin === baseUrl) return url;
+      } catch {
+        // fallback to relative if valid
+      }
+      return url.startsWith("/") ? url : baseUrl;
+    },
   },
   trustHost: true,
 });

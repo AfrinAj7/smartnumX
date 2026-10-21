@@ -1,3 +1,4 @@
+import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 import { ZodError } from "zod";
 import { auth } from "@/lib/auth";
@@ -34,6 +35,7 @@ export async function PUT(request: Request) {
 
   try {
     const content = await saveHomepageContent(await request.json(), actor.id, db);
+    revalidatePath("/");
     return NextResponse.json({ data: content }, {
       headers: { "Cache-Control": "private, no-store" },
     });
