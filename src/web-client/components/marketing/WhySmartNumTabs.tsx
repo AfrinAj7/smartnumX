@@ -3,194 +3,233 @@
 import Image from "next/image";
 import { useState } from "react";
 
-type FeatureTab = {
+type FeatureCategory = {
   id: string;
-  title: string;
-  subtitle: string;
-  description: string;
-  highlights: string[];
+  tabLabel: string;
   icon: string;
+  eyebrow: string;
+  heading: string;
+  description: string;
+  checklist: string[];
+  thumbnailUrl: string;
+  youtubeId: string;
 };
 
-const whySmartNumFeatures: FeatureTab[] = [
+const whySmartNumFeatures: FeatureCategory[] = [
   {
-    id: "hands-on",
-    title: "Hands-on Practical & Conceptual Maths",
-    subtitle: "Visualizing abstract mathematical concepts",
+    id: "conceptual-maths",
+    tabLabel: "Conceptual Maths",
+    icon: "∑",
+    eyebrow: "VISUALIZING ABSTRACT MATHEMATICAL CONCEPTS",
+    heading: "Hands-on Practical & Conceptual Maths",
     description:
       "We replace rote memorization with worked examples, geometric visualization, and step-by-step problem breakdown so students understand why formulas work.",
-    highlights: [
+    checklist: [
       "Concept breakdown before numerical problem solving",
       "Interactive smart classroom visualizations",
       "Step-by-step worked solutions for complex topics",
     ],
-    icon: "∑",
+    thumbnailUrl: "/images/smartnum images2.gif",
+    youtubeId: "yXpQo9168C4",
   },
   {
     id: "cctv-safety",
-    title: "Safe CCTV-Enabled Campus Smart Class",
-    subtitle: "Complete safety, transparency, and comfort",
-    description:
-      "Air-conditioned smart classrooms equipped with 24/7 CCTV surveillance ensure a comfortable, secure, and focused environment for every learner.",
-    highlights: [
-      "Full CCTV coverage across all learning spaces",
-      "Air-conditioned smart classrooms with digital aids",
-      "Transparent environment for parent peace of mind",
-    ],
+    tabLabel: "Smart Class & CCTV",
     icon: "🏛️",
+    eyebrow: "SAFETY, TRANSPARENCY & FOCUSED LEARNING",
+    heading: "Safe CCTV-Enabled Campus & Smart Class",
+    description:
+      "Air-conditioned smart classrooms equipped with 24/7 CCTV surveillance ensure a comfortable, secure, and focused learning environment for every learner in Indirapuram.",
+    checklist: [
+      "Full CCTV coverage across all learning spaces",
+      "Air-conditioned smart classrooms with digital boards",
+      "Transparent learning spaces for parent peace of mind",
+    ],
+    thumbnailUrl: "/images/smartnum images2.gif",
+    youtubeId: "yXpQo9168C4",
   },
   {
     id: "worksheets",
-    title: "Worksheets & Periodic Practice Sets",
-    subtitle: "Purposeful practice tailored to board syllabus",
+    tabLabel: "Curated Worksheets",
+    icon: "📝",
+    eyebrow: "PURPOSEFUL PRACTICE TAILORED TO BOARDS",
+    heading: "Worksheets & Periodic Practice Sets",
     description:
       "Curated study material, chapter-wise worksheets, and homework review sets designed specifically for CBSE, ICSE, State Boards, and competitive exams.",
-    highlights: [
+    checklist: [
       "Chapter-wise curated practice worksheets",
       "NCERT & Board exam past paper practice",
       "Graded difficulty levels from basic to advanced",
     ],
-    icon: "📝",
+    thumbnailUrl: "/images/smartnum images2.gif",
+    youtubeId: "yXpQo9168C4",
   },
   {
     id: "report-cards",
-    title: "Personalised Progress Report Cards",
-    subtitle: "Data-driven performance tracking for each student",
+    tabLabel: "Progress Cards",
+    icon: "📊",
+    eyebrow: "DATA-DRIVEN PERFORMANCE TRACKING",
+    heading: "Personalised Progress Report Cards",
     description:
       "Every student receives a tailor-made progress card tracking attendance, test scores, strength areas, and topics needing extra attention.",
-    highlights: [
+    checklist: [
       "Monthly performance and progress report cards",
       "Attendance and test score tracking",
       "Actionable recommendations for improvement",
     ],
-    icon: "📊",
+    thumbnailUrl: "/images/smartnum images2.gif",
+    youtubeId: "yXpQo9168C4",
   },
   {
     id: "doubt-sessions",
-    title: "Mock Exams & 1-on-1 Doubt Sessions",
-    subtitle: "Dedicated individual support before every exam",
+    tabLabel: "1-on-1 Doubts & Mocks",
+    icon: "🎯",
+    eyebrow: "DEDICATED INDIVIDUAL SUPPORT",
+    heading: "Mock Exams & 1-on-1 Doubt Sessions",
     description:
       "Regular exam-pattern mock tests combined with one-to-one doubt clearing sessions ensure students walk into exam halls with absolute confidence.",
-    highlights: [
+    checklist: [
       "Dedicated 1-on-1 doubt clearing appointments",
       "Board & IIT-JEE pattern mock examination series",
       "Detailed answer key breakdown and error analysis",
     ],
-    icon: "🎯",
+    thumbnailUrl: "/images/smartnum images2.gif",
+    youtubeId: "yXpQo9168C4",
   },
 ];
 
 export function WhySmartNumTabs() {
-  const [activeTabId, setActiveTabId] = useState<string>("hands-on");
-  const [openMobileAccordion, setOpenMobileAccordion] = useState<string>("hands-on");
+  // Default to the CCTV safety & smart class tab per specification requirement #6
+  const [activeTabId, setActiveTabId] = useState<string>("cctv-safety");
+  const [isPlayingVideo, setIsPlayingVideo] = useState<boolean>(false);
 
-  const activeFeature = whySmartNumFeatures.find((item) => item.id === activeTabId) ?? whySmartNumFeatures[0];
+  const activeFeature =
+    whySmartNumFeatures.find((item) => item.id === activeTabId) ?? whySmartNumFeatures[1];
+
+  function handleTabSelect(id: string) {
+    setActiveTabId(id);
+    setIsPlayingVideo(false);
+  }
 
   return (
     <div className="why-smartnum-wrapper">
-      {/* Desktop Tabs Navigation */}
-      <div className="why-desktop-tabs" role="tablist" aria-label="Why choose SmartNum">
+      {/* 5 Feature Navigation Tabs in a single, well-aligned row */}
+      <div
+        className="why-feature-tabs-row"
+        role="tablist"
+        aria-label="SmartNum Academic Excellence Categories"
+      >
         {whySmartNumFeatures.map((item) => {
+          const isSelected = activeTabId === item.id;
           const tabId = `why-tab-${item.id}`;
           const panelId = `why-panel-${item.id}`;
-          const isSelected = activeTabId === item.id;
 
           return (
             <button
-              key={`tab-btn-${item.id}`}
+              key={item.id}
               id={tabId}
               type="button"
               role="tab"
               aria-selected={isSelected}
               aria-controls={panelId}
-              className={isSelected ? "why-tab-btn is-active" : "why-tab-btn"}
-              onClick={() => setActiveTabId(item.id)}
+              className={`why-feature-tab ${isSelected ? "is-active" : ""}`}
+              onClick={() => handleTabSelect(item.id)}
             >
-              <span className="why-tab-icon" aria-hidden="true">{item.icon}</span>
-              <span className="why-tab-text">{item.title}</span>
+              <span className="tab-icon" aria-hidden="true">
+                {item.icon}
+              </span>
+              <span className="tab-label">{item.tabLabel}</span>
             </button>
           );
         })}
       </div>
 
-      {/* Desktop Tab Panel */}
+      {/* Main 16:9 Presentation Card (2 Columns: ~48% Text, ~52% Video) */}
       <div
         id={`why-panel-${activeFeature.id}`}
         role="tabpanel"
         aria-labelledby={`why-tab-${activeFeature.id}`}
-        className="why-desktop-panel"
+        className="why-content-card"
       >
-        <div className="why-panel-content">
-          <span className="section-kicker">{activeFeature.subtitle}</span>
-          <h3>{activeFeature.title}</h3>
-          <p>{activeFeature.description}</p>
-          <ul className="why-highlights-list">
-            {activeFeature.highlights.map((highlight) => (
+        {/* Left Column (Text, Heading, Checklist, CTA) */}
+        <div className="why-card-text-col">
+          <span className="why-card-eyebrow">{activeFeature.eyebrow}</span>
+          <h3 className="why-card-heading">{activeFeature.heading}</h3>
+          <p className="why-card-desc">{activeFeature.description}</p>
+
+          <ul className="why-checklist" aria-label="Feature highlights">
+            {activeFeature.checklist.map((highlight) => (
               <li key={highlight}>
-                <span className="check-mark" aria-hidden="true">✓</span>
+                <span className="gold-check-icon" aria-hidden="true">
+                  ✓
+                </span>
                 <span>{highlight}</span>
               </li>
             ))}
           </ul>
-          <a className="button button-demo" href="#book-demo">
-            Book a free demo class <span aria-hidden="true">↗</span>
-          </a>
-        </div>
-        <div className="why-panel-visual">
-          <Image
-            className="why-visual-bg"
-            src="/images/smartnum images2.gif"
-            alt="SmartNum Air-conditioned Smart Classroom Indirapuram"
-            fill
-            sizes="380px"
-            unoptimized
-          />
+
+          <div className="why-cta-wrap">
+            <a className="button-gold-cta" href="#book-demo">
+              Book a Free Demo Class <span className="btn-arrow" aria-hidden="true">→</span>
+            </a>
+          </div>
         </div>
 
-        {/* Mobile Accordion (Different Unique DOM IDs) */}
-        <div className="why-mobile-accordion" aria-label="Why choose SmartNum accordion">
-          {whySmartNumFeatures.map((item) => {
-            const accBtnId = `why-acc-btn-${item.id}`;
-            const accPanelId = `why-acc-panel-${item.id}`;
-            const isOpen = openMobileAccordion === item.id;
-
-            return (
-              <div key={`acc-item-${item.id}`} className={isOpen ? "why-acc-item is-open" : "why-acc-item"}>
+        {/* Right Column (16:9 Video Presentation) */}
+        <div className="why-card-video-col">
+          <div className="why-video-box">
+            {isPlayingVideo ? (
+              <div className="why-video-active-frame">
+                <iframe
+                  src={`https://www.youtube-nocookie.com/embed/${activeFeature.youtubeId}?autoplay=1&rel=0`}
+                  title={`${activeFeature.heading} video player`}
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  className="why-video-iframe"
+                />
                 <button
-                  id={accBtnId}
                   type="button"
-                  className="why-acc-header"
-                  aria-expanded={isOpen}
-                  aria-controls={accPanelId}
-                  onClick={() => setOpenMobileAccordion(isOpen ? "" : item.id)}
+                  className="why-video-close-btn"
+                  onClick={() => setIsPlayingVideo(false)}
+                  aria-label="Close video and return to preview"
                 >
-                  <span className="why-acc-title">
-                    <span className="why-acc-icon" aria-hidden="true">{item.icon}</span>
-                    {item.title}
-                  </span>
-                  <span className="why-acc-chevron" aria-hidden="true">{isOpen ? "−" : "+"}</span>
+                  ✕ Close
                 </button>
-
-                {isOpen && (
-                  <div id={accPanelId} role="region" aria-labelledby={accBtnId} className="why-acc-body">
-                    <span className="section-kicker">{item.subtitle}</span>
-                    <p>{item.description}</p>
-                    <ul className="why-highlights-list">
-                      {item.highlights.map((highlight) => (
-                        <li key={`acc-${item.id}-${highlight}`}>
-                          <span className="check-mark" aria-hidden="true">✓</span>
-                          <span>{highlight}</span>
-                        </li>
-                      ))}
-                    </ul>
-                    <a className="button button-demo button-sm" href="#book-demo">
-                      Book a free demo
-                    </a>
-                  </div>
-                )}
               </div>
-            );
-          })}
+            ) : (
+              <div className="why-video-poster-box">
+                <Image
+                  src={activeFeature.thumbnailUrl}
+                  alt={`${activeFeature.heading} classroom preview`}
+                  fill
+                  className="why-video-poster-img"
+                  sizes="(max-width: 900px) 100vw, 620px"
+                  priority
+                />
+                <div className="why-video-gradient-overlay" />
+
+                {/* Elegant "Watch Our Teaching Approach" Badge */}
+                <span className="why-watch-badge">
+                  <span className="badge-play-icon" aria-hidden="true">
+                    ▶
+                  </span>
+                  Watch Our Teaching Approach
+                </span>
+
+                {/* Centered Golden Play Button */}
+                <button
+                  type="button"
+                  className="why-center-play-btn"
+                  onClick={() => setIsPlayingVideo(true)}
+                  aria-label={`Play video: ${activeFeature.heading}`}
+                >
+                  <span className="play-triangle" aria-hidden="true">
+                    ▶
+                  </span>
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

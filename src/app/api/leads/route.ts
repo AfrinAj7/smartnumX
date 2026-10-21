@@ -21,7 +21,7 @@ export async function POST(request: Request) {
 
   try {
     await createDemoLead(await request.json(), db);
-    return NextResponse.json({ data: { message: "Thanks. The Ziel team will be in touch." } }, { status: 201 });
+    return NextResponse.json({ data: { message: "Thanks. The SmartNum team will be in touch." } }, { status: 201 });
   } catch (error) {
     if (error instanceof ZodError) {
       return NextResponse.json({ error: error.flatten() }, { status: 422 });

@@ -9,6 +9,7 @@ import { SiteFooter } from "@/web-client/components/layout/SiteFooter";
 import { SiteHeader } from "@/web-client/components/layout/SiteHeader";
 import { MobileFloatingActions } from "@/web-client/components/marketing/MobileFloatingActions";
 import { ScrollRevealProvider } from "@/web-client/components/animation/ScrollRevealProvider";
+import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { getHomepageContent } from "@/server/site-content/homepage";
 
@@ -20,12 +21,13 @@ const learningSteps = [
 ];
 
 export async function SmartNumLandingView() {
-  const content = await getHomepageContent(db);
+  const [content, session] = await Promise.all([
+    getHomepageContent(db),
+    auth(),
+  ]);
   const questions = content.faqs.filter((faq) => faq.published);
   const contactPhone = content.contact.phone || process.env.NEXT_PUBLIC_SITE_PHONE || "+91 99589 47774";
-  const contactEmail = content.contact.email || process.env.NEXT_PUBLIC_SITE_EMAIL || "gosmartnum@gmail.com";
   const whatsappNumber = content.contact.whatsapp || process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "+91 99589 47774";
-  const whatsappHref = whatsappNumber.replace(/\D/g, "");
 
   const faqStructuredData = {
     "@context": "https://schema.org",
@@ -37,9 +39,18 @@ export async function SmartNumLandingView() {
     })),
   };
 
+  const navUser = session?.user
+    ? {
+        id: session.user.id,
+        name: session.user.name,
+        email: session.user.email,
+        role: session.user.role,
+      }
+    : null;
+
   return (
     <div className="site-home">
-      <SiteHeader phone={contactPhone} whatsappNumber={whatsappNumber} />
+      <SiteHeader phone={contactPhone} whatsappNumber={whatsappNumber} user={navUser} />
       <ScrollRevealProvider>
         <main>
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqStructuredData).replace(/</g, "\\u003c") }} />
@@ -95,11 +106,17 @@ export async function SmartNumLandingView() {
             </div>
 
             <div className="why-main-content">
-              <div className="section-heading section-heading-row why-header-row">
-                <div>
-                  <span className="section-kicker">Academic Excellence</span>
-                  <h2 id="why-title">Make the method clear, then practise it.</h2>
+              <div className="why-header-area">
+                <div className="why-eyebrow-wrap">
+                  <span className="why-gold-dash" aria-hidden="true" />
+                  <span className="why-eyebrow-text">ACADEMIC EXCELLENCE</span>
                 </div>
+                <h2 id="why-title" className="why-headline">
+                  Make the method clear, <span className="why-gold-highlight">then practise it.</span>
+                </h2>
+                <p className="why-subheadline">
+                  Visual worked examples, dedicated faculty guidance, and structured problem breakdown so students understand why formulas work.
+                </p>
               </div>
 
               <WhySmartNumTabs />
@@ -107,13 +124,20 @@ export async function SmartNumLandingView() {
           </div>
         </section>
 
-        {/* Course Explorer */}
+        {/* Course Explorer / Academic Programmes */}
         <section className="explore-section" id="course-explorer" aria-labelledby="explore-title">
-          <div className="section-wrap explore-layout">
-            <div className="section-heading explore-heading">
-              <span className="section-kicker">Our programmes</span>
-              <h2 id="explore-title">Find a useful next step in mathematics.</h2>
-              <p>SmartNum programmes for Classes 9–12th, Any Board, Foundational Courses, IIT-JEE Mains &amp; Advanced, and Olympiads.</p>
+          <div className="section-wrap explore-container">
+            <div className="explore-header-center">
+              <div className="explore-kicker-wrap">
+                <span className="explore-kicker-dash" aria-hidden="true" />
+                <span className="explore-kicker-text">ACADEMIC PROGRAMMES</span>
+              </div>
+              <h2 id="explore-title" className="explore-headline">
+                Find your next step in mathematics
+              </h2>
+              <p className="explore-subheadline">
+                Programmes for Classes 9 to 12, any board, from first principles to JEE and Olympiad problems.
+              </p>
             </div>
             <CourseExplorer />
           </div>
