@@ -3,7 +3,7 @@ import Link from "next/link";
 export function AdminDashboardView() {
   const kpis = [
     { title: "Total Students", value: "1,000+", subtitle: "Enrolled across all boards", change: "+12% this month", icon: "🎓", color: "blue" },
-    { title: "Active Programs", value: "6", subtitle: "Classes 10–12, JEE", change: "4 Active Boards", icon: "📚", color: "green" },
+    { title: "Active Programs", value: "6", subtitle: "Classes 9–12, JEE", change: "4 Active Boards", icon: "📚", color: "green" },
     { title: "Demo Requests / Leads", value: "New Requests", subtitle: "Website demo inquiries", change: "Lead capture active", icon: "📥", color: "orange" },
     { title: "Faculty & Tutors", value: "75+", subtitle: "Verified subject experts", change: "Active across batches", icon: "👨‍🏫", color: "purple" },
   ];
