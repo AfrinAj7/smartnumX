@@ -2,10 +2,20 @@ import { Prisma, PrismaClient } from "@prisma/client";
 import { z } from "zod";
 
 const text = z.string().trim().max(4000);
-const mediaUrl = z.string().trim().max(2048).refine(
+const mediaUrl = z.preprocess((val) => {
+  if (typeof val !== "string") return "";
+  const trimmed = val.trim();
+  if (!trimmed) return "";
+  if (/^https?:\/\//i.test(trimmed)) return trimmed;
+  if (trimmed.startsWith("/")) return trimmed;
+  if (!trimmed.includes(":") && !trimmed.startsWith("//")) {
+    return `/${trimmed}`;
+  }
+  return trimmed;
+}, z.string().trim().max(2048).refine(
   (value) => value === "" || value.startsWith("/") || /^https?:\/\//i.test(value),
   "Use a site-relative or HTTPS media URL.",
-);
+));
 
 const heroSlideSchema = z.object({
   eyebrow: text.max(120),
@@ -57,10 +67,10 @@ const curriculumSchema = z.object({
 });
 
 const facultySchema = z.object({
-  name: text.max(100),
-  subject: text.max(100),
-  qualification: text.max(140),
-  experience: text.max(80),
+  name: text.max(250),
+  subject: text.max(250),
+  qualification: text.max(1000),
+  experience: text.max(1000),
   photoUrl: mediaUrl,
   approved: z.boolean(),
 });
@@ -101,12 +111,13 @@ export const homepageContentSchema = z.object({
   curricula: z.array(curriculumSchema).max(10),
   aboutHeadline: text.max(140),
   aboutParagraphs: z.array(text.max(1000)).max(5),
-  faculty: z.array(facultySchema).max(12),
+  faculty: z.array(facultySchema).max(50),
   testimonials: z.array(testimonialSchema).max(20),
   faqs: z.array(faqSchema).max(20),
   demoVideos: z.array(demoVideoSchema).max(12),
   contact: z.object({
     address: text.max(240),
+    mapsUrl: mediaUrl.optional().default("https://share.google/8gHRuZQQxRuYAkqVd"),
     phone: text.max(40),
     secondaryPhone: text.max(40),
     email: z.string().trim().email().max(254),
@@ -239,8 +250,78 @@ export const DEFAULT_HOMEPAGE_CONTENT: HomepageContent = {
     "Our campus features air-conditioned smart classrooms, full CCTV surveillance, small batch sizes, self-paced recorded learning paths, and 1-on-1 doubt clearing sessions.",
     "We believe in continuous assessment, curated study materials, and transparent progress reports for parents. Contact us to schedule a free demo session."
   ],
-  faculty: [],
-  testimonials: [],
+  faculty: [
+    {
+      name: "Dr. Sweta Agrawal",
+      subject: "Higher Mathematics & Competitive Exams",
+      qualification: "Ph.D. | M.Sc in Mathematics | Assistant Professor | Lead Educator",
+      experience:
+        "Accomplished mathematician and researcher with a Ph.D. in Mathematics and extensive academic experience as an Assistant Professor. She specializes in breaking down complex concepts for Board exams, IIT-JEE Mains & Advanced, and Olympiad aspirants through conceptual clarity and first principles.",
+      photoUrl:
+        "https://content.jdmagicbox.com/v2/comp/meerut/y7/9999px121.x121.240511122551.s5y7/catalogue/dr-shweta-agarwal-garh-rd-meerut-meerut-cancer-hospitals-pftrp2h0ro.jpg",
+      approved: true,
+    },
+    {
+      name: "Senior JEE Problem-Solving Specialist",
+      subject: "Advanced Mathematics & JEE Mains / Advanced",
+      qualification: "M.Tech / M.Sc Mathematics · 10+ Years Mentorship",
+      experience:
+        "Specialized in multi-concept synthesis linking coordinate geometry, algebra, and vectors. Expert in error-reduction techniques and time management strategies for IIT-JEE aspirants.",
+      photoUrl: "/images/why-smartnum-tutor.jpg",
+      approved: true,
+    },
+    {
+      name: "Foundation & Olympiad Mentor",
+      subject: "Mathematics & Logical Reasoning (Classes 9–10)",
+      qualification: "B.Tech & Olympiad Coach · 8+ Years Experience",
+      experience:
+        "Dedicated to building rock-solid mathematical intuition for Classes 9 and 10 students. Focuses on elimination of fear in algebra, geometry proofs, and Olympiad-level puzzle solving.",
+      photoUrl: "/images/Confident Mathematics Teacher Portrait.png",
+      approved: true,
+    },
+  ],
+  testimonials: [
+    {
+      name: "Arnav Goel",
+      quote:
+        "Shweta ma'am is the reason I survived through jee period. I am currently studying at IIT Kanpur, and Shweta ma'am is still one of the best teacher's I've had. I would definitely recommend joining this tuition for JEE and boards.",
+      approved: true,
+      relation: "Student",
+      learnerClass: "JEE",
+    },
+    {
+      name: "Jaydeep Kumar Verma",
+      quote:
+        "The Magician Of Mathematics, How Easily sweta mam teaches us just look so smooth.",
+      approved: true,
+      relation: "Student",
+      learnerClass: "12",
+    },
+    {
+      name: "Ananya Goel",
+      quote:
+        "The best tuition you can take for maths! Shweta ma'am is the reason I cracked JEE Advance to get into IIT! Also I got 99% in maths in 12th due to her giving us many tests for practise!\n\nRecommended for any student taking up PCM in 12th or preparing for IIT JEE",
+      approved: true,
+      relation: "Student",
+      learnerClass: "IIT JEE",
+    },
+    {
+      name: "Nibha B",
+      quote:
+        "Studying at SmartNum Maths Academy completely transformed my JEE preparation. Shweta ma'am focuses heavily on concept clarity and previous year questions (PYQs). Thanks to her rigorous practice tests and personalized doubt-clearing sessions, I was able to clear JEE Advanced and secure a seat at IIT. Highly recommend for anyone looking for the best math coaching for Class 11 and 12!",
+      approved: true,
+      relation: "Student",
+      learnerClass: "12",
+    },
+    {
+      name: "Afrin J",
+      quote:
+        "If you want to excel in Class 12 CBSE Maths, SmartNum is the perfect place. Shweta ma'am provides excellent study material and conducts regular chapter-wise mock tests that build real confidence. I scored a 99% in my board exams entirely because of her dedicated guidance. She is undoubtedly one of the best math teachers for PCM students.",
+      approved: true,
+      relation: "Student",
+      learnerClass: "12",
+    },
+  ],
   faqs: [
     { question: "Which classes and competitive exams does SmartNum support?", answer: "SmartNum supports Classes 9th to 12th for Any Board, along with targeted preparation for Foundational Courses, IIT-JEE Mains, IIT-JEE Advanced, and Olympiads.", published: true },
     { question: "Which educational boards are covered?", answer: "We cover Any Board including CBSE, ICSE/ISC, UP State Board, and IB/IGCSE international curricula.", published: true },
@@ -250,9 +331,38 @@ export const DEFAULT_HOMEPAGE_CONTENT: HomepageContent = {
     { question: "How do batch sizes work at SmartNum?", answer: "We maintain small batch sizes to ensure every student receives personalized attention and teacher interaction.", published: true },
     { question: "Where is SmartNum located and how can I book a free demo?", answer: "We are located at 04224, ATS Advantage, Indirapuram, Ghaziabad, UP - 201014. You can book a free demo class by submitting our online form or calling +91 99589 47774 / +91 88004 05640.", published: true },
   ],
-  demoVideos: [],
+  demoVideos: [
+    {
+      title: "Class 10 Board Excellence: Visualizing Quadratic Equations",
+      subject: "Mathematics",
+      classLabel: "Class 10 · Board Exam Prep",
+      videoUrl: "https://www.youtube.com/watch?v=yXpQo9168C4",
+      thumbnailUrl: "/images/smartnum-classroom-backdrop.jpg",
+      altText: "SmartNum Class 10 Mathematics demo class",
+      published: true,
+    },
+    {
+      title: "Foundations of Calculus: Limits & First Principles",
+      subject: "Mathematics",
+      classLabel: "Class 11 & 12 · Core Calculus",
+      videoUrl: "https://www.youtube.com/watch?v=yXpQo9168C4",
+      thumbnailUrl: "/images/Students in a Bright EdTech Wave Background.png",
+      altText: "SmartNum Class 11 and 12 Calculus lecture preview",
+      published: true,
+    },
+    {
+      title: "IIT-JEE Advanced Mentorship: Multi-Concept Problem Breakdown",
+      subject: "IIT-JEE Maths",
+      classLabel: "Target JEE Mains & Advanced",
+      videoUrl: "https://www.youtube.com/watch?v=yXpQo9168C4",
+      thumbnailUrl: "/images/why-smartnum-tutor.jpg",
+      altText: "SmartNum IIT-JEE advanced problem solving demo",
+      published: true,
+    },
+  ],
   contact: {
     address: "04224, ATS Advantage, Indirapuram, Ghaziabad, UP - 201014",
+    mapsUrl: "https://share.google/8gHRuZQQxRuYAkqVd",
     phone: "+91 99589 47774",
     secondaryPhone: "+91 88004 05640",
     email: "gosmartnum@gmail.com",

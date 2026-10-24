@@ -95,6 +95,27 @@ export function SiteContentEditor({ initialContent }: { initialContent: Homepage
     setNotice("");
   }
 
+  function formatErrorMessage(err: unknown): string {
+    if (!err) return "An unexpected error occurred.";
+    if (typeof err === "string") return err;
+    if (typeof err === "object" && err !== null) {
+      const errObj = err as Record<string, unknown>;
+      if (errObj.fieldErrors && typeof errObj.fieldErrors === "object") {
+        const list = Object.entries(errObj.fieldErrors as Record<string, unknown>).map(([field, errs]) => {
+          const fieldClean = field.replace(/\./g, " > ");
+          const msgs = Array.isArray(errs) ? errs.join(", ") : String(errs);
+          return `${fieldClean}: ${msgs}`;
+        });
+        if (list.length > 0) return list.join(" | ");
+      }
+      if (errObj.formErrors && Array.isArray(errObj.formErrors) && errObj.formErrors.length > 0) {
+        return errObj.formErrors.join(" | ");
+      }
+      if (typeof errObj.message === "string") return errObj.message;
+    }
+    return String(err);
+  }
+
   async function uploadMedia(section: "heroSlides" | "programs" | "curricula" | "faculty" | "demoVideos", index: number, field: string, event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -102,23 +123,20 @@ export function SiteContentEditor({ initialContent }: { initialContent: Homepage
     setError("");
     setNotice("");
     try {
-      const signResponse = await fetch("/api/admin/media-upload", {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await fetch("/api/admin/media-upload", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ fileName: file.name, contentType: file.type, size: file.size }),
+        body: formData,
       });
-      const signed = await signResponse.json();
-      if (!signResponse.ok) throw new Error(signed.error ?? "Could not prepare the upload.");
+      const result = await response.json();
+      if (!response.ok) {
+        throw new Error(formatErrorMessage(result.error) || "Could not upload file.");
+      }
 
-      const uploadResponse = await fetch(signed.data.uploadUrl, {
-        method: "PUT",
-        headers: signed.data.requiredHeaders,
-        body: file,
-      });
-      if (!uploadResponse.ok) throw new Error("Upload failed. Check storage bucket CORS and try again.");
-
-      updateItem(section, index, field, signed.data.mediaUrl);
-      setNotice("Media uploaded. Save homepage changes to publish the new URL.");
+      updateItem(section, index, field, result.data.mediaUrl);
+      setNotice("Media uploaded successfully. Click 'Save homepage changes' to publish.");
     } catch (uploadError) {
       setError(uploadError instanceof Error ? uploadError.message : "Upload failed.");
     } finally {
@@ -138,9 +156,11 @@ export function SiteContentEditor({ initialContent }: { initialContent: Homepage
         body: JSON.stringify(content),
       });
       const result = await response.json();
-      if (!response.ok) throw new Error(result.error?.message ?? "Could not save homepage content.");
+      if (!response.ok) {
+        throw new Error(formatErrorMessage(result.error) || "Could not save homepage content.");
+      }
       setContent(result.data);
-      setNotice("Homepage content saved.");
+      setNotice("Homepage content saved successfully.");
     } catch (saveError) {
       setError(saveError instanceof Error ? saveError.message : "Could not save homepage content.");
     } finally {
@@ -213,6 +233,7 @@ export function SiteContentEditor({ initialContent }: { initialContent: Homepage
                 <TextField label="Brand unit / portal label" value={content.unitLabel} onChange={(value) => updateField("unitLabel", value)} />
                 <TextField label="Tagline" value={content.tagline} onChange={(value) => updateField("tagline", value)} />
                 <TextField label="Address" value={content.contact.address} onChange={(value) => updateContact("address", value)} multiline />
+                <TextField label="Google Maps / Directions URL" value={content.contact.mapsUrl ?? ""} onChange={(value) => updateContact("mapsUrl", value)} />
                 <div className="cms-two-fields"><TextField label="Primary phone" value={content.contact.phone} onChange={(value) => updateContact("phone", value)} /><TextField label="Secondary phone" value={content.contact.secondaryPhone} onChange={(value) => updateContact("secondaryPhone", value)} /></div>
                 <TextField label="Email" value={content.contact.email} onChange={(value) => updateContact("email", value)} />
                 <TextField label="WhatsApp" value={content.contact.whatsapp} onChange={(value) => updateContact("whatsapp", value)} />

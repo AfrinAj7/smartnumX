@@ -11,7 +11,7 @@ export function VisitUsSection({ contact }: { contact: ContactDetails }) {
   const whatsappDigits = whatsapp.replace(/\D/g, "");
 
   const encodedAddress = encodeURIComponent(address);
-  const mapsSearchUrl = `https://www.google.com/maps/search/?api=1&query=${encodedAddress}`;
+  const mapsSearchUrl = contact.mapsUrl || "https://share.google/8gHRuZQQxRuYAkqVd";
 
   return (
     <section className="visit-us-section section-wrap" id="visit-us" aria-labelledby="visit-title">

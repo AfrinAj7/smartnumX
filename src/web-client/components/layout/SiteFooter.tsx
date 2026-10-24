@@ -160,7 +160,7 @@ export function SiteFooter({
               <circle cx="12" cy="10" r="3" />
             </svg>
             <a
-              href="https://maps.google.com/?q=04224+ATS+Advantage+Indirapuram+Ghaziabad+UP+201014"
+              href={contact?.mapsUrl || "https://share.google/8gHRuZQQxRuYAkqVd"}
               target="_blank"
               rel="noreferrer"
               className="footer-address-link"
@@ -210,7 +210,7 @@ export function SiteFooter({
         {/* Column 2: Company */}
         <div className="footer-link-group">
           <h2>COMPANY</h2>
-          <Link className="footer-link-item" href="/#about">About SmartNum</Link>
+          <Link className="footer-link-item" href="/about">About SmartNum</Link>
           <Link className="footer-link-item" href="/#teachers">Expert Tutors &amp; Faculty</Link>
           <Link className="footer-link-item" href="/#why-smartnum">Student Results &amp; Wall of Fame</Link>
           <Link className="footer-link-item" href="/#visit-us">Campus Tour &amp; Facilities</Link>

@@ -30,4 +30,25 @@ describe("homepage content", () => {
       heroSlides: [...DEFAULT_HOMEPAGE_CONTENT.heroSlides, DEFAULT_HOMEPAGE_CONTENT.heroSlides[0]],
     }).success).toBe(false);
   });
+
+  it("validates faculty profiles with comprehensive credentials and auto-normalizes photo URLs", () => {
+    const validWithFaculty = {
+      ...DEFAULT_HOMEPAGE_CONTENT,
+      faculty: [
+        {
+          name: "Dr. Sweta Agrawal",
+          subject: "Mathematics & Statistics",
+          qualification: "Ph.D. in Mathematics, Assistant Professor with extensive international research publications in statistics, reliability theory, and quality control",
+          experience: "Over 12 years of impactful teaching and intellectual exploration across CBSE, ICSE, and IIT-JEE students",
+          photoUrl: "images/editorial/Confident Mathematics Teacher Portrait.png",
+          approved: true,
+        },
+      ],
+    };
+    const parsed = homepageContentSchema.safeParse(validWithFaculty);
+    expect(parsed.success).toBe(true);
+    if (parsed.success) {
+      expect(parsed.data.faculty[0].photoUrl).toBe("/images/editorial/Confident Mathematics Teacher Portrait.png");
+    }
+  });
 });
