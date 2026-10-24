@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { HomepageContent } from "@/server/site-content/homepage";
 
 type Faculty = HomepageContent["faculty"][number];
@@ -27,7 +27,6 @@ function getYoutubeEmbedUrl(value: string) {
 
 function getFacultyVideoConcepts(video: DemoVideo): string[] {
   const title = video.title.toLowerCase();
-  const subj = video.subject.toLowerCase();
 
   if (title.includes("matrices") || title.includes("determinant")) {
     return [
@@ -186,7 +185,7 @@ export function FacultyCarousel({
     }
   }, [activeVideoModal]);
 
-  const checkScroll = () => {
+  const checkScroll = useCallback(() => {
     const el = trackRef.current;
     if (!el) return;
     const isAtStart = el.scrollLeft <= 8;
@@ -200,7 +199,7 @@ export function FacultyCarousel({
     setActiveFacultyIndex(
       Math.min(Math.max(0, current), Math.max(0, facultyList.length - 1))
     );
-  };
+  }, [facultyList.length]);
 
   useEffect(() => {
     const el = trackRef.current;
@@ -212,7 +211,7 @@ export function FacultyCarousel({
       el.removeEventListener("scroll", checkScroll);
       window.removeEventListener("resize", checkScroll);
     };
-  }, [facultyList.length]);
+  }, [checkScroll]);
 
   const scrollByDirection = (direction: "left" | "right") => {
     const el = trackRef.current;

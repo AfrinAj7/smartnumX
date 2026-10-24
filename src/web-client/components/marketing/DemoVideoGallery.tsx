@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { HomepageContent } from "@/server/site-content/homepage";
 
 type DemoVideo = HomepageContent["demoVideos"][number];
@@ -83,7 +83,7 @@ export function DemoVideoGallery({ videos }: { videos: DemoVideo[] }) {
   }, [activeVideo]);
 
   // Handle scroll position and enable/disable navigation buttons
-  const checkScrollState = () => {
+  const checkScrollState = useCallback(() => {
     const el = trackRef.current;
     if (!el) return;
     const isAtStart = el.scrollLeft <= 8;
@@ -96,7 +96,7 @@ export function DemoVideoGallery({ videos }: { videos: DemoVideo[] }) {
     const cardWidth = firstCard ? firstCard.offsetWidth + 24 : 380;
     const currentIndex = Math.round(el.scrollLeft / cardWidth);
     setActiveCardIndex(Math.min(Math.max(0, currentIndex), Math.max(0, videos.length - 1)));
-  };
+  }, [videos.length]);
 
   useEffect(() => {
     const el = trackRef.current;
@@ -108,7 +108,7 @@ export function DemoVideoGallery({ videos }: { videos: DemoVideo[] }) {
       el.removeEventListener("scroll", checkScrollState);
       window.removeEventListener("resize", checkScrollState);
     };
-  }, [videos.length]);
+  }, [checkScrollState]);
 
   const scrollByDirection = (direction: "left" | "right") => {
     const el = trackRef.current;

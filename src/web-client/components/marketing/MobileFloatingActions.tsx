@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useState } from "react";
 
 type MobileFloatingActionsProps = {
@@ -24,11 +25,27 @@ export function MobileFloatingActions({ phone, whatsappNumber }: MobileFloatingA
       {/* Slide-in Quick Menu */}
       <div className="floating-menu-slide" aria-hidden={!open}>
         <a className="floating-menu-item item-demo" href="#book-demo" onClick={() => setOpen(false)}>
-          <span className="item-icon"><img src="https://static.wixstatic.com/media/8db5b7_b96cea69c9564e1f86469277f901163b~mv2.gif" alt="" /></span>
+          <span className="item-icon">
+            <Image
+              src="https://static.wixstatic.com/media/8db5b7_b96cea69c9564e1f86469277f901163b~mv2.gif"
+              alt="Demo icon"
+              width={24}
+              height={24}
+              unoptimized
+            />
+          </span>
           <span className="item-label">Book Free Demo</span>
         </a>
         <a className="floating-menu-item item-call" href={`tel:${phoneDigits}`} onClick={() => setOpen(false)}>
-          <span className="item-icon"><img src="https://cdn-icons-png.flaticon.com/256/8705/8705273.png" alt="" /></span>
+          <span className="item-icon">
+            <Image
+              src="https://cdn-icons-png.flaticon.com/256/8705/8705273.png"
+              alt="Call icon"
+              width={24}
+              height={24}
+              unoptimized
+            />
+          </span>
           <span className="item-label">Call Center</span>
         </a>
         {whatsappDigits && (
@@ -39,7 +56,15 @@ export function MobileFloatingActions({ phone, whatsappNumber }: MobileFloatingA
             rel="noreferrer"
             onClick={() => setOpen(false)}
           >
-            <span className="item-icon"><img src="https://static.vecteezy.com/system/resources/previews/059/285/595/non_2x/whatsapp-business-app-icon-transparent-background-free-png.png" alt="" /></span>
+            <span className="item-icon">
+              <Image
+                src="https://static.vecteezy.com/system/resources/previews/059/285/595/non_2x/whatsapp-business-app-icon-transparent-background-free-png.png"
+                alt="WhatsApp icon"
+                width={24}
+                height={24}
+                unoptimized
+              />
+            </span>
             <span className="item-label">WhatsApp Chat</span>
           </a>
         )}
@@ -56,7 +81,14 @@ export function MobileFloatingActions({ phone, whatsappNumber }: MobileFloatingA
         {open ? (
           <span className="trigger-icon">✕</span>
         ) : (
-          <img className="trigger-gif" src={TAP_HERE_GIF} alt="Tap Here" />
+          <Image
+            className="trigger-gif"
+            src={TAP_HERE_GIF}
+            alt="Tap Here"
+            width={38}
+            height={38}
+            unoptimized
+          />
         )}
         {!open && <span className="trigger-pulse" />}
       </button>

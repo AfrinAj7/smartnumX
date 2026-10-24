@@ -194,7 +194,7 @@ export default async function AboutPage() {
             <a className="about-nav-chip" href="#founder">Teachers &amp; Founder</a>
             <a className="about-nav-chip" href="#how-we-teach">How We Teach</a>
             <a className="about-nav-chip" href="#our-space">Campus &amp; Space</a>
-            <a className="about-nav-chip" href="/#book-demo">Book a Demo</a>
+            <Link className="about-nav-chip" href="/#book-demo">Book a Demo</Link>
             <a className="about-nav-chip" href="#faq">FAQs</a>
             <Link className="about-nav-chip" href="/#contact">Contact</Link>
           </div>
@@ -228,9 +228,9 @@ export default async function AboutPage() {
               </p>
 
               <div className="about-hero-cta-row">
-                <a className="button-orange-primary" href="/#book-demo">
+                <Link className="button-orange-primary" href="/#book-demo">
                   Book a free demo <span className="btn-arrow" aria-hidden="true">→</span>
-                </a>
+                </Link>
                 <a className="about-scroll-link" href="#founder">
                   Meet the teacher <span aria-hidden="true">↓</span>
                 </a>
@@ -358,9 +358,9 @@ export default async function AboutPage() {
                 </span>
               </div>
               <div className="mission-action-btn">
-                <a className="button-orange-primary" href="/#book-demo">
+                <Link className="button-orange-primary" href="/#book-demo">
                   Experience a Class →
-                </a>
+                </Link>
               </div>
             </div>
           </div>
@@ -537,9 +537,9 @@ export default async function AboutPage() {
                   >
                     Get directions <span className="btn-arrow" aria-hidden="true">↗</span>
                   </a>
-                  <a className="button-soft-outline" href="/#book-demo">
+                  <Link className="button-soft-outline" href="/#book-demo">
                     Schedule a campus visit
-                  </a>
+                  </Link>
                 </div>
               </div>
 
@@ -641,9 +641,9 @@ export default async function AboutPage() {
                 The best way to decide is to see it. Book a free demo session, meet the teacher, and ask anything you like.
               </p>
               <div className="final-cta-actions">
-                <a className="button-orange-primary" href="/#book-demo">
+                <Link className="button-orange-primary" href="/#book-demo">
                   Book a free demo <span className="btn-arrow" aria-hidden="true">→</span>
-                </a>
+                </Link>
                 <a className="button-call-outline" href={`tel:${contactPhone.replace(/\s+/g, "")}`}>
                   Call us: {contactPhone}
                 </a>

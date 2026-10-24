@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { HomepageContent } from "@/server/site-content/homepage";
 
 type Testimonial = HomepageContent["testimonials"][number];
@@ -75,7 +75,7 @@ export function TestimonialsCarousel({ testimonials }: { testimonials: Testimoni
   const [canScrollRight, setCanScrollRight] = useState(true);
   const [activeIndex, setActiveIndex] = useState(0);
 
-  const checkScroll = () => {
+  const checkScroll = useCallback(() => {
     const el = trackRef.current;
     if (!el) return;
     const isAtStart = el.scrollLeft <= 8;
@@ -87,7 +87,7 @@ export function TestimonialsCarousel({ testimonials }: { testimonials: Testimoni
     const cardWidth = firstCard ? firstCard.offsetWidth + 20 : 380;
     const current = Math.round(el.scrollLeft / cardWidth);
     setActiveIndex(Math.min(Math.max(0, current), items.length - 1));
-  };
+  }, [items.length]);
 
   useEffect(() => {
     const el = trackRef.current;
@@ -99,7 +99,7 @@ export function TestimonialsCarousel({ testimonials }: { testimonials: Testimoni
       el.removeEventListener("scroll", checkScroll);
       window.removeEventListener("resize", checkScroll);
     };
-  }, [items.length]);
+  }, [checkScroll]);
 
   const scrollByDirection = (direction: "left" | "right") => {
     const el = trackRef.current;
