@@ -18,19 +18,25 @@ export async function POST(request: Request) {
         { status: 429, headers: { "Retry-After": String(quota.retryAfterSeconds) } },
       );
     }
-    await registerUser(await request.json(), {
+    const body = await request.json();
+    await registerUser(body, {
       repository: new PrismaAuthRepository(db),
       mailer: authMailer,
     });
     return NextResponse.json({
-      data: { message: "If registration can be completed, check your email for the next step." },
+      data: {
+        message: "Kindly verify your account. A link to verify your account has been sent on your registered email.",
+        email: body.email,
+      },
     });
   } catch (error) {
+    console.error("[REGISTER ERROR]", error);
     if (error instanceof ZodError) {
       return NextResponse.json({ error: error.flatten() }, { status: 422 });
     }
+    const message = error instanceof Error ? error.message : "Registration could not be completed.";
     return NextResponse.json(
-      { error: "Registration could not be completed. Check email setup and try again." },
+      { error: { message } },
       { status: 503 },
     );
   }

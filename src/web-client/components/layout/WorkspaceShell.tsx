@@ -23,8 +23,9 @@ type NavItem = {
 const adminNavigation: NavItem[] = [
   { label: "Dashboard", href: "/admin", icon: "📊" },
   { label: "Site Content (CMS)", href: "/admin/site-content", icon: "✏️" },
-  { label: "Courses & Modules", href: null, icon: "📚", badge: "Soon" },
-  { label: "Learners & Enrolments", href: null, icon: "🎓", badge: "Soon" },
+  { label: "Courses & Catalog", href: "/admin/courses", icon: "📚" },
+  { label: "Learners & Enrolments", href: "/admin/enrollments", icon: "🎓" },
+  { label: "Orders & Demo Payments", href: "/admin/orders", icon: "💳" },
   { label: "Leads & Demo Requests", href: null, icon: "📥", badge: "Soon" },
   { label: "Reports & Revenue", href: null, icon: "📈", badge: "Soon" },
   { label: "System Settings", href: null, icon: "⚙️", badge: "Soon" },
@@ -32,7 +33,8 @@ const adminNavigation: NavItem[] = [
 
 const learnerNavigation: NavItem[] = [
   { label: "Overview", href: "/dashboard", icon: "📊" },
-  { label: "My Courses", href: null, icon: "📚", badge: "Soon" },
+  { label: "My Courses", href: "/dashboard/my-courses", icon: "📚" },
+  { label: "Order History", href: "/dashboard/orders", icon: "🧾" },
   { label: "1-on-1 Doubts", href: null, icon: "❓", badge: "Soon" },
   { label: "Mock Tests", href: null, icon: "📝", badge: "Soon" },
   { label: "Study Library", href: null, icon: "📁", badge: "Soon" },

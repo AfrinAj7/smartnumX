@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { ChangeEvent, useState } from "react";
-import type { HomepageContent } from "@/server/site-content/homepage";
+import { DEFAULT_HOMEPAGE_CONTENT, type HomepageContent } from "@/server/site-content/homepage";
 
 type ListSection = "heroSlides" | "metrics" | "features" | "programs" | "plans" | "curricula" | "faculty" | "testimonials" | "faqs" | "demoVideos";
 type ObjectItem = Record<string, string | boolean | string[]>;
@@ -15,6 +15,7 @@ const sections: Array<{ id: string; label: string }> = [
   { id: "faculty", label: "Faculty & testimonials" },
   { id: "media", label: "Demo videos" },
   { id: "faq", label: "FAQs" },
+  { id: "policies", label: "Legal & Policies" },
 ];
 
 const templates: Partial<Record<ListSection, ObjectItem>> = {
@@ -71,6 +72,20 @@ export function SiteContentEditor({ initialContent }: { initialContent: Homepage
 
   function updateContact(key: keyof HomepageContent["contact"], value: string) {
     setContent((current) => ({ ...current, contact: { ...current.contact, [key]: value } }));
+    setNotice("");
+  }
+
+  function updatePolicySettings<K extends keyof NonNullable<HomepageContent["policySettings"]>>(
+    key: K,
+    value: NonNullable<HomepageContent["policySettings"]>[K],
+  ) {
+    setContent((current) => ({
+      ...current,
+      policySettings: {
+        ...(current.policySettings || DEFAULT_HOMEPAGE_CONTENT.policySettings),
+        [key]: value,
+      },
+    }));
     setNotice("");
   }
 
@@ -314,6 +329,133 @@ export function SiteContentEditor({ initialContent }: { initialContent: Homepage
             <article className="cms-panel"><div className="cms-card-heading"><h3>Frequently asked questions</h3><button className="cms-add" type="button" onClick={() => addItem("faqs")}>Add FAQ</button></div>
               {content.faqs.map((faq, index) => <div className="cms-list-row" key={`faq-${index}`}><TextField label="Question" value={faq.question} onChange={(value) => updateItem("faqs", index, "question", value)} /><TextField label="Answer" value={faq.answer} onChange={(value) => updateItem("faqs", index, "answer", value)} multiline /><ToggleField label="Published" checked={faq.published} onChange={(value) => updateItem("faqs", index, "published", value)} /><button className="cms-remove" type="button" onClick={() => removeItem("faqs", index)}>Remove</button></div>)}
             </article>
+          )}
+
+          {activeSection === "policies" && (
+            <div className="cms-panel-grid">
+              <article className="cms-panel">
+                <div className="cms-card-heading">
+                  <div>
+                    <h3>Legal Entity & Business Details</h3>
+                    <p className="cms-hint">Appears across Terms, Privacy, Refund, and Child Safety policy pages.</p>
+                  </div>
+                </div>
+                <TextField
+                  label="Legal Entity / Proprietor Name"
+                  placeholder="e.g. SmartNum Learning Space / Shweta Agarwal"
+                  value={content.policySettings?.legalEntityName ?? ""}
+                  onChange={(val) => updatePolicySettings("legalEntityName", val)}
+                />
+                <TextField
+                  label="GSTIN (leave empty if not registered)"
+                  placeholder="e.g. 09ABCDE1234F1Z5"
+                  value={content.policySettings?.gstin ?? ""}
+                  onChange={(val) => updatePolicySettings("gstin", val)}
+                />
+                <TextField
+                  label="Last Updated Date (Displayed on all policies)"
+                  placeholder="e.g. October 2026"
+                  value={content.policySettings?.lastUpdated ?? ""}
+                  onChange={(val) => updatePolicySettings("lastUpdated", val)}
+                />
+                <TextField
+                  label="Academic Programs & Exams Covered"
+                  placeholder="e.g. Classes 9–12 for Board exams, NEET, IIT-JEE and Olympiads"
+                  value={content.policySettings?.classesAndExams ?? ""}
+                  onChange={(val) => updatePolicySettings("classesAndExams", val)}
+                  multiline
+                />
+                <TextField
+                  label="Courts & Dispute Jurisdiction City"
+                  placeholder="e.g. Ghaziabad, Uttar Pradesh"
+                  value={content.policySettings?.jurisdictionCity ?? ""}
+                  onChange={(val) => updatePolicySettings("jurisdictionCity", val)}
+                />
+              </article>
+
+              <article className="cms-panel">
+                <div className="cms-card-heading">
+                  <div>
+                    <h3>Fees, Cooling-Off & Refund Rules</h3>
+                    <p className="cms-hint">Configured in terms & refund policies for learners and Cashfree gateway compliance.</p>
+                  </div>
+                </div>
+                <TextField
+                  label="Non-refundable Admission / Registration Fee"
+                  placeholder="e.g. ₹1,000"
+                  value={content.policySettings?.admissionFee ?? ""}
+                  onChange={(val) => updatePolicySettings("admissionFee", val)}
+                />
+                <TextField
+                  label="Cooling-off Period (Days from fee payment)"
+                  placeholder="e.g. 3"
+                  value={content.policySettings?.coolingOffDays ?? ""}
+                  onChange={(val) => updatePolicySettings("coolingOffDays", val)}
+                />
+                <TextField
+                  label="Max Recorded Lessons Watched for Cooling-off Refund (%)"
+                  placeholder="e.g. 10"
+                  value={content.policySettings?.maxRecordedLessonsPercent ?? ""}
+                  onChange={(val) => updatePolicySettings("maxRecordedLessonsPercent", val)}
+                />
+                <TextField
+                  label="Mid-Programme Pro-rata Withdrawal Window (Days)"
+                  placeholder="e.g. 30"
+                  value={content.policySettings?.withdrawalWindowDays ?? ""}
+                  onChange={(val) => updatePolicySettings("withdrawalWindowDays", val)}
+                />
+                <TextField
+                  label="Instalment Overdue Grace Window (Days before pause)"
+                  placeholder="e.g. 7"
+                  value={content.policySettings?.overdueGraceDays ?? ""}
+                  onChange={(val) => updatePolicySettings("overdueGraceDays", val)}
+                />
+              </article>
+
+              <article className="cms-panel">
+                <div className="cms-card-heading">
+                  <div>
+                    <h3>Grievance & Child Safety Officers</h3>
+                    <p className="cms-hint">Required under Indian IT / DPDP rules and Child Safety / POCSO guidelines.</p>
+                  </div>
+                </div>
+                <TextField
+                  label="Grievance Redressal Officer Name"
+                  placeholder="e.g. Shweta Agarwal"
+                  value={content.policySettings?.grievanceOfficerName ?? ""}
+                  onChange={(val) => updatePolicySettings("grievanceOfficerName", val)}
+                />
+                <TextField
+                  label="Grievance Redressal Officer Designation"
+                  placeholder="e.g. Academic Director & Grievance Redressal Officer"
+                  value={content.policySettings?.grievanceOfficerRole ?? ""}
+                  onChange={(val) => updatePolicySettings("grievanceOfficerRole", val)}
+                />
+                <TextField
+                  label="Child Safety Officer Name"
+                  placeholder="e.g. Shweta Agarwal"
+                  value={content.policySettings?.childSafetyOfficerName ?? ""}
+                  onChange={(val) => updatePolicySettings("childSafetyOfficerName", val)}
+                />
+                <TextField
+                  label="Child Safety Officer Designation"
+                  placeholder="e.g. Founder, Lead Educator & Child Safety Officer"
+                  value={content.policySettings?.childSafetyOfficerRole ?? ""}
+                  onChange={(val) => updatePolicySettings("childSafetyOfficerRole", val)}
+                />
+                <TextField
+                  label="CCTV Video Footage Retention (Days)"
+                  placeholder="e.g. 30"
+                  value={content.policySettings?.cctvRetentionDays ?? ""}
+                  onChange={(val) => updatePolicySettings("cctvRetentionDays", val)}
+                />
+                <ToggleField
+                  label="Proctored online tests with camera/audio are conducted (explicit consent required)"
+                  checked={content.policySettings?.proctoredTestsConsent ?? false}
+                  onChange={(val) => updatePolicySettings("proctoredTestsConsent", val)}
+                />
+              </article>
+            </div>
           )}
         </div>
       </section>

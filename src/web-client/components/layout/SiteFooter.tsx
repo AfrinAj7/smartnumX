@@ -222,13 +222,14 @@ export function SiteFooter({
         {/* Column 3: Learn & Practice */}
         <div className="footer-link-group">
           <h2>LEARN &amp; PRACTICE</h2>
-          <Link className="footer-link-item" href="/#course-explorer">Classes 9 &amp; 10 Tuition</Link>
-          <Link className="footer-link-item" href="/#course-explorer">Classes 11 &amp; 12th Tuition</Link>
-          <Link className="footer-link-item" href="/#course-explorer">IIT-JEE Mains &amp; Advanced</Link>
-          <Link className="footer-link-item" href="/#course-explorer">Olympiads Preparation</Link>
-          <Link className="footer-link-item" href="/#course-explorer">Free Diagnostic Mock Tests</Link>
-          <Link className="footer-link-item" href="/#why-smartnum">Curated Worksheets &amp; PYQs</Link>
-          <Link className="footer-link-item" href="/#book-demo">Book Free Demo Lesson</Link>
+          <Link className="footer-link-item" href="/courses/class-9-maths-science-tuition">Class 9 Tuition (Maths &amp; Science)</Link>
+          <Link className="footer-link-item" href="/courses/class-10-board-excellence">Class 10 Board Excellence</Link>
+          <Link className="footer-link-item" href="/courses/class-11-foundation-and-boards">Class 11 Foundation &amp; Boards</Link>
+          <Link className="footer-link-item" href="/courses/class-12-board-mastery">Class 12 Board Mastery</Link>
+          <Link className="footer-link-item" href="/courses/iit-jee-mains-preparation">IIT-JEE Mains Preparation</Link>
+          <Link className="footer-link-item" href="/courses/iit-jee-advanced-mentorship">JEE Advanced Mentorship</Link>
+          <Link className="footer-link-item" href="/courses/maths-science-olympiads">Math &amp; Science Olympiads</Link>
+          <Link className="footer-link-item" href="/courses/self-paced-recorded-modules">Self-Paced Recorded Modules</Link>
         </div>
 
         {/* Column 4: Boards & Curricula */}
@@ -285,7 +286,32 @@ export function SiteFooter({
 
       {/* Footer Bottom Legal Bar */}
       <div className="footer-bottom">
-        <span>© {new Date().getFullYear()} SmartNum Learning Space. All rights reserved.</span>
+        <span className="footer-copyright">
+          © {new Date().getFullYear()} SmartNum Learning Space. All rights reserved.
+        </span>
+
+        <div className="footer-credit">
+          Designed &amp; Developed By{" "}
+          <a
+            href="https://www.bazaarx.co"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="footer-credit-link"
+          >
+             Bazaarx.Co
+          </a>{" "}
+
+          <a
+            href="https://www.bazaarx.co"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="footer-credit-link"
+          >
+
+          </a>
+
+        </div>
+
         <div className="footer-legal-wrap">
           <Link href="/policies/terms">Terms</Link>
           <span className="footer-divider" aria-hidden="true">|</span>
@@ -293,7 +319,7 @@ export function SiteFooter({
           <span className="footer-divider" aria-hidden="true">|</span>
           <Link href="/policies/refund">Refund Policy</Link>
           <span className="footer-divider" aria-hidden="true">|</span>
-          <Link href="/policies/terms">Child Safety</Link>
+          <Link href="/policies/child-safety">Child Safety</Link>
           <button className="scroll-to-top" onClick={scrollToTop} aria-label="Scroll to top">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <polyline points="18 15 12 9 6 15" />

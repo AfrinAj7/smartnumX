@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { signOut } from "next-auth/react";
 import { SmartNumWordmark } from "./SmartNumWordmark";
+import { CartButton } from "../cart/CartButton";
 
 export type NavUser = {
   id?: string;
@@ -23,19 +24,19 @@ const coursesMegaMenu = [
   {
     title: "School & Board Tuition",
     items: [
-      { label: "Class 9 Tuition (Maths & Science)", href: "/#course-explorer", badge: "CBSE & ICSE" },
-      { label: "Class 10 Board Excellence", href: "/#course-explorer", badge: "Board Prep" },
-      { label: "Class 11 Foundation & Boards", href: "/#course-explorer", badge: "Any Board" },
-      { label: "Class 12 Board Mastery", href: "/#course-explorer", badge: "Board + Prep" },
+      { label: "Class 9 Tuition (Maths & Science)", href: "/courses/class-9-maths-science-tuition", badge: "CBSE & ICSE" },
+      { label: "Class 10 Board Excellence", href: "/courses/class-10-board-excellence", badge: "Board Prep" },
+      { label: "Class 11 Foundation & Boards", href: "/courses/class-11-foundation-and-boards", badge: "Any Board" },
+      { label: "Class 12 Board Mastery", href: "/courses/class-12-board-mastery", badge: "Board + Prep" },
     ],
   },
   {
     title: "Competitive Pathways",
     items: [
-      { label: "IIT-JEE Mains Preparation", href: "/#course-explorer", badge: "Popular" },
-      { label: "IIT-JEE Advanced Mentorship", href: "/#course-explorer", badge: "Intensive" },
-      { label: "Math & Science Olympiads", href: "/#course-explorer", badge: "National" },
-      { label: "Self-Paced Recorded Modules", href: "/#course-explorer", badge: "Online" },
+      { label: "IIT-JEE Mains Preparation", href: "/courses/iit-jee-mains-preparation", badge: "Popular" },
+      { label: "IIT-JEE Advanced Mentorship", href: "/courses/iit-jee-advanced-mentorship", badge: "Intensive" },
+      { label: "Math & Science Olympiads", href: "/courses/maths-science-olympiads", badge: "National" },
+      { label: "Self-Paced Recorded Modules", href: "/courses/self-paced-recorded-modules", badge: "Online" },
     ],
   },
 ];
@@ -186,13 +187,13 @@ export function SiteHeader({
             </Link>
 
             <Link
-              className={`nav-link ${pathname === "/about" ? "is-active" : ""}`}
-              href="/about"
+              className={`nav-link ${pathname === "/courses" ? "is-active" : ""}`}
+              href="/courses"
             >
-              About
+              Courses
             </Link>
 
-            {/* Courses Mega Menu */}
+            {/* Batches 2027 Mega Menu */}
             <div
               className={`nav-dropdown-wrapper ${activeDropdown === "courses" ? "is-open" : ""}`}
               onMouseEnter={() => handleDropdownEnter("courses")}
@@ -205,7 +206,7 @@ export function SiteHeader({
                 aria-expanded={activeDropdown === "courses"}
                 aria-haspopup="true"
               >
-                <span>Courses</span>
+                <span>Batches 2027</span>
                 <span className="dropdown-chevron" aria-hidden="true" />
               </button>
 
@@ -365,36 +366,15 @@ export function SiteHeader({
             </div>
           </nav>
 
-          {/* Desktop Right Actions: Call, Contact & Role-Aware Auth */}
+          {/* Desktop Right Actions: Contact, Cart & Role-Aware Auth */}
           <div className="site-header-actions">
-            {/* Outline Orange Call Button */}
-            <a
-              className="button-call-outline"
-              href={`tel:${phoneDigits}`}
-              title={`Call SmartNum: ${phone} (Mon–Sat 10:00 AM – 7:00 PM)`}
-              aria-label={`Call SmartNum at ${phone}`}
-            >
-              <svg
-                width="15"
-                height="15"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.3"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="call-icon-svg"
-                aria-hidden="true"
-              >
-                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
-              </svg>
-              <span className="call-text">Call Us</span>
-            </a>
-
             {/* Solid Orange Contact Button */}
             <Link className="button-contact-solid" href="/#contact">
               Contact
             </Link>
+
+            {/* Shopping Cart Button */}
+            <CartButton />
 
             {/* Role-Aware Auth Button / Avatar Menu */}
             {user ? (
@@ -540,14 +520,14 @@ export function SiteHeader({
           </Link>
 
           <Link
-            href="/about"
-            className={`mobile-nav-root-link ${pathname === "/about" ? "is-active" : ""}`}
+            href="/courses"
+            className={`mobile-nav-root-link ${pathname === "/courses" ? "is-active" : ""}`}
             onClick={() => setMobileDrawerOpen(false)}
           >
-            ℹ️ About SmartNum
+            📚 Courses
           </Link>
 
-          {/* Courses Accordion */}
+          {/* Batches 2027 Accordion */}
           <div className="mobile-accordion-group">
             <button
               type="button"
@@ -555,7 +535,7 @@ export function SiteHeader({
               onClick={() => toggleAccordion("courses")}
               aria-expanded={mobileAccordion === "courses"}
             >
-              <span>🎓 Courses &amp; Programmes</span>
+              <span>🎓 Batches 2027</span>
               <span className={`accordion-icon ${mobileAccordion === "courses" ? "is-open" : ""}`}>▾</span>
             </button>
             {mobileAccordion === "courses" && (

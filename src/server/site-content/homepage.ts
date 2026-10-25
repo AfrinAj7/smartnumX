@@ -99,6 +99,25 @@ const demoVideoSchema = z.object({
   published: z.boolean(),
 });
 
+const policySettingsSchema = z.object({
+  legalEntityName: text.max(160).default("SmartNum Learning Space"),
+  gstin: text.max(40).default(""),
+  lastUpdated: text.max(60).default("October 2026"),
+  classesAndExams: text.max(240).default("Classes 9–12 for Board exams (CBSE, ICSE, State Boards), NEET, IIT-JEE and Olympiads"),
+  admissionFee: text.max(40).default("₹1,000"),
+  coolingOffDays: text.max(20).default("3"),
+  maxRecordedLessonsPercent: text.max(20).default("10"),
+  withdrawalWindowDays: text.max(20).default("30"),
+  overdueGraceDays: text.max(20).default("7"),
+  cctvRetentionDays: text.max(20).default("30"),
+  grievanceOfficerName: text.max(120).default("Shweta Agarwal"),
+  grievanceOfficerRole: text.max(120).default("Academic Director & Grievance Redressal Officer"),
+  childSafetyOfficerName: text.max(120).default("Shweta Agarwal"),
+  childSafetyOfficerRole: text.max(120).default("Founder, Lead Educator & Child Safety Officer"),
+  jurisdictionCity: text.max(120).default("Ghaziabad, Uttar Pradesh"),
+  proctoredTestsConsent: z.boolean().default(false),
+});
+
 export const homepageContentSchema = z.object({
   siteName: text.min(2).max(60),
   unitLabel: text.max(80),
@@ -126,6 +145,24 @@ export const homepageContentSchema = z.object({
     facebookUrl: mediaUrl,
     youtubeUrl: mediaUrl,
     linkedInUrl: mediaUrl,
+  }),
+  policySettings: policySettingsSchema.default({
+    legalEntityName: "SmartNum Learning Space",
+    gstin: "",
+    lastUpdated: "October 2026",
+    classesAndExams: "Classes 9–12 for Board exams (CBSE, ICSE, State Boards), NEET, IIT-JEE and Olympiads",
+    admissionFee: "₹1,000",
+    coolingOffDays: "3",
+    maxRecordedLessonsPercent: "10",
+    withdrawalWindowDays: "30",
+    overdueGraceDays: "7",
+    cctvRetentionDays: "30",
+    grievanceOfficerName: "Shweta Agarwal",
+    grievanceOfficerRole: "Academic Director & Grievance Redressal Officer",
+    childSafetyOfficerName: "Shweta Agarwal",
+    childSafetyOfficerRole: "Founder, Lead Educator & Child Safety Officer",
+    jurisdictionCity: "Ghaziabad, Uttar Pradesh",
+    proctoredTestsConsent: false,
   }),
 });
 
@@ -371,6 +408,24 @@ export const DEFAULT_HOMEPAGE_CONTENT: HomepageContent = {
     facebookUrl: "https://www.facebook.com/profile.php?id=61594903500934",
     youtubeUrl: "https://www.youtube.com/@GoSmartNum",
     linkedInUrl: "https://www.linkedin.com/company/smartnum/about/",
+  },
+  policySettings: {
+    legalEntityName: "SmartNum Learning Space",
+    gstin: "",
+    lastUpdated: "October 2026",
+    classesAndExams: "Classes 9–12 for Board exams (CBSE, ICSE, State Boards), NEET, IIT-JEE and Olympiads",
+    admissionFee: "₹1,000",
+    coolingOffDays: "3",
+    maxRecordedLessonsPercent: "10",
+    withdrawalWindowDays: "30",
+    overdueGraceDays: "7",
+    cctvRetentionDays: "30",
+    grievanceOfficerName: "Shweta Agarwal",
+    grievanceOfficerRole: "Academic Director & Grievance Redressal Officer",
+    childSafetyOfficerName: "Shweta Agarwal",
+    childSafetyOfficerRole: "Founder, Lead Educator & Child Safety Officer",
+    jurisdictionCity: "Ghaziabad, Uttar Pradesh",
+    proctoredTestsConsent: false,
   },
 };
 

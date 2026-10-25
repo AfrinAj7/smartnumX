@@ -140,6 +140,7 @@ model User {
   auditLogs         AuditLog[]          @relation("AuditActor")
   assignedLeads     Lead[]              @relation("LeadAssignee")
   convertedLeads    Lead[]              @relation("LeadConvertedUser")
+  cartItems         CartItem[]
 
   @@index([role, status])
   @@index([deletedAt])
@@ -215,6 +216,7 @@ model Course {
   enrollments           Enrollment[]
   orderItems            OrderItem[]
   reviews               Review[]
+  cartItems             CartItem[]
 
   @@index([status, deletedAt])
   @@index([categoryId, status])
@@ -557,3 +559,15 @@ model LoginThrottle {
 
   @@index([lockedUntil])
 }
+
+model CartItem {
+  id        String   @id @default(cuid())
+  userId    String
+  courseId  String
+  addedAt   DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, courseId])
+  @@index([userId])
+}

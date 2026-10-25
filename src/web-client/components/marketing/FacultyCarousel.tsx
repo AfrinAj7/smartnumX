@@ -25,49 +25,6 @@ function getYoutubeEmbedUrl(value: string) {
   }
 }
 
-function getFacultyVideoConcepts(video: DemoVideo): string[] {
-  const title = video.title.toLowerCase();
-
-  if (title.includes("matrices") || title.includes("determinant")) {
-    return [
-      "Row & column elementary transformations with intuitive geometric meaning",
-      "Properties of determinants & calculating inverse without computational errors",
-      "Cramer's Rule & solving system of linear equations for CBSE Board 6-markers",
-      "Previous Year JEE Main & Advanced trap questions and determinant symmetry tricks",
-    ];
-  }
-  if (title.includes("binomial")) {
-    return [
-      "First-principles derivation of binomial expansion and general term T_(r+1)",
-      "Finding middle terms, greatest binomial coefficients, and term independent of x",
-      "Series summation involving binomial coefficients using differentiation and integration",
-      "High-yield shortcut formulas for competitive JEE Main & Advanced speed",
-    ];
-  }
-  if (title.includes("complex")) {
-    return [
-      "Geometric interpretation of complex numbers on Argand plane & Euler's form",
-      "Modulus-argument inequalities and loci representation in 2D geometry",
-      "De Moivre's Theorem and cube roots of unity (1, ω, ω²) problem synthesis",
-      "Step-by-step solutions of high-frequency JEE Advanced multi-concept problems",
-    ];
-  }
-  if (title.includes("calculus") || title.includes("limits")) {
-    return [
-      "Limits from first principles and graphical interpretation of continuity",
-      "L'Hôpital's rule versus algebraic rationalization & standard expansions",
-      "Differentiability tests and tangent slope visualization on Cartesian plane",
-      "Board exam presentation format and JEE speed shortcuts",
-    ];
-  }
-  return [
-    `Core theoretical foundation for ${video.subject} (${video.classLabel})`,
-    "Conceptual derivations from first principles without rote memorization",
-    "Identifying tricky board exam traps and negative-marking pitfalls",
-    "Past 10 years question pattern breakdown and step-by-step solutions",
-  ];
-}
-
 const DEFAULT_COMPANION_FACULTY: Faculty[] = [
   {
     name: "Dr. Sweta Agrawal",
@@ -101,77 +58,29 @@ const DEFAULT_COMPANION_FACULTY: Faculty[] = [
 
 export function FacultyCarousel({
   faculty,
-  videos,
 }: {
   faculty: Faculty[];
-  videos: DemoVideo[];
+  videos?: DemoVideo[];
 }) {
   const approvedFaculty = faculty.filter((f) => f.approved);
   const facultyList =
     approvedFaculty.length >= 2
       ? approvedFaculty
       : approvedFaculty.length === 1
-      ? [
+        ? [
           approvedFaculty[0],
           ...DEFAULT_COMPANION_FACULTY.filter(
             (c) => c.name !== approvedFaculty[0].name
           ),
         ]
-      : DEFAULT_COMPANION_FACULTY;
-
-  const publishedVideos = videos.filter((v) => v.published);
-  const videoList =
-    publishedVideos.length > 0
-      ? publishedVideos
-      : [
-          {
-            title: "Zero To Hero Matrices & Determinants | Class 12 JEE 2027",
-            subject: "Mathematics",
-            classLabel: "Class 12 · JEE",
-            videoUrl: "https://youtu.be/56ojjVBFb1M?si=9QYI-T5l64bE-bBN",
-            thumbnailUrl:
-              "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRo8pubcGyPp1EywtxW-H7QDgq7hu3qc7iKrlOazlCgQQ&s=10",
-            altText: "Matrices and determinants lecture preview",
-            published: true,
-          },
-          {
-            title: "Binomial Theorem COMPLETE Concepts | JEE 2027",
-            subject: "Maths",
-            classLabel: "IIT JEE",
-            videoUrl: "https://www.youtube.com/watch?v=wHScZKwUXcg",
-            thumbnailUrl:
-              "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSWdhBtT278XOAIF3GzXe5NVBaPio1-AINagdVXqw_C_g&s=10",
-            altText: "Binomial theorem lecture preview",
-            published: true,
-          },
-          {
-            title: "Determinants Tricks & Shortcuts | JEE Main + Advanced",
-            subject: "Maths",
-            classLabel: "JEE",
-            videoUrl: "https://youtu.be/79_rE0QQcLY?si=pxI6yGGdev_SI2ej",
-            thumbnailUrl: "https://i.ytimg.com/vi/2Dbf7HiM9V0/maxresdefault.jpg",
-            altText: "Determinants tricks lecture preview",
-            published: true,
-          },
-          {
-            title: "Complex Numbers Important JEE Questions with Solutions",
-            subject: "Mathematics",
-            classLabel: "Class 12 Maths",
-            videoUrl: "https://www.youtube.com/watch?v=0F2Y6fjYFbg",
-            thumbnailUrl: "https://i.ytimg.com/vi/0F2Y6fjYFbg/maxresdefault.jpg",
-            altText: "Complex numbers lecture preview",
-            published: true,
-          },
-        ];
+        : DEFAULT_COMPANION_FACULTY;
 
   const trackRef = useRef<HTMLDivElement>(null);
-  const accordionsSectionRef = useRef<HTMLDivElement>(null);
   const dialogRef = useRef<HTMLDialogElement>(null);
 
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
   const [activeFacultyIndex, setActiveFacultyIndex] = useState(0);
-  const [openAccordionIndex, setOpenAccordionIndex] = useState<number | null>(0);
   const [activeVideoModal, setActiveVideoModal] = useState<DemoVideo | null>(null);
 
   useEffect(() => {
@@ -236,13 +145,11 @@ export function FacultyCarousel({
     setActiveFacultyIndex(index);
   };
 
-  const toggleAccordion = (index: number) => {
-    setOpenAccordionIndex((prev) => (prev === index ? null : index));
-  };
-
-  const scrollToMasterclasses = (videoIndex = 0) => {
-    setOpenAccordionIndex(videoIndex);
-    accordionsSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  const scrollToMasterclasses = () => {
+    const el = document.getElementById("demo-videos") || document.getElementById("course-explorer");
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
   };
 
   return (
@@ -342,7 +249,7 @@ export function FacultyCarousel({
                   <button
                     type="button"
                     className="faculty-view-lectures-btn"
-                    onClick={() => scrollToMasterclasses(0)}
+                    onClick={scrollToMasterclasses}
                   >
                     <span>View Lectures &amp; Syllabus</span>
                     <span className="btn-arrow" aria-hidden="true">↓</span>
@@ -372,158 +279,7 @@ export function FacultyCarousel({
         ))}
       </div>
 
-      {/* 3. DYNAMIC ACCORDIONS MATCHING THE NUMBER OF VIDEOS */}
-      <div
-        className="faculty-accordions-section"
-        ref={accordionsSectionRef}
-        aria-labelledby="faculty-accordions-heading"
-      >
-        <div className="faculty-accordions-header">
-          <div className="accordions-subkicker-wrap">
-            <span className="badge-spark-dot" aria-hidden="true" />
-            <span className="accordions-subkicker">
-              Faculty Masterclasses · {videoList.length} Recorded Chapters
-            </span>
-          </div>
-
-          <h3 id="faculty-accordions-heading" className="faculty-accordions-title">
-            Curriculum &amp; Video Breakdown Taught by Our Faculty
-          </h3>
-
-          <p className="faculty-accordions-desc">
-            Explore the exact conceptual framework, proofs, and trap-question strategies taught in each class. Each accordion corresponds directly to our published video masterclasses.
-          </p>
-        </div>
-
-        <div className="faculty-accordions-list">
-          {videoList.map((video, idx) => {
-            const isOpen = openAccordionIndex === idx;
-            const concepts = getFacultyVideoConcepts(video);
-
-            return (
-              <div
-                key={`faculty-video-acc-${video.title}-${idx}`}
-                className={`faculty-accordion-item ${isOpen ? "is-open" : ""}`}
-              >
-                <button
-                  type="button"
-                  className="faculty-accordion-trigger"
-                  onClick={() => toggleAccordion(idx)}
-                  aria-expanded={isOpen}
-                  id={`faculty-acc-trigger-${idx}`}
-                  aria-controls={`faculty-acc-panel-${idx}`}
-                >
-                  <div className="trigger-left-col">
-                    <span className="trigger-num-badge">0{idx + 1}</span>
-                    <div className="trigger-info">
-                      <div className="trigger-tags-row">
-                        <span className="trigger-tag subject">{video.subject}</span>
-                        <span className="trigger-tag class-level">{video.classLabel}</span>
-                        <span className="trigger-tag mentor">Taught by Dr. Sweta Agrawal</span>
-                      </div>
-                      <h4 className="trigger-video-title">{video.title}</h4>
-                    </div>
-                  </div>
-
-                  <div className="trigger-right-col">
-                    <span
-                      className="trigger-play-cta"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setActiveVideoModal(video);
-                      }}
-                    >
-                      Watch Lecture ▶
-                    </span>
-                    <span className="trigger-toggle-symbol" aria-hidden="true">
-                      {isOpen ? "−" : "+"}
-                    </span>
-                  </div>
-                </button>
-
-                {isOpen && (
-                  <div
-                    className="faculty-accordion-content"
-                    id={`faculty-acc-panel-${idx}`}
-                    role="region"
-                    aria-labelledby={`faculty-acc-trigger-${idx}`}
-                  >
-                    <div className="accordion-grid-layout">
-                      <div className="accordion-details-col">
-                        <h5 className="accordion-concepts-heading">
-                          Core Concepts &amp; Proofs in This Masterclass:
-                        </h5>
-                        <ul className="accordion-concepts-list">
-                          {concepts.map((concept, cIdx) => (
-                            <li key={cIdx}>
-                              <span className="concept-check-icon" aria-hidden="true">✓</span>
-                              <span>{concept}</span>
-                            </li>
-                          ))}
-                        </ul>
-
-                        <div className="accordion-pedagogy-box">
-                          <span className="pedagogy-title">SmartNum Teaching Method:</span>
-                          <p className="pedagogy-desc">
-                            Delivered via interactive smart board in small batches. We break down the &ldquo;why&rdquo; before formulas, followed by step-by-step past year questions (PYQs) so students never get stuck on exam day.
-                          </p>
-                        </div>
-
-                        <div className="accordion-footer-actions">
-                          <button
-                            type="button"
-                            className="btn-play-lecture"
-                            onClick={() => setActiveVideoModal(video)}
-                          >
-                            Play video lecture <span aria-hidden="true">▶</span>
-                          </button>
-
-                          <a className="btn-book-topic-demo" href="#book-demo">
-                            Book demo on this chapter →
-                          </a>
-                        </div>
-                      </div>
-
-                      <div className="accordion-preview-col">
-                        <button
-                          type="button"
-                          className="accordion-video-thumbnail"
-                          onClick={() => setActiveVideoModal(video)}
-                          aria-label={`Play masterclass: ${video.title}`}
-                        >
-                          {video.thumbnailUrl ? (
-                            <Image
-                              src={video.thumbnailUrl}
-                              alt={video.altText || video.title}
-                              fill
-                              sizes="(max-width: 768px) 100vw, 300px"
-                              className="accordion-thumb-img"
-                              unoptimized
-                            />
-                          ) : (
-                            <div className="accordion-thumb-fallback">
-                              <span>SmartNum Masterclass</span>
-                            </div>
-                          )}
-                          <div className="accordion-thumb-overlay" />
-                          <span className="accordion-play-bubble" aria-hidden="true">
-                            <span className="play-triangle">▶</span>
-                          </span>
-                        </button>
-                        <span className="accordion-thumb-caption">
-                          Click to stream preview player
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* 4. ACCESSIBLE VIDEO LIGHTBOX MODAL */}
+      {/* 3. ACCESSIBLE VIDEO LIGHTBOX MODAL */}
       <dialog
         className="demo-video-dialog"
         ref={dialogRef}

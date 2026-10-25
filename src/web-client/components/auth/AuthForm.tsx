@@ -50,6 +50,8 @@ export function AuthForm({ mode, googleEnabled = false }: { mode: AuthMode; goog
   const [pending, setPending] = useState(false);
   const [feedback, setFeedback] = useState("");
   const [error, setError] = useState("");
+  const [showVerifyModal, setShowVerifyModal] = useState(false);
+  const [registeredEmail, setRegisteredEmail] = useState("");
   const details = content[mode];
   const token = searchParams.get("token") ?? "";
   const callbackUrl = safeDestination(searchParams.get("callbackUrl"));
@@ -106,7 +108,12 @@ export function AuthForm({ mode, googleEnabled = false }: { mode: AuthMode; goog
       } else if (mode === "change-password") {
         await signOut({ redirectTo: "/sign-in?passwordChanged=1" });
       } else {
-        setFeedback(result.data?.message ?? "Your request has been received.");
+        const msg = result.data?.message ?? "Your request has been received.";
+        setFeedback(msg);
+        if (mode === "register") {
+          setRegisteredEmail(String(result.data?.email || values.get("email") || ""));
+          setShowVerifyModal(true);
+        }
       }
     } catch {
       setError("We couldn’t reach the service. Please try again.");
@@ -236,6 +243,167 @@ export function AuthForm({ mode, googleEnabled = false }: { mode: AuthMode; goog
       </div>
 
       <footer className="auth-footer">SmartNum Learning Space</footer>
+
+      {showVerifyModal && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="verify-modal-title"
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 9999,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "1.25rem",
+            backgroundColor: "rgba(2, 6, 23, 0.8)",
+            backdropFilter: "blur(8px)",
+          }}
+        >
+          <div
+            style={{
+              position: "relative",
+              width: "100%",
+              maxWidth: "460px",
+              background: "#081528",
+              border: "1px solid rgba(56, 189, 248, 0.3)",
+              borderRadius: "1.25rem",
+              padding: "2.25rem 2rem",
+              boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.7), 0 0 30px rgba(56, 189, 248, 0.15)",
+              textAlign: "center",
+              color: "#f8fafc",
+            }}
+          >
+            <button
+              type="button"
+              onClick={() => setShowVerifyModal(false)}
+              aria-label="Close modal"
+              style={{
+                position: "absolute",
+                top: "1rem",
+                right: "1rem",
+                background: "transparent",
+                border: "none",
+                color: "#94a3b8",
+                fontSize: "1.25rem",
+                cursor: "pointer",
+                padding: "0.25rem 0.5rem",
+                borderRadius: "0.375rem",
+                lineHeight: 1,
+              }}
+            >
+              ✕
+            </button>
+
+            <div
+              style={{
+                width: "64px",
+                height: "64px",
+                margin: "0 auto 1.25rem auto",
+                borderRadius: "50%",
+                background: "rgba(249, 115, 22, 0.15)",
+                border: "2px solid rgba(249, 115, 22, 0.4)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: "2rem",
+              }}
+            >
+              ✉️
+            </div>
+
+            <h2
+              id="verify-modal-title"
+              style={{
+                fontSize: "1.375rem",
+                fontWeight: 700,
+                color: "#ffffff",
+                marginBottom: "0.75rem",
+                letterSpacing: "-0.01em",
+              }}
+            >
+              Kindly verify your account
+            </h2>
+
+            <p
+              style={{
+                fontSize: "0.975rem",
+                color: "#cbd5e1",
+                lineHeight: 1.6,
+                marginBottom: "1.25rem",
+              }}
+            >
+              A link to verify your account has been sent on your registered email
+              {registeredEmail ? (
+                <>
+                  {" "}
+                  <strong style={{ color: "#38bdf8", wordBreak: "break-all" }}>
+                    ({registeredEmail})
+                  </strong>
+                </>
+              ) : (
+                ""
+              )}
+              .
+            </p>
+
+            <div
+              style={{
+                background: "rgba(15, 23, 42, 0.7)",
+                border: "1px solid rgba(255, 255, 255, 0.1)",
+                borderRadius: "0.625rem",
+                padding: "0.85rem 1rem",
+                fontSize: "0.825rem",
+                color: "#94a3b8",
+                textAlign: "left",
+                marginBottom: "1.5rem",
+                lineHeight: 1.5,
+              }}
+            >
+              💡 <strong>Next step:</strong> Please check your inbox (or spam folder) and click the verification link to activate your account and start your courses.
+            </div>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+              <Link
+                href={`/sign-in${callbackUrl ? `?callbackUrl=${encodeURIComponent(callbackUrl)}` : ""}`}
+                style={{
+                  display: "inline-flex",
+                  width: "100%",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  padding: "0.8rem 1.25rem",
+                  borderRadius: "0.5rem",
+                  background: "linear-gradient(135deg, #ea580c, #f97316)",
+                  color: "#ffffff",
+                  fontWeight: 600,
+                  fontSize: "0.95rem",
+                  textDecoration: "none",
+                  boxShadow: "0 4px 14px rgba(234, 88, 12, 0.35)",
+                }}
+              >
+                Go to Sign In →
+              </Link>
+
+              <button
+                type="button"
+                onClick={() => setShowVerifyModal(false)}
+                style={{
+                  background: "transparent",
+                  border: "1px solid rgba(255, 255, 255, 0.15)",
+                  color: "#cbd5e1",
+                  padding: "0.6rem 1rem",
+                  borderRadius: "0.5rem",
+                  fontSize: "0.875rem",
+                  cursor: "pointer",
+                }}
+              >
+                Dismiss
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
