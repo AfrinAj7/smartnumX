@@ -12,6 +12,7 @@ export async function listUserEnrollments(userId: string) {
       course: {
         include: {
           category: { select: { name: true } },
+          centre: { select: { name: true, city: true } },
           modules: {
             orderBy: { position: "asc" },
             include: {
@@ -56,6 +57,17 @@ export async function listUserEnrollments(userId: string) {
         description: enr.course.description,
         thumbnailUrl: enr.course.thumbnailUrl,
         categoryName: enr.course.category?.name || "General",
+        productType: enr.course.productType as "COURSE" | "TEST_SERIES",
+        mode: enr.course.mode,
+        targetClass: enr.course.targetClass,
+        targetExam: enr.course.targetExam,
+        badge: enr.course.badge,
+        validity: enr.course.validity,
+        testCountFull: enr.course.testCountFull,
+        testCountChapter: enr.course.testCountChapter,
+        sampleTestUrl: enr.course.sampleTestUrl,
+        centreName: enr.course.centre?.name || null,
+        centreCity: enr.course.centre?.city || null,
         modules: enr.course.modules,
         totalLessons,
       },
@@ -63,6 +75,29 @@ export async function listUserEnrollments(userId: string) {
       progressPct,
     };
   });
+}
+
+export async function checkUserCourseAccess(userId: string, courseIdOrSlug: string): Promise<boolean> {
+  const enrollment = await db.enrollment.findFirst({
+    where: {
+      userId,
+      status: EnrollmentStatus.ACTIVE,
+      OR: [
+        { courseId: courseIdOrSlug },
+        { course: { slug: courseIdOrSlug } },
+      ],
+      AND: [
+        {
+          OR: [
+            { expiresAt: null },
+            { expiresAt: { gt: new Date() } },
+          ],
+        },
+      ],
+    },
+  });
+
+  return Boolean(enrollment);
 }
 
 export async function listAdminEnrollments(params: {

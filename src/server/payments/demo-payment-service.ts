@@ -1,6 +1,7 @@
 import { db } from "@/lib/db";
 import { OrderStatus, EnrollmentStatus, EnrollmentSource } from "@prisma/client";
 import { clearCart } from "@/server/cart/cart-service";
+import { sendOrderReceiptEmail } from "@/lib/mail";
 
 export interface DemoPaymentParams {
   orderId: string;
@@ -16,6 +17,7 @@ export async function processDemoPayment(params: DemoPaymentParams) {
   const order = await db.order.findFirst({
     where: { id: orderId, userId },
     include: {
+      user: { select: { id: true, name: true, email: true } },
       items: {
         include: {
           course: true,
@@ -70,10 +72,19 @@ export async function processDemoPayment(params: DemoPaymentParams) {
       },
     });
 
-    // B. Create Enrollments for each course item
+    // B. Create Enrollments and handle physical seats for each course item
     const enrollments = [];
     for (const item of order.items) {
       const course = item.course;
+
+      // Decrement physical coaching seats atomically if applicable
+      if (course.mode === "PHYSICAL" && course.seatsLeft !== null && course.seatsLeft > 0) {
+        await tx.course.update({
+          where: { id: course.id },
+          data: { seatsLeft: { decrement: 1 } },
+        });
+      }
+
       const validityDays = course.validityDays;
       let expiresAt: Date | null = null;
       if (validityDays && validityDays > 0) {
@@ -138,6 +149,19 @@ export async function processDemoPayment(params: DemoPaymentParams) {
 
   // 4. Clear user's cart now that order is paid
   await clearCart(userId);
+
+  // 5. Send order confirmation email asynchronously
+  if (order.user?.email && result.updatedOrder.invoiceNo) {
+    const itemTitles = order.items.map((i) => i.course.title);
+    sendOrderReceiptEmail({
+      to: order.user.email,
+      name: order.user.name || "Student",
+      invoiceNo: result.updatedOrder.invoiceNo,
+      total: Number(order.total),
+      items: itemTitles,
+      orderId: result.updatedOrder.id,
+    }).catch((err) => console.error("[RECEIPT EMAIL ERROR]", err));
+  }
 
   return {
     success: true,

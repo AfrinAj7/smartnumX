@@ -68,11 +68,24 @@ export function AuthForm({ mode, googleEnabled = false }: { mode: AuthMode; goog
 
     try {
       if (mode === "sign-in") {
-        await signIn("credentials", {
-          email: String(values.get("email") ?? "").trim(),
-          password: String(values.get("password") ?? ""),
+        const email = String(values.get("email") ?? "").trim();
+        const password = String(values.get("password") ?? "");
+
+        const res = await signIn("credentials", {
+          email,
+          password,
+          redirect: false,
           redirectTo: callbackUrl,
         });
+
+        if (!res || res.error || !res.ok) {
+          setError("Incorrect email or password. Please check your credentials and try again.");
+          setPending(false);
+          return;
+        }
+
+        // Successfully authenticated! Navigate to destination on current host
+        window.location.href = callbackUrl;
         return;
       }
 
@@ -217,7 +230,7 @@ export function AuthForm({ mode, googleEnabled = false }: { mode: AuthMode; goog
             {urlError && !error && (
               <p className="auth-inline-error" role="alert">
                 {urlError === "CredentialsSignin"
-                  ? "Sign-in failed. Please check your email and password."
+                  ? "Incorrect email or password. Please check your credentials and try again."
                   : "Sign-in failed. Check your details or try again later."}
               </p>
             )}

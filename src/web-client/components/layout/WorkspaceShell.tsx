@@ -23,21 +23,21 @@ type NavItem = {
 const adminNavigation: NavItem[] = [
   { label: "Dashboard", href: "/admin", icon: "📊" },
   { label: "Site Content (CMS)", href: "/admin/site-content", icon: "✏️" },
-  { label: "Courses & Catalog", href: "/admin/courses", icon: "📚" },
+  { label: "Courses & Test Series", href: "/admin/courses", icon: "📚" },
+  { label: "Coupons & Vouchers", href: "/admin/coupons", icon: "🏷️" },
   { label: "Learners & Enrolments", href: "/admin/enrollments", icon: "🎓" },
   { label: "Orders & Demo Payments", href: "/admin/orders", icon: "💳" },
   { label: "Leads & Demo Requests", href: null, icon: "📥", badge: "Soon" },
-  { label: "Reports & Revenue", href: null, icon: "📈", badge: "Soon" },
   { label: "System Settings", href: null, icon: "⚙️", badge: "Soon" },
 ];
 
 const learnerNavigation: NavItem[] = [
-  { label: "Overview", href: "/dashboard", icon: "📊" },
-  { label: "My Courses", href: "/dashboard/my-courses", icon: "📚" },
-  { label: "Order History", href: "/dashboard/orders", icon: "🧾" },
+  { label: "My Purchases & Access", href: "/dashboard", icon: "🎓" },
+  { label: "Tuition Programmes", href: "/dashboard/my-courses", icon: "📐" },
+  { label: "Order History & Invoices", href: "/dashboard/orders", icon: "🧾" },
+  { label: "Explore Courses", href: "/courses", icon: "📚" },
+  { label: "Explore Test Series", href: "/test-series", icon: "📝" },
   { label: "1-on-1 Doubts", href: null, icon: "❓", badge: "Soon" },
-  { label: "Mock Tests", href: null, icon: "📝", badge: "Soon" },
-  { label: "Study Library", href: null, icon: "📁", badge: "Soon" },
   { label: "My Attendance", href: null, icon: "📅", badge: "Soon" },
 ];
 
@@ -53,7 +53,7 @@ function getInitials(name: string) {
 export function WorkspaceShell({ role, name, children }: WorkspaceShellProps) {
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const isAdmin = role !== "STUDENT";
+  const isAdmin = role !== "STUDENT" && pathname.startsWith("/admin");
   const navigation = isAdmin ? adminNavigation : learnerNavigation;
   const initials = getInitials(name);
 

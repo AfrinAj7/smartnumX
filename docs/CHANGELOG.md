@@ -14,3 +14,30 @@
 - Comprehensive SmartNum marketing landing page complete with sticky navigation, mathematics hero carousel, interactive Why SmartNum tabs/mobile accordion, programmes & curricula cards, YouTube facade video gallery, demo lead capture, FAQ accordion with JSON-LD schema, and dedicated Indirapuram Visit Us location block with Google Maps embed.
 - Full SmartNum branding and contact integration: Indirapuram address (04224, ATS Advantage, Indirapuram, Ghaziabad, UP - 201014), phones (+91 99589 47774, +91 88004 05640), email (gosmartnum@gmail.com), WhatsApp, Instagram, Facebook, YouTube, and LinkedIn profiles.
 - Admin Panel Site Content Editor (`/admin/site-content`) with S3 presigned upload support for hero images, curriculum images, tutor photos, and MP4 demo videos. S3 variables (`S3_ENDPOINT`, `S3_PUBLIC_URL`) documented in `.env.example` and `ARCHITECTURE.md`.
+- Buy Flow Phase 2: Extended Prisma schema with `ProductType` (`COURSE`, `TEST_SERIES`), `ProductMode` (`ONLINE`, `PHYSICAL`, `BOTH`), `Centre` model for physical coaching centers, hierarchical `Category` tree with parent-child relations, and extended course product metadata (seat caps, real-time seats left, test series counts, validity, free flag, syllabus/mock inclusions). Seeded full product catalog and coupons.
+- Buy Flow Phase 3: Redesigned header with categorized Courses dropdown (School & Board Tuition vs Competitive Pathways) and interactive two-column Test Series Mega-Menu (left category tabs, dynamic right flyout, badges, mobile accordion, no NEET entries). Added "My Purchases & Access" to user dropdown.
+- Buy Flow Phase 4: Implemented Course and Test Series listing and detail pages (`/courses`, `/courses/[slug]`, `/test-series`, `/test-series/[slug]`).
+  - Created interactive Dual-Mode Course Detail with Online vs Physical (Offline) toggle, centre selector, and real-time seat availability countdown.
+  - Created Test Series catalog and detail views with test breakdown (Full Mocks, Chapter Drills, Video Solutions), CBT simulator tags, sample test preview, rank/percentile analysis features, and test schedule.
+  - Built unified `BuyButtons` client component supporting instant "Buy Now" (direct to `/checkout`), "Add to Cart", and 1-click free enrollment for diagnostic tests (`/api/free-enroll`).
+  - Added responsive design and styling via `src/app/catalog-flow.css`.
+- Buy Flow Phase 5: Cart, Checkout, and Payment Integration (Test Mode).
+  - Extended `getCart()` with productType, delivery mode, centre name, remaining seats, and test series mock counts.
+  - Built dedicated Coupon Validation Engine (`src/server/coupons/coupon-service.ts`) and API (`/api/coupons/validate`) with expiry, usage limits, minimum cart value, and product-type scope checks.
+  - Redesigned `/cart` with SmartNum orange branding, product-aware cards (Tuition Programme vs Test Series), live coupon apply/remove, and seamless transition to checkout.
+  - Built comprehensive `/checkout` view featuring Student & Academic details form (Name, WhatsApp Phone, Email, Target Class, City/Centre), simulated payment mode selector (UPI, Cards, NetBanking), and instant payment success/failure simulation.
+  - Added atomic physical batch seat-decrement protection in `demo-payment-service.ts` to prevent overselling of physical coaching classroom seats.
+  - Enhanced Order Confirmation (`/orders/[id]`) with product-specific badges, item breakdowns, invoice display, and direct portal navigation.
+- Buy Flow Phase 6: Post-Purchase Entitlements, "My Purchases" Access, and Email Receipts.
+  - Implemented `checkUserCourseAccess(userId, courseIdOrSlug)` in `enrollment-service.ts` to enforce active enrollment gating on courses and test series.
+  - Extended `listUserEnrollments` to surface product type, mode, offline centre, validity, and mock counts.
+  - Built full `StudentDashboardView.tsx` with student greeting, quick metrics (active enrollments, courses, mock test packs), category tabs (`All`, `Tuition Courses`, `Test Series`), and direct action buttons ("Start Learning" / "Attempt Tests").
+  - Connected `/dashboard` and `/dashboard/my-courses` to load real active enrollments and order histories.
+  - Updated `WorkspaceShell` navigation with "My Purchases & Access", tuition programmes, order history, and direct catalog links.
+  - Added automated order receipt dispatch (`sendOrderReceiptEmail`) via SMTP/Resend with console fallback upon payment completion.
+- Buy Flow Phase 7: Admin Panel Management, Coupon Administration, and Production Readiness.
+  - Upgraded Course Management in Admin Panel (`/admin/courses` and `CourseManagementView.tsx`) to support full CRUD for both Tuition Courses and Test Series packages.
+  - Added management of delivery mode (Online vs Physical), offline coaching centre selection, classroom capacity and live remaining seats countdown, test breakdown metrics (Full Mocks, Chapter Drills), promotional badges, and free diagnostic flags.
+  - Added dedicated Coupon & Voucher Management (`/admin/coupons` and `CouponManagementView.tsx`) with percentage/flat discounts, minimum cart values, usage caps, product-type targeting, and expiry controls.
+  - Added "Courses & Test Series" and "Coupons & Vouchers" to `adminNavigation` in `WorkspaceShell.tsx`.
+  - Verified 0 TypeScript compilation errors, 0 ESLint errors, 29/29 passing unit tests, and successful Next.js production build (`next build`) generating all 47 routes.

@@ -1,6 +1,15 @@
 import { db } from "@/lib/db";
 import { OrderStatus, Prisma } from "@prisma/client";
 import { getCart } from "@/server/cart/cart-service";
+import { validateCoupon } from "@/server/coupons/coupon-service";
+
+export interface StudentDetails {
+  studentName?: string;
+  studentPhone?: string;
+  studentEmail?: string;
+  studentClass?: string;
+  studentCity?: string;
+}
 
 export interface CreateOrderResult {
   orderId: string;
@@ -19,43 +28,63 @@ function generateInvoiceNumber(): string {
 
 export async function createPendingOrder(
   userId: string,
-  couponCode?: string
+  couponCode?: string,
+  studentDetails?: StudentDetails
 ): Promise<CreateOrderResult> {
   const cart = await getCart(userId);
   if (cart.items.length === 0) {
     throw new Error("Your cart is empty. Add courses before checking out.");
   }
 
-  // Calculate pricing
+  // Check physical seats availability
+  for (const item of cart.items) {
+    if (item.mode === "PHYSICAL" && item.seatsLeft !== null && item.seatsLeft <= 0) {
+      throw new Error(
+        `The physical batch for "${item.title}" is currently full. Please switch to the Online edition or contact our centre.`
+      );
+    }
+  }
+
+  // Base pricing
   const subtotal = cart.subtotal;
   let discount = cart.discount;
   let total = cart.total;
   let couponId: string | null = null;
 
-  // Validate coupon if applied
+  // Validate coupon through coupon engine
   if (couponCode && couponCode.trim()) {
-    const coupon = await db.coupon.findUnique({
-      where: { code: couponCode.trim().toUpperCase() },
-    });
-
-    if (coupon) {
-      const now = new Date();
-      const isValidDate = (!coupon.validFrom || coupon.validFrom <= now) && (!coupon.validTo || coupon.validTo >= now);
-      const isUnderLimit = !coupon.maxUses || coupon.usedCount < coupon.maxUses;
-
-      if (isValidDate && isUnderLimit) {
-        couponId = coupon.id;
-        const couponVal = Number(coupon.value);
-        if (coupon.type === "PERCENT") {
-          const couponDiscount = Math.round(((total * couponVal) / 100) * 100) / 100;
-          discount += couponDiscount;
-          total = Math.max(0, total - couponDiscount);
-        } else {
-          // FLAT discount
-          discount += couponVal;
-          total = Math.max(0, total - couponVal);
-        }
+    const couponRes = await validateCoupon(couponCode, userId);
+    if (couponRes.valid && couponRes.discount && couponRes.code) {
+      const couponRecord = await db.coupon.findUnique({
+        where: { code: couponRes.code },
+        select: { id: true },
+      });
+      if (couponRecord) {
+        couponId = couponRecord.id;
+        discount += couponRes.discount;
+        total = Math.max(0, total - couponRes.discount);
       }
+    }
+  }
+
+  // Optionally update student phone/name if missing
+  if (studentDetails?.studentPhone || studentDetails?.studentName) {
+    try {
+      const user = await db.user.findUnique({
+        where: { id: userId },
+        select: { phone: true, name: true },
+      });
+      if (user && (!user.phone || !user.name)) {
+        await db.user.update({
+          where: { id: userId },
+          data: {
+            phone: user.phone || studentDetails.studentPhone || null,
+            name: user.name || studentDetails.studentName || null,
+          },
+        });
+      }
+    } catch {
+      // Non-fatal if user update fails
     }
   }
 
@@ -111,6 +140,7 @@ export async function getOrderById(orderId: string, userId?: string) {
     where,
     include: {
       user: { select: { id: true, name: true, email: true, phone: true } },
+      coupon: { select: { code: true, type: true, value: true } },
       items: {
         include: {
           course: {
@@ -120,6 +150,20 @@ export async function getOrderById(orderId: string, userId?: string) {
               slug: true,
               thumbnailUrl: true,
               validityDays: true,
+              productType: true,
+              mode: true,
+              targetClass: true,
+              targetExam: true,
+              badge: true,
+              testCountFull: true,
+              testCountChapter: true,
+              validity: true,
+              centre: {
+                select: {
+                  name: true,
+                  city: true,
+                },
+              },
             },
           },
         },

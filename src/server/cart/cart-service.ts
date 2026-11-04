@@ -12,6 +12,17 @@ export interface CartCalculation {
     discountPrice: number | null;
     finalPrice: number;
     categoryName: string | null;
+    productType: "COURSE" | "TEST_SERIES";
+    mode: "ONLINE" | "PHYSICAL" | "BOTH" | null;
+    targetClass: string | null;
+    targetExam: string | null;
+    badge: string | null;
+    validity: string | null;
+    seatsLeft: number | null;
+    centreName: string | null;
+    centreCity: string | null;
+    testCountFull: number | null;
+    testCountChapter: number | null;
   }>;
   subtotal: number;
   discount: number;
@@ -27,6 +38,7 @@ export async function getCart(userId: string): Promise<CartCalculation> {
       course: {
         include: {
           category: { select: { name: true } },
+          centre: { select: { name: true, city: true } },
         },
       },
     },
@@ -60,6 +72,17 @@ export async function getCart(userId: string): Promise<CartCalculation> {
       discountPrice,
       finalPrice,
       categoryName: course.category?.name || null,
+      productType: course.productType as "COURSE" | "TEST_SERIES",
+      mode: course.mode,
+      targetClass: course.targetClass,
+      targetExam: course.targetExam,
+      badge: course.badge,
+      validity: course.validity,
+      seatsLeft: course.seatsLeft,
+      centreName: course.centre?.name || null,
+      centreCity: course.centre?.city || null,
+      testCountFull: course.testCountFull,
+      testCountChapter: course.testCountChapter,
     });
   }
 

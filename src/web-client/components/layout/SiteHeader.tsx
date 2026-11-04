@@ -22,31 +22,206 @@ type SiteHeaderProps = {
 
 const coursesMegaMenu = [
   {
-    title: "School & Board Tuition",
+    title: "School & Board Tuition (Classes 9–12)",
     items: [
-      { label: "Class 9 Tuition (Maths & Science)", href: "/courses/class-9-maths-science-tuition", badge: "CBSE & ICSE" },
-      { label: "Class 10 Board Excellence", href: "/courses/class-10-board-excellence", badge: "Board Prep" },
-      { label: "Class 11 Foundation & Boards", href: "/courses/class-11-foundation-and-boards", badge: "Any Board" },
-      { label: "Class 12 Board Mastery", href: "/courses/class-12-board-mastery", badge: "Board + Prep" },
+      { label: "Class 9th Coaching (Maths & Science)", href: "/courses/class-9-maths-science-tuition", badge: "CBSE & ICSE", mode: "Online | Physical" },
+      { label: "Class 10th Board Excellence", href: "/courses/class-10-board-excellence", badge: "Board Prep", mode: "Online | Physical" },
+      { label: "Class 11th Foundation & Boards", href: "/courses/class-11-foundation-and-boards", badge: "Foundation", mode: "Online | Physical" },
+      { label: "Class 12th Board Mastery", href: "/courses/class-12-board-mastery", badge: "Board + Prep", mode: "Online | Physical" },
     ],
   },
   {
-    title: "Competitive Pathways",
+    title: "Competitive Pathways & Olympiads",
     items: [
-      { label: "IIT-JEE Mains Preparation", href: "/courses/iit-jee-mains-preparation", badge: "Popular" },
-      { label: "IIT-JEE Advanced Mentorship", href: "/courses/iit-jee-advanced-mentorship", badge: "Intensive" },
-      { label: "Math & Science Olympiads", href: "/courses/maths-science-olympiads", badge: "National" },
-      { label: "Self-Paced Recorded Modules", href: "/courses/self-paced-recorded-modules", badge: "Online" },
+      { label: "IIT-JEE (Main) Intensive Prep", href: "/courses/iit-jee-mains-preparation", badge: "Popular", mode: "Online | Physical" },
+      { label: "IIT-JEE (Main + Advanced) Mentorship", href: "/courses/iit-jee-advanced-mentorship", badge: "Intensive", mode: "Online | Physical" },
+      { label: "Math & Science Olympiads", href: "/courses/maths-science-olympiads", badge: "National", mode: "Online | Physical" },
+      { label: "Self-Paced Recorded Modules", href: "/courses/self-paced-recorded-modules", badge: "Online", mode: "Digital Only" },
     ],
   },
 ];
 
-const testSeriesMenu = [
-  { label: "Free Diagnostic Mock Test", href: "/#course-explorer", badge: "Free" },
-  { label: "Class 10 Board Mock Series", href: "/#course-explorer", badge: "New" },
-  { label: "Class 12 Board Mock Papers", href: "/#course-explorer", badge: "2026 Batch" },
-  { label: "IIT-JEE Mains Full Mocks", href: "/#course-explorer", badge: "High Yield" },
-  { label: "Annual Scholarship Assessment", href: "/#book-demo", badge: "Up to 50% Off" },
+export interface TestSeriesNavItem {
+  id: string;
+  name: string;
+  slug: string;
+  badge?: string;
+  badgeType?: "free" | "highlight" | "default";
+  desc: string;
+  subcategories: Array<{ label: string; href: string }>;
+  featuredTests: Array<{
+    title: string;
+    href: string;
+    badge: string;
+    badgeType?: "free" | "highlight" | "default";
+    stats: string;
+    price: string;
+    discountPrice?: string;
+    isFree?: boolean;
+  }>;
+}
+
+const testSeriesNavCategories: TestSeriesNavItem[] = [
+  {
+    id: "ts-iit-jee-main-advanced",
+    name: "IIT JEE (Main + Advanced)",
+    slug: "ts-iit-jee-main-advanced",
+    badge: "Advanced",
+    desc: "Rigorous dual-paper mock series with multi-pattern questions & all-India percentile prediction.",
+    subcategories: [
+      { label: "Class 11th", href: "/test-series?category=ts-jee-adv-class-11" },
+      { label: "Class 12th", href: "/test-series?category=ts-jee-adv-class-12" },
+      { label: "Class 12th Plus (Droppers)", href: "/test-series?category=ts-jee-adv-droppers" },
+    ],
+    featuredTests: [
+      {
+        title: "IIT-JEE Advanced Full Mock Challenge",
+        href: "/test-series/iit-jee-advanced-full-mock-challenge",
+        badge: "Popular",
+        stats: "15 Dual Papers · 30 Chapter Tests",
+        price: "₹2,499",
+        discountPrice: "₹1,499",
+      },
+      {
+        title: "IIT-JEE Mains Full Mocks",
+        href: "/test-series/iit-jee-mains-full-mocks",
+        badge: "High Yield",
+        badgeType: "highlight",
+        stats: "20 Full Mocks · 40 Chapter Tests",
+        price: "₹1,999",
+        discountPrice: "₹999",
+      },
+    ],
+  },
+  {
+    id: "ts-iit-jee-main",
+    name: "IIT JEE Main",
+    slug: "ts-iit-jee-main",
+    badge: "High Yield",
+    badgeType: "highlight",
+    desc: "Computer-Based Test (CBT) mock exam series strictly matching the latest NTA exam pattern.",
+    subcategories: [
+      { label: "Class 11th", href: "/test-series?category=ts-jee-main-class-11" },
+      { label: "Class 12th", href: "/test-series?category=ts-jee-main-class-12" },
+      { label: "Class 12th Plus (Droppers)", href: "/test-series?category=ts-jee-main-droppers" },
+    ],
+    featuredTests: [
+      {
+        title: "IIT-JEE Mains Full Mocks (High Yield)",
+        href: "/test-series/iit-jee-mains-full-mocks",
+        badge: "High Yield",
+        badgeType: "highlight",
+        stats: "20 Full Mocks · NTA CBT Engine",
+        price: "₹1,999",
+        discountPrice: "₹999",
+      },
+      {
+        title: "Free Diagnostic Mock Test",
+        href: "/test-series/free-diagnostic-mock-test",
+        badge: "Free",
+        badgeType: "free",
+        stats: "30-Min Rapid Test · Instant Scorecard",
+        price: "Free",
+        isFree: true,
+      },
+    ],
+  },
+  {
+    id: "ts-class-9-12",
+    name: "Class 9–12",
+    slug: "ts-class-9-12",
+    badge: "Boards",
+    desc: "Board-focused mock papers with official step-by-step scoring rubric and topper model solutions.",
+    subcategories: [
+      { label: "Class 9", href: "/test-series?category=ts-school-class-9" },
+      { label: "Class 10 (Board)", href: "/test-series?category=ts-school-class-10" },
+      { label: "Class 11", href: "/test-series?category=ts-school-class-11" },
+      { label: "Class 12 (Board)", href: "/test-series?category=ts-school-class-12" },
+    ],
+    featuredTests: [
+      {
+        title: "Class 10 Board Mock Series",
+        href: "/test-series/class-10-board-mock-series",
+        badge: "New",
+        stats: "10 Full Board Mocks · 25 Topic Tests",
+        price: "₹1,299",
+        discountPrice: "₹699",
+      },
+      {
+        title: "Class 12 Board Mock Papers",
+        href: "/test-series/class-12-board-mock-papers",
+        badge: "2026 Batch",
+        badgeType: "highlight",
+        stats: "12 Full Board Mocks · 30 Sectional Mocks",
+        price: "₹1,499",
+        discountPrice: "₹799",
+      },
+    ],
+  },
+  {
+    id: "ts-popular-exams",
+    name: "Popular Exams",
+    slug: "ts-popular-exams",
+    badge: "Diagnostic",
+    desc: "National aptitude benchmarks and comprehensive scholarship diagnostic evaluations.",
+    subcategories: [
+      { label: "Annual Scholarship Assessment", href: "/test-series/annual-scholarship-assessment" },
+      { label: "Free Diagnostic Mock Test", href: "/test-series/free-diagnostic-mock-test" },
+    ],
+    featuredTests: [
+      {
+        title: "Annual Scholarship Assessment",
+        href: "/test-series/annual-scholarship-assessment",
+        badge: "Up to 50% Off",
+        badgeType: "highlight",
+        stats: "60-Min Test · Tuition Scholarship",
+        price: "Free",
+        isFree: true,
+      },
+      {
+        title: "Free Diagnostic Mock Test",
+        href: "/test-series/free-diagnostic-mock-test",
+        badge: "Free",
+        badgeType: "free",
+        stats: "30-Min Rapid Test · Weak Spot Analysis",
+        price: "Free",
+        isFree: true,
+      },
+    ],
+  },
+  {
+    id: "ts-free-test-series",
+    name: "Free Test Series",
+    slug: "ts-free-test-series",
+    badge: "FREE",
+    badgeType: "free",
+    desc: "Explore 100% free diagnostic and scholarship test series with zero payment required.",
+    subcategories: [
+      { label: "Free Diagnostic Mock", href: "/test-series/free-diagnostic-mock-test" },
+      { label: "Scholarship Assessment", href: "/test-series/annual-scholarship-assessment" },
+      { label: "View All Free Tests", href: "/test-series?free=true" },
+    ],
+    featuredTests: [
+      {
+        title: "Free Diagnostic Mock Test",
+        href: "/test-series/free-diagnostic-mock-test",
+        badge: "Free",
+        badgeType: "free",
+        stats: "Instant Evaluation · Weak Area Heatmap",
+        price: "₹0 Free",
+        isFree: true,
+      },
+      {
+        title: "Annual Scholarship Assessment",
+        href: "/test-series/annual-scholarship-assessment",
+        badge: "Up to 50% Off",
+        badgeType: "highlight",
+        stats: "Benchmark Score · 50% Fee Waiver",
+        price: "₹0 Free",
+        isFree: true,
+      },
+    ],
+  },
 ];
 
 const freeResourcesMenu = [
@@ -79,6 +254,7 @@ export function SiteHeader({
   const pathname = usePathname();
   const [isScrolled, setIsScrolled] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+  const [activeTestCategory, setActiveTestCategory] = useState<string>("ts-iit-jee-main-advanced");
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const [mobileAccordion, setMobileAccordion] = useState<string | null>("courses");
   const [userMenuOpen, setUserMenuOpen] = useState(false);
@@ -164,6 +340,10 @@ export function SiteHeader({
   const portalLabel =
     user?.role === "SUPER_ADMIN" ? "Admin Panel" : user?.role === "INSTRUCTOR" ? "Instructor Panel" : "My Dashboard";
 
+  const activeCategoryData =
+    testSeriesNavCategories.find((c) => c.id === activeTestCategory) ||
+    testSeriesNavCategories[0];
+
   return (
     <>
       <header
@@ -186,31 +366,95 @@ export function SiteHeader({
               Home
             </Link>
 
-            <Link
-              className={`nav-link ${pathname === "/courses" ? "is-active" : ""}`}
-              href="/courses"
+            {/* Courses Dropdown */}
+            <div
+              className={`nav-dropdown-wrapper ${activeDropdown === "courseMenu" ? "is-open" : ""}`}
+              onMouseEnter={() => handleDropdownEnter("courseMenu")}
+              onMouseLeave={handleDropdownLeave}
             >
-              Courses
-            </Link>
+              <div style={{ display: "inline-flex", alignItems: "center" }}>
+                <Link
+                  className={`nav-link ${pathname === "/courses" ? "is-active" : ""}`}
+                  href="/courses"
+                >
+                  Courses
+                </Link>
+                <button
+                  type="button"
+                  className="nav-link nav-dropdown-trigger"
+                  style={{ paddingLeft: "0.15rem", marginLeft: "-0.3rem" }}
+                  onClick={() => toggleDropdownClick("courseMenu")}
+                  aria-expanded={activeDropdown === "courseMenu"}
+                  aria-haspopup="true"
+                  aria-label="Toggle courses menu"
+                >
+                  <span className="dropdown-chevron" aria-hidden="true" />
+                </button>
+              </div>
+
+              <div className="nav-dropdown-panel courses-dropdown-panel" role="region" aria-label="Courses directory">
+                <div className="mega-columns-grid" style={{ gridTemplateColumns: "1fr 1fr" }}>
+                  {coursesMegaMenu.map((group) => (
+                    <div key={group.title} className="mega-column">
+                      <h3 className="mega-heading">{group.title}</h3>
+                      <ul className="mega-list">
+                        {group.items.map((item) => (
+                          <li key={item.label}>
+                            <Link
+                              href={item.href}
+                              onClick={() => setActiveDropdown(null)}
+                              className="mega-item-link"
+                            >
+                              <div>
+                                <span style={{ fontWeight: 600 }}>{item.label}</span>
+                                {item.mode && (
+                                  <span style={{ display: "block", fontSize: "0.72rem", color: "#64748b", marginTop: "2px" }}>
+                                    {item.mode}
+                                  </span>
+                                )}
+                              </div>
+                              {item.badge && <span className="nav-badge">{item.badge}</span>}
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="courses-panel-banner">
+                  <span className="courses-banner-text">
+                    📍 Indirapuram Campus + Live Interactive Online Mode available for every course
+                  </span>
+                  <Link
+                    href="/courses"
+                    onClick={() => setActiveDropdown(null)}
+                    className="courses-banner-link"
+                  >
+                    View All Courses &amp; Batches →
+                  </Link>
+                </div>
+              </div>
+            </div>
 
             {/* Batches 2027 Mega Menu */}
             <div
-              className={`nav-dropdown-wrapper ${activeDropdown === "courses" ? "is-open" : ""}`}
-              onMouseEnter={() => handleDropdownEnter("courses")}
+              className={`nav-dropdown-wrapper ${activeDropdown === "batches" ? "is-open" : ""}`}
+              onMouseEnter={() => handleDropdownEnter("batches")}
               onMouseLeave={handleDropdownLeave}
             >
               <button
                 type="button"
                 className="nav-link nav-dropdown-trigger"
-                onClick={() => toggleDropdownClick("courses")}
-                aria-expanded={activeDropdown === "courses"}
+                onClick={() => toggleDropdownClick("batches")}
+                aria-expanded={activeDropdown === "batches"}
                 aria-haspopup="true"
               >
                 <span>Batches 2027</span>
                 <span className="dropdown-chevron" aria-hidden="true" />
               </button>
 
-              <div className="nav-mega-panel courses-panel" role="region" aria-label="Courses menu">
+              <div className="nav-mega-panel courses-panel" role="region" aria-label="Batches 2027 menu">
                 <div className="mega-columns-grid">
                   {coursesMegaMenu.map((group) => (
                     <div key={group.title} className="mega-column">
@@ -251,39 +495,142 @@ export function SiteHeader({
               </div>
             </div>
 
-            {/* Test Series Dropdown */}
+            {/* Test Series (Latest 2026-27) Two-Column Mega-Menu */}
             <div
-              className={`nav-dropdown-wrapper ${activeDropdown === "tests" ? "is-open" : ""}`}
-              onMouseEnter={() => handleDropdownEnter("tests")}
+              className={`nav-dropdown-wrapper ${activeDropdown === "testSeries" ? "is-open" : ""}`}
+              onMouseEnter={() => handleDropdownEnter("testSeries")}
               onMouseLeave={handleDropdownLeave}
             >
-              <button
-                type="button"
-                className="nav-link nav-dropdown-trigger"
-                onClick={() => toggleDropdownClick("tests")}
-                aria-expanded={activeDropdown === "tests"}
-                aria-haspopup="true"
-              >
-                <span>Test Series</span>
-                <span className="nav-badge highlight">Mocks</span>
-                <span className="dropdown-chevron" aria-hidden="true" />
-              </button>
+              <div style={{ display: "inline-flex", alignItems: "center" }}>
+                <Link
+                  className={`nav-link ${pathname.startsWith("/test-series") ? "is-active" : ""}`}
+                  href="/test-series"
+                >
+                  <span>Test Series</span>
+                  <span className="nav-badge highlight-orange">Latest 2026-27</span>
+                </Link>
+                <button
+                  type="button"
+                  className="nav-link nav-dropdown-trigger"
+                  style={{ paddingLeft: "0.15rem", marginLeft: "-0.3rem" }}
+                  onClick={() => toggleDropdownClick("testSeries")}
+                  aria-expanded={activeDropdown === "testSeries"}
+                  aria-haspopup="true"
+                  aria-label="Toggle test series menu"
+                >
+                  <span className="dropdown-chevron" aria-hidden="true" />
+                </button>
+              </div>
 
-              <div className="nav-dropdown-panel test-panel" role="region" aria-label="Test series menu">
-                <ul className="dropdown-list">
-                  {testSeriesMenu.map((item) => (
-                    <li key={item.label}>
-                      <Link
-                        href={item.href}
-                        onClick={() => setActiveDropdown(null)}
-                        className="dropdown-item-link"
-                      >
-                        <span>{item.label}</span>
-                        {item.badge && <span className="nav-badge">{item.badge}</span>}
-                      </Link>
-                    </li>
+              <div className="nav-mega-panel test-series-mega-panel" role="region" aria-label="Test series latest 2026-27 menu">
+                {/* Left Column: Category Tabs */}
+                <div className="ts-mega-sidebar">
+                  <div className="ts-mega-sidebar-title">Categories</div>
+                  {testSeriesNavCategories.map((cat) => (
+                    <button
+                      key={cat.id}
+                      type="button"
+                      className={`ts-category-btn ${activeTestCategory === cat.id ? "is-active" : ""}`}
+                      onMouseEnter={() => setActiveTestCategory(cat.id)}
+                      onClick={() => setActiveTestCategory(cat.id)}
+                    >
+                      <div className="ts-category-label-group">
+                        <span>{cat.name}</span>
+                        {cat.badge && (
+                          <span className={`nav-badge ${cat.badgeType === "free" ? "free" : cat.badgeType === "highlight" ? "highlight-orange" : ""}`}>
+                            {cat.badge}
+                          </span>
+                        )}
+                      </div>
+                      <span className="ts-chevron" aria-hidden="true" />
+                    </button>
                   ))}
-                </ul>
+                </div>
+
+                {/* Right Flyout: Subcategories & Featured Tests */}
+                <div className="ts-mega-content">
+                  <div>
+                    <div className="ts-content-header">
+                      <div className="ts-content-heading-row">
+                        <h4 className="ts-content-title">{activeCategoryData.name}</h4>
+                        <Link
+                          href={`/test-series?category=${activeCategoryData.slug}`}
+                          onClick={() => setActiveDropdown(null)}
+                          className="ts-view-all-link"
+                        >
+                          View All {activeCategoryData.name} Tests →
+                        </Link>
+                      </div>
+                      <p className="ts-content-desc">{activeCategoryData.desc}</p>
+
+                      <div className="ts-subcat-pills-row">
+                        <span style={{ fontSize: "0.74rem", color: "#94a3b8", fontWeight: 700, textTransform: "uppercase" }}>Grades / Stream:</span>
+                        {activeCategoryData.subcategories.map((sub) => (
+                          <Link
+                            key={sub.label}
+                            href={sub.href}
+                            onClick={() => setActiveDropdown(null)}
+                            className="ts-subcat-pill"
+                          >
+                            {sub.label}
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="ts-tests-grid">
+                      {activeCategoryData.featuredTests.map((test) => (
+                        <Link
+                          key={test.title}
+                          href={test.href}
+                          onClick={() => setActiveDropdown(null)}
+                          className="ts-test-card"
+                        >
+                          <div>
+                            <div className="ts-card-badge-row">
+                              <span className={`nav-badge ${test.badgeType === "free" ? "free" : test.badgeType === "highlight" ? "highlight-orange" : ""}`}>
+                                {test.badge}
+                              </span>
+                              <span style={{ fontSize: "0.72rem", color: "#64748b", fontWeight: 600 }}>Mock Series</span>
+                            </div>
+                            <h5 className="ts-card-title">{test.title}</h5>
+                            <div className="ts-card-stats">
+                              <span>📊</span>
+                              <span>{test.stats}</span>
+                            </div>
+                          </div>
+
+                          <div className="ts-card-pricing-row">
+                            <div className="ts-price-display">
+                              <span className={`ts-price-sale ${test.isFree ? "free" : ""}`}>
+                                {test.discountPrice || test.price}
+                              </span>
+                              {test.discountPrice && (
+                                <span className="ts-price-mrp">{test.price}</span>
+                              )}
+                            </div>
+                            <span className="ts-card-action">
+                              {test.isFree ? "Enroll Free" : "Explore / Buy"} →
+                            </span>
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="ts-content-footer">
+                    <span style={{ fontSize: "0.78rem", color: "#64748b" }}>
+                      All tests include real-time scoring, detailed accuracy heatmaps &amp; step-by-step solutions.
+                    </span>
+                    <Link
+                      href="/test-series"
+                      onClick={() => setActiveDropdown(null)}
+                      className="ts-view-all-link"
+                    >
+                      Full Test Series Directory ↗
+                    </Link>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -407,11 +754,25 @@ export function SiteHeader({
                         {portalLabel}
                       </Link>
                       <Link
-                        href="/#course-explorer"
+                        href="/dashboard"
+                        role="menuitem"
+                        onClick={() => setUserMenuOpen(false)}
+                      >
+                        My Purchases &amp; Access
+                      </Link>
+                      <Link
+                        href="/courses"
                         role="menuitem"
                         onClick={() => setUserMenuOpen(false)}
                       >
                         Explore Courses
+                      </Link>
+                      <Link
+                        href="/test-series"
+                        role="menuitem"
+                        onClick={() => setUserMenuOpen(false)}
+                      >
+                        Test Series (Mocks)
                       </Link>
                     </div>
                     <div className="user-menu-footer">
@@ -555,7 +916,7 @@ export function SiteHeader({
             )}
           </div>
 
-          {/* Test Series Accordion */}
+          {/* Test Series (Latest 2026-27) Accordion */}
           <div className="mobile-accordion-group">
             <button
               type="button"
@@ -563,21 +924,38 @@ export function SiteHeader({
               onClick={() => toggleAccordion("tests")}
               aria-expanded={mobileAccordion === "tests"}
             >
-              <span>📝 Test Series &amp; Mocks</span>
+              <span>📝 Test Series (Latest 2026-27)</span>
               <span className={`accordion-icon ${mobileAccordion === "tests" ? "is-open" : ""}`}>▾</span>
             </button>
             {mobileAccordion === "tests" && (
               <div className="accordion-content">
-                {testSeriesMenu.map((item) => (
-                  <Link
-                    key={item.label}
-                    href={item.href}
-                    onClick={() => setMobileDrawerOpen(false)}
-                    className="accordion-sublink"
-                  >
-                    <span>{item.label}</span>
-                    {item.badge && <span className="nav-badge highlight">{item.badge}</span>}
-                  </Link>
+                <Link
+                  href="/test-series"
+                  onClick={() => setMobileDrawerOpen(false)}
+                  className="accordion-sublink"
+                  style={{ fontWeight: 700, color: "#0284c7", borderBottom: "1px solid #e2e8f0", paddingBottom: "0.6rem" }}
+                >
+                  <span>Explore All Test Series ↗</span>
+                  <span className="nav-badge highlight">Mocks</span>
+                </Link>
+
+                {testSeriesNavCategories.map((cat) => (
+                  <div key={cat.id} style={{ marginTop: "0.6rem", marginBottom: "0.4rem" }}>
+                    <div style={{ fontSize: "0.75rem", fontWeight: 800, color: "#64748b", textTransform: "uppercase", padding: "0.2rem 0.5rem" }}>
+                      {cat.name}
+                    </div>
+                    {cat.subcategories.map((sub) => (
+                      <Link
+                        key={sub.label}
+                        href={sub.href}
+                        onClick={() => setMobileDrawerOpen(false)}
+                        className="accordion-sublink"
+                        style={{ paddingLeft: "1.2rem", fontSize: "0.82rem" }}
+                      >
+                        <span>{sub.label}</span>
+                      </Link>
+                    ))}
+                  </div>
                 ))}
               </div>
             )}

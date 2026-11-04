@@ -154,3 +154,78 @@ export const authMailer: AuthMailer = {
     });
   },
 };
+
+export async function sendOrderReceiptEmail(input: {
+  to: string;
+  name: string;
+  invoiceNo: string;
+  total: number;
+  items: string[];
+  orderId: string;
+}) {
+  const baseUrl = process.env.APP_URL || process.env.NEXTAUTH_URL || "http://localhost:3000";
+  const invoiceUrl = `${baseUrl}/orders/${input.orderId}`;
+  const portalUrl = `${baseUrl}/dashboard`;
+  const safeName = escapeHtml(input.name || "Student");
+
+  const fromEmail = process.env.EMAIL_FROM || process.env.SMTP_USER || process.env.SEED_ADMIN_EMAIL || "gosmartnum@gmail.com";
+  const from = fromEmail.includes("<") ? fromEmail : `"SmartNum Learning Space" <${fromEmail}>`;
+  const subject = `Enrolment Confirmed: Invoice #${input.invoiceNo} | SmartNum`;
+
+  const itemsHtml = input.items.map((i) => `<li><strong>${escapeHtml(i)}</strong></li>`).join("");
+
+  const transporter = getSmtpTransporter();
+  if (transporter) {
+    try {
+      console.info(`[SMTP] Sending receipt for ${input.invoiceNo} to ${input.to}...`);
+      await transporter.sendMail({
+        from,
+        to: input.to,
+        subject,
+        text: `Hi ${input.name},\n\nYour enrolment is confirmed!\nInvoice No: ${input.invoiceNo}\nTotal Paid: ₹${input.total.toLocaleString("en-IN")}\nProgrammes: ${input.items.join(", ")}\n\nAccess your learning dashboard: ${portalUrl}\nView invoice receipt: ${invoiceUrl}`,
+        html: `
+          <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #1e293b; max-width: 580px; margin: 0 auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 8px;">
+            <div style="background-color: #0f172a; padding: 16px 20px; border-radius: 6px; margin-bottom: 20px;">
+              <h2 style="color: #ffffff; margin: 0; font-size: 20px;">SmartNum Learning Space</h2>
+              <p style="color: #ea580c; font-weight: bold; margin: 4px 0 0; font-size: 13px;">Enrolment &amp; Payment Confirmation</p>
+            </div>
+            <p>Dear ${safeName},</p>
+            <p>Congratulations! Your enrolment has been successfully processed and your learning portal is now active.</p>
+            <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 16px; margin: 20px 0;">
+              <p style="margin: 0 0 8px;"><strong>Invoice Number:</strong> ${escapeHtml(input.invoiceNo)}</p>
+              <p style="margin: 0 0 8px;"><strong>Total Paid:</strong> ₹${input.total.toLocaleString("en-IN")}</p>
+              <p style="margin: 0 0 8px;"><strong>Enrolled Programmes:</strong></p>
+              <ul style="margin: 0; padding-left: 20px;">
+                ${itemsHtml}
+              </ul>
+            </div>
+            <p style="margin: 25px 0;">
+              <a href="${portalUrl}" style="background-color: #ea580c; color: #ffffff; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: bold; display: inline-block;">
+                Access My Courses &amp; Tests →
+              </a>
+            </p>
+            <p style="font-size: 13px; color: #64748b;">You can also view or download your invoice receipt anytime at: <br/><a href="${invoiceUrl}" style="color: #2563eb;">${invoiceUrl}</a></p>
+            <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 20px 0;" />
+            <p style="font-size: 12px; color: #94a3b8; margin: 0;">SmartNum Learning Centre: 04224, ATS Advantage, Indirapuram, Ghaziabad, UP · +91 99589 47774</p>
+          </div>
+        `,
+      });
+      console.info(`[SMTP] Successfully delivered receipt for ${input.invoiceNo} to ${input.to}`);
+      return;
+    } catch (smtpError) {
+      console.error("[SMTP ERROR] Failed to send receipt via SMTP:", smtpError);
+    }
+  }
+
+  // Resend or console simulation
+  console.info(
+    `\n======================================================\n` +
+    `[ORDER RECEIPT EMAIL SIMULATION]\n` +
+    `To: ${input.to}\n` +
+    `Invoice: ${input.invoiceNo}\n` +
+    `Total: ₹${input.total}\n` +
+    `Programmes: ${input.items.join(", ")}\n` +
+    `Portal Link: ${portalUrl}\n` +
+    `======================================================\n`
+  );
+}

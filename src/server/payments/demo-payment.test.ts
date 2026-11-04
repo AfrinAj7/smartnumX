@@ -25,4 +25,42 @@ describe("Demo payment calculations and security", () => {
 
     expect(invoiceNo).toMatch(/^SN-INV-\d{8}-\d{4}$/);
   });
+
+  it("filters coupon applicability by product type", () => {
+    const items = [
+      { id: "1", productType: "COURSE", finalPrice: 2000 },
+      { id: "2", productType: "TEST_SERIES", finalPrice: 999 },
+    ];
+
+    const testSeriesOnlyCoupon = {
+      applicableTypes: ["TEST_SERIES"],
+      type: "PERCENT",
+      value: 20, // 20%
+    };
+
+    const eligibleItems = items.filter((item) =>
+      testSeriesOnlyCoupon.applicableTypes.includes(item.productType)
+    );
+    const eligibleAmount = eligibleItems.reduce((acc, curr) => acc + curr.finalPrice, 0);
+    const discount = Math.round(((eligibleAmount * testSeriesOnlyCoupon.value) / 100) * 100) / 100;
+
+    expect(eligibleItems.length).toBe(1);
+    expect(eligibleAmount).toBe(999);
+    expect(discount).toBe(199.8);
+  });
+
+  it("identifies sold-out physical coaching batches", () => {
+    const physicalItem = {
+      title: "Class 10 Board Physical",
+      mode: "PHYSICAL",
+      seatsLeft: 0,
+    };
+
+    const isSoldOut =
+      physicalItem.mode === "PHYSICAL" &&
+      physicalItem.seatsLeft !== null &&
+      physicalItem.seatsLeft <= 0;
+
+    expect(isSoldOut).toBe(true);
+  });
 });

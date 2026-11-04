@@ -181,13 +181,44 @@ model VerificationToken {
   @@id([identifier, token])
 }
 
-model Category {
+enum ProductType {
+  COURSE
+  TEST_SERIES
+}
+
+enum ProductMode {
+  ONLINE
+  PHYSICAL
+  BOTH
+}
+
+model Centre {
   id        String   @id @default(cuid())
   name      String
-  slug      String   @unique
+  city      String   @default("Indirapuram, Ghaziabad")
+  address   String?
+  phone     String?
+  isActive  Boolean  @default(true)
   courses   Course[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model Category {
+  id        String       @id @default(cuid())
+  name      String
+  slug      String       @unique
+  type      ProductType  @default(COURSE)
+  parentId  String?
+  parent    Category?    @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
+  children  Category[]   @relation("CategoryHierarchy")
+  order     Int          @default(0)
+  courses   Course[]
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  @@index([type, order])
+  @@index([parentId])
 }
 
 model Course {
@@ -198,6 +229,22 @@ model Course {
   thumbnailUrl          String?
   categoryId            String?
   instructorId          String?
+  productType           ProductType  @default(COURSE)
+  mode                  ProductMode? @default(ONLINE)
+  targetClass           String?
+  targetExam            String?
+  badge                 String?
+  inclusions            String[]     @default([])
+  validity              String?
+  startDate             DateTime?
+  seatsTotal            Int?
+  seatsLeft             Int?
+  centreId              String?
+  isFree                Boolean      @default(false)
+  testCountFull         Int?
+  testCountChapter      Int?
+  sampleTestUrl         String?
+  features              String[]     @default([])
   price                 Decimal      @db.Decimal(10, 2)
   discountPrice         Decimal?     @db.Decimal(10, 2)
   validityDays          Int?
@@ -211,6 +258,7 @@ model Course {
   deletedAt             DateTime?
   category              Category?    @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   instructor            User?        @relation("CourseInstructor", fields: [instructorId], references: [id], onDelete: SetNull)
+  centre                Centre?      @relation(fields: [centreId], references: [id], onDelete: SetNull)
   modules               Module[]
   batches               Batch[]
   enrollments           Enrollment[]
@@ -220,7 +268,9 @@ model Course {
 
   @@index([status, deletedAt])
   @@index([categoryId, status])
+  @@index([productType, status])
   @@index([instructorId])
+  @@index([centreId])
 }
 
 model Module {
@@ -393,16 +443,18 @@ model Refund {
 }
 
 model Coupon {
-  id        String     @id @default(cuid())
-  code      String     @unique
-  type      CouponType
-  value     Decimal    @db.Decimal(10, 2)
-  maxUses   Int?
-  usedCount Int        @default(0)
-  validFrom DateTime
-  validTo   DateTime?
-  courseIds String[]
-  orders    Order[]
+  id              String        @id @default(cuid())
+  code            String        @unique
+  type            CouponType
+  value           Decimal       @db.Decimal(10, 2)
+  minCart         Decimal?      @db.Decimal(10, 2)
+  maxUses         Int?
+  usedCount       Int           @default(0)
+  validFrom       DateTime
+  validTo         DateTime?
+  courseIds       String[]
+  applicableTypes ProductType[] @default([COURSE, TEST_SERIES])
+  orders          Order[]
 }
 
 model Announcement {

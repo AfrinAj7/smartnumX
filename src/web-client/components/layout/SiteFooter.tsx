@@ -291,15 +291,15 @@ export function SiteFooter({
         </span>
 
         <div className="footer-credit">
-          Designed &amp; Developed By{" "}
+          Designed &amp; Developed By {"—"}
           <a
             href="https://www.bazaarx.co"
             target="_blank"
             rel="noopener noreferrer"
             className="footer-credit-link"
           >
-             Bazaarx.Co
-          </a>{" "}
+            {"—"} Bazaarx.Co
+          </a>
 
           <a
             href="https://www.bazaarx.co"

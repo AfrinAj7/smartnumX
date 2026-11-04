@@ -1012,6 +1012,324 @@ html {
   transform: translateY(-1px);
 }
 
+/* Test Series Two-Column Mega-Menu */
+.test-series-mega-panel {
+  width: min(920px, 94vw);
+  padding: 0;
+  display: grid;
+  grid-template-columns: 290px 1fr;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #ffffff;
+  border: 1px solid rgba(11, 31, 75, 0.12);
+  box-shadow: 0 24px 60px rgba(11, 31, 75, 0.16), 0 4px 16px rgba(11, 31, 75, 0.06);
+}
+
+.ts-mega-sidebar {
+  background: #f8fafc;
+  padding: 1.1rem 0.85rem;
+  border-right: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.ts-mega-sidebar-title {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #64748b;
+  padding: 0 0.5rem 0.5rem;
+  border-bottom: 1px solid #e2e8f0;
+  margin-bottom: 0.35rem;
+}
+
+.ts-category-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0.75rem 0.85rem;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: #1e293b;
+  transition: all 140ms ease;
+}
+
+.ts-category-btn:hover {
+  background: #ffffff;
+  color: #0284c7;
+  border-color: #e2e8f0;
+}
+
+.ts-category-btn.is-active {
+  background: #ffffff;
+  color: #0369a1;
+  font-weight: 750;
+  border-color: #cbd5e1;
+  border-left: 3.5px solid #0284c7;
+  box-shadow: 0 2px 8px rgba(2, 132, 199, 0.07);
+}
+
+.ts-category-label-group {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.ts-chevron {
+  display: inline-block;
+  width: 0.38rem;
+  height: 0.38rem;
+  border-right: 1.8px solid currentColor;
+  border-bottom: 1.8px solid currentColor;
+  transform: rotate(-45deg);
+  transition: transform 160ms ease;
+  opacity: 0.6;
+}
+
+.ts-category-btn.is-active .ts-chevron {
+  opacity: 1;
+  transform: translateX(2px) rotate(-45deg);
+  color: #0284c7;
+}
+
+.ts-mega-content {
+  padding: 1.4rem 1.6rem;
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.ts-content-header {
+  margin-bottom: 1rem;
+}
+
+.ts-content-heading-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.ts-content-title {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #0b1f4b;
+}
+
+.ts-content-desc {
+  margin: 0.3rem 0 0;
+  font-size: 0.8rem;
+  color: #64748b;
+  line-height: 1.4;
+}
+
+.ts-subcat-pills-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-top: 0.75rem;
+}
+
+.ts-subcat-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.32rem 0.7rem;
+  border-radius: 999px;
+  background: #f1f5f9;
+  color: #334155;
+  font-size: 0.76rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 140ms ease;
+  border: 1px solid #e2e8f0;
+}
+
+.ts-subcat-pill:hover {
+  background: #0284c7;
+  color: #ffffff;
+  border-color: #0284c7;
+  transform: translateY(-1px);
+}
+
+.ts-tests-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.85rem;
+  margin-top: 0.75rem;
+}
+
+.ts-test-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 0.95rem;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  text-decoration: none;
+  transition: all 180ms ease;
+  min-height: 125px;
+}
+
+.ts-test-card:hover {
+  border-color: #38bdf8;
+  box-shadow: 0 8px 24px -4px rgba(2, 132, 199, 0.14);
+  transform: translateY(-2px);
+}
+
+.ts-card-badge-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.ts-card-title {
+  margin: 0.45rem 0 0.25rem;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1.35;
+}
+
+.ts-test-card:hover .ts-card-title {
+  color: #0284c7;
+}
+
+.ts-card-stats {
+  font-size: 0.74rem;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.ts-card-pricing-row {
+  margin-top: 0.65rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 0.5rem;
+  border-top: 1px dashed #e2e8f0;
+}
+
+.ts-price-display {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+}
+
+.ts-price-sale {
+  font-size: 0.94rem;
+  font-weight: 800;
+  color: #0b1f4b;
+}
+
+.ts-price-sale.free {
+  color: #16a34a;
+}
+
+.ts-price-mrp {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  text-decoration: line-through;
+}
+
+.ts-card-action {
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: #f97316;
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+.ts-content-footer {
+  margin-top: 1.1rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid #f1f5f9;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.ts-view-all-link {
+  font-size: 0.82rem;
+  font-weight: 750;
+  color: #0284c7;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  transition: gap 140ms ease;
+}
+
+.ts-view-all-link:hover {
+  color: #0369a1;
+  gap: 0.55rem;
+}
+
+/* Nav Badges Variations */
+.nav-badge.free {
+  background: #ecfdf5;
+  color: #059669;
+  border: 1px solid #a7f3d0;
+}
+
+.nav-badge.highlight-orange {
+  background: #fff7ed;
+  color: #c2410c;
+  border: 1px solid #ffedd5;
+}
+
+/* Courses Dropdown Panel */
+.courses-dropdown-panel {
+  width: min(780px, 92vw);
+  padding: 1.5rem;
+}
+
+.courses-panel-banner {
+  margin-top: 1.25rem;
+  padding: 0.85rem 1.1rem;
+  background: linear-gradient(135deg, #f0fdf4 0%, #e0f2fe 100%);
+  border: 1px solid #bae6fd;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.courses-banner-text {
+  font-size: 0.8rem;
+  color: #0369a1;
+  font-weight: 600;
+}
+
+.courses-banner-link {
+  font-size: 0.8rem;
+  font-weight: 750;
+  color: #0b1f4b;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.courses-banner-link:hover {
+  color: #f97316;
+}
+
 /* Standard Dropdown Panels */
 .test-panel {
   width: 320px;

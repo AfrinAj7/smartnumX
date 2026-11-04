@@ -11,8 +11,17 @@ export async function POST(request: Request) {
   try {
     const body = await request.json().catch(() => ({}));
     const couponCode = body.couponCode as string | undefined;
+    const studentDetails = body.studentDetails as
+      | {
+          studentName?: string;
+          studentPhone?: string;
+          studentEmail?: string;
+          studentClass?: string;
+          studentCity?: string;
+        }
+      | undefined;
 
-    const orderResult = await createPendingOrder(session.user.id, couponCode);
+    const orderResult = await createPendingOrder(session.user.id, couponCode, studentDetails);
     return NextResponse.json({ data: orderResult }, { status: 201 });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Failed to initiate checkout.";

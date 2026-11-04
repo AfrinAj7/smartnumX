@@ -7,6 +7,7 @@ import {
   listAdminCourses,
   listCategories,
   listInstructors,
+  listCentres,
   ensureDefaultCoursesInDb,
 } from "@/server/courses/course-service";
 import { CourseStatus } from "@prisma/client";
@@ -41,10 +42,11 @@ export async function GET(request: Request) {
   // Sync sample/default marketing courses if DB has none
   await ensureDefaultCoursesInDb();
 
-  const [result, categories, instructors] = await Promise.all([
+  const [result, categories, instructors, centres] = await Promise.all([
     listAdminCourses({ search, status, categoryId, page, pageSize }),
     listCategories(),
     listInstructors(),
+    listCentres(),
   ]);
 
   return NextResponse.json({
@@ -53,6 +55,7 @@ export async function GET(request: Request) {
       ...result.meta,
       categories,
       instructors,
+      centres,
     },
   });
 }

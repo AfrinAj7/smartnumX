@@ -44,7 +44,7 @@ export default async function StudentOrdersPage() {
               <tr style={{ backgroundColor: "#f8fafc", borderBottom: "1px solid #e2e8f0" }}>
                 <th style={{ padding: "0.875rem 1rem", color: "#475569", fontWeight: 600 }}>Invoice #</th>
                 <th style={{ padding: "0.875rem 1rem", color: "#475569", fontWeight: 600 }}>Date</th>
-                <th style={{ padding: "0.875rem 1rem", color: "#475569", fontWeight: 600 }}>Courses</th>
+                <th style={{ padding: "0.875rem 1rem", color: "#475569", fontWeight: 600 }}>Enrolled Programmes</th>
                 <th style={{ padding: "0.875rem 1rem", color: "#475569", fontWeight: 600 }}>Amount</th>
                 <th style={{ padding: "0.875rem 1rem", color: "#475569", fontWeight: 600 }}>Status</th>
                 <th style={{ padding: "0.875rem 1rem", color: "#475569", fontWeight: 600, textAlign: "right" }}>Receipt</th>

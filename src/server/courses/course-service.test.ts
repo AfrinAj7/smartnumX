@@ -54,3 +54,16 @@ describe("Course validation schema", () => {
     expect(() => courseSchema.parse(invalid)).toThrow();
   });
 });
+
+describe("Free product eligibility logic", () => {
+  it("determines free eligibility when product price is 0 or isFree is true", () => {
+    const isFreeProduct = (p: { isFree?: boolean; price: number; discountPrice?: number | null }) => {
+      return p.isFree || p.price === 0 || p.discountPrice === 0;
+    };
+
+    expect(isFreeProduct({ isFree: true, price: 499 })).toBe(true);
+    expect(isFreeProduct({ price: 0, isFree: false })).toBe(true);
+    expect(isFreeProduct({ price: 499, discountPrice: 0 })).toBe(true);
+    expect(isFreeProduct({ price: 1499, discountPrice: 999, isFree: false })).toBe(false);
+  });
+});

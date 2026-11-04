@@ -10,7 +10,7 @@ export default async function StudentLayout({ children }: Readonly<{ children: R
     await signOut({ redirectTo: "/sign-in?error=suspended" });
   }
   if (session.user.mustChangePassword) redirect("/change-password");
-  if (!hasRole(session.user, ["STUDENT"])) redirect("/admin");
+  if (!hasRole(session.user, ["STUDENT", "SUPER_ADMIN", "INSTRUCTOR"])) redirect("/admin");
 
   return (
     <WorkspaceShell role={session.user.role} name={session.user.name ?? session.user.email ?? "Learner"}>

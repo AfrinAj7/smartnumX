@@ -142,26 +142,63 @@ export default async function OrderConfirmationPage({
 
           {/* Purchased Items List */}
           <div style={{ borderTop: "1px solid #e2e8f0", paddingTop: "1rem", marginBottom: "1.5rem" }}>
-            <h3 style={{ fontSize: "0.875rem", textTransform: "uppercase", color: "#64748b", fontWeight: 600, marginBottom: "0.75rem" }}>
-              Enrolled Courses
+            <h3 style={{ fontSize: "0.875rem", textTransform: "uppercase", color: "#64748b", fontWeight: 700, letterSpacing: "0.04em", marginBottom: "0.75rem" }}>
+              Enrolled Programmes &amp; Test Series
             </h3>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-              {order.items.map((item) => (
-                <div key={item.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <div>
-                    <strong style={{ color: "#0f172a", fontSize: "0.9375rem" }}>
-                      {item.course?.title || "Tuition Course"}
-                    </strong>
-                    <div style={{ fontSize: "0.75rem", color: "#64748b" }}>
-                      Full Syllabus Coverage · 1 Year Portal Validity
+            <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+              {order.items.map((item) => {
+                const isTestSeries = item.course?.productType === "TEST_SERIES";
+
+                return (
+                  <div key={item.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "1rem", flexWrap: "wrap" }}>
+                    <div>
+                      <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.25rem" }}>
+                        <span
+                          style={{
+                            fontSize: "0.6875rem",
+                            fontWeight: 700,
+                            padding: "0.15rem 0.45rem",
+                            borderRadius: "0.25rem",
+                            backgroundColor: isTestSeries ? "#eff6ff" : "#fff7ed",
+                            color: isTestSeries ? "#1d4ed8" : "#c2410c",
+                          }}
+                        >
+                          {isTestSeries ? "Test Series" : "Tuition Programme"}
+                        </span>
+                        {item.course?.mode === "PHYSICAL" && (
+                          <span style={{ fontSize: "0.6875rem", fontWeight: 700, backgroundColor: "#fef3c7", color: "#92400e", padding: "0.15rem 0.45rem", borderRadius: "0.25rem" }}>
+                            📍 Indirapuram Centre
+                          </span>
+                        )}
+                      </div>
+
+                      <strong style={{ color: "#0f172a", fontSize: "0.9375rem" }}>
+                        {item.course?.title || "Academic Programme"}
+                      </strong>
+
+                      <div style={{ fontSize: "0.75rem", color: "#64748b", marginTop: "0.25rem" }}>
+                        {isTestSeries ? (
+                          <>
+                            {item.course?.testCountFull && `${item.course.testCountFull} Full Length Mocks · `}
+                            {item.course?.testCountChapter && `${item.course.testCountChapter} Chapter Tests · `}
+                            {item.course?.validity || "Till Exam 2026-27"}
+                          </>
+                        ) : (
+                          <>
+                            {item.course?.targetClass && `Class: ${item.course.targetClass} · `}
+                            Full Syllabus Coverage · Live &amp; Recorded Lectures Included
+                          </>
+                        )}
+                      </div>
                     </div>
+
+                    <span style={{ fontWeight: 800, color: "#0f172a", fontSize: "1rem" }}>
+                      ₹{item.price.toLocaleString("en-IN")}
+                    </span>
                   </div>
-                  <span style={{ fontWeight: 700, color: "#0f172a" }}>
-                    ₹{item.price.toLocaleString("en-IN")}
-                  </span>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
 
@@ -199,9 +236,9 @@ export default async function OrderConfirmationPage({
         <div style={{ display: "flex", gap: "1rem", justifyContent: "center", flexWrap: "wrap" }}>
           {order.status === "PAID" && (
             <Link
-              href="/dashboard/my-courses"
+              href="/dashboard"
               style={{
-                backgroundColor: "#2563eb",
+                backgroundColor: "#ea580c",
                 color: "#ffffff",
                 padding: "0.875rem 1.75rem",
                 borderRadius: "0.5rem",
@@ -210,10 +247,10 @@ export default async function OrderConfirmationPage({
                 display: "inline-flex",
                 alignItems: "center",
                 gap: "0.5rem",
-                boxShadow: "0 2px 4px rgba(37, 99, 235, 0.25)",
+                boxShadow: "0 4px 6px -1px rgba(234, 88, 12, 0.25)",
               }}
             >
-              <span>Go to My Courses</span>
+              <span>Go to Student Portal &amp; Start Learning</span>
               <span>→</span>
             </Link>
           )}
@@ -231,6 +268,21 @@ export default async function OrderConfirmationPage({
             }}
           >
             Explore More Courses
+          </Link>
+
+          <Link
+            href="/test-series"
+            style={{
+              backgroundColor: "#f8fafc",
+              color: "#0f172a",
+              border: "1px solid #cbd5e1",
+              padding: "0.875rem 1.5rem",
+              borderRadius: "0.5rem",
+              fontWeight: 600,
+              textDecoration: "none",
+            }}
+          >
+            Explore Test Series
           </Link>
         </div>
       </main>

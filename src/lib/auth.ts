@@ -102,14 +102,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (url.startsWith("/")) return url;
       try {
         const parsed = new URL(url);
-        if (parsed.hostname === "localhost" || parsed.hostname === "127.0.0.1") {
-          return `${parsed.pathname}${parsed.search}`;
-        }
-        if (parsed.origin === baseUrl) return url;
+        // Always return relative path so redirects stay on the live/current host
+        return `${parsed.pathname}${parsed.search}${parsed.hash}` || "/";
       } catch {
         // fallback to relative if valid
       }
-      return url.startsWith("/") ? url : baseUrl;
+      return url.startsWith("/") ? url : "/";
     },
   },
   trustHost: true,
