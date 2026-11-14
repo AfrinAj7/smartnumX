@@ -2,6 +2,7 @@ import { PrismaAdapter } from "@auth/prisma-adapter";
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import Google from "next-auth/providers/google";
+import { headers } from "next/headers";
 import { authMailer } from "@/lib/mail";
 import { db } from "@/lib/db";
 import { authenticateCredentials } from "@/server/auth/auth-service";
@@ -99,20 +100,52 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return session;
     },
     async redirect({ url, baseUrl }) {
-      const base = baseUrl || process.env.NEXTAUTH_URL || process.env.AUTH_URL || "http://localhost:3000";
+      // 1. Detect dynamic host from incoming request headers
+      let detectedOrigin: string | null = null;
+      try {
+        const headerList = await headers();
+        const host = headerList.get("x-forwarded-host") || headerList.get("host");
+        const proto = headerList.get("x-forwarded-proto") || (host && !host.includes("localhost") ? "https" : "http");
+        if (host && !host.includes("localhost") && !host.includes("127.0.0.1")) {
+          detectedOrigin = `${proto}://${host}`;
+        }
+      } catch {
+        // headers() not available outside request scope
+      }
+
+      // 2. Check configured production URLs (ignoring localhost fallback when detecting production)
+      const envAppUrl = process.env.APP_URL && !process.env.APP_URL.includes("localhost") ? process.env.APP_URL : null;
+      const envNextAuthUrl = process.env.NEXTAUTH_URL && !process.env.NEXTAUTH_URL.includes("localhost") ? process.env.NEXTAUTH_URL : null;
+      const envSiteUrl = process.env.NEXT_PUBLIC_SITE_URL && !process.env.NEXT_PUBLIC_SITE_URL.includes("localhost") ? process.env.NEXT_PUBLIC_SITE_URL : null;
+
+      const prodBase = detectedOrigin || envAppUrl || envNextAuthUrl || envSiteUrl;
+      const base = prodBase || (baseUrl && !baseUrl.includes("localhost") ? baseUrl : null) || baseUrl || "http://localhost:3000";
       const cleanBase = base.replace(/\/$/, "");
+
+      // If url is a relative path (e.g. "/" or "/sign-in")
       if (url && url.startsWith("/")) {
         return `${cleanBase}${url}`;
       }
+
+      // If url is already an absolute URL
       try {
         const parsed = new URL(url);
-        const baseParsed = new URL(cleanBase);
-        if (parsed.origin === baseParsed.origin) {
+        // If parsed origin matches cleanBase, allow it
+        if (cleanBase && parsed.origin === new URL(cleanBase).origin) {
+          return url;
+        }
+        // If url is on the detected live origin, allow it
+        if (detectedOrigin && parsed.origin === new URL(detectedOrigin).origin) {
+          return url;
+        }
+        // If url is on a valid non-localhost domain, allow it
+        if (!parsed.origin.includes("localhost") && !parsed.origin.includes("127.0.0.1")) {
           return url;
         }
       } catch {
         // fallback to cleanBase if url is not a valid absolute URL
       }
+
       return cleanBase;
     },
   },

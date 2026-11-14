@@ -206,6 +206,23 @@ describe("auth service", () => {
     expect(context.repository.tokens.has(getAuthTokenHash(context.verificationEmails[0].token))).toBe(true);
   });
 
+  it("handles empty and formatted phone numbers during registration", async () => {
+    const context = setup();
+    await registerUser(
+      { ...validRegistration, email: "user1@example.com", phone: "" },
+      context.dependencies,
+    );
+    const user1 = await context.repository.findUserByEmail("user1@example.com");
+    expect(user1?.phone).toBeNull();
+
+    await registerUser(
+      { ...validRegistration, email: "user2@example.com", phone: "+91 98765 43210" },
+      context.dependencies,
+    );
+    const user2 = await context.repository.findUserByEmail("user2@example.com");
+    expect(user2?.phone).toBe("+919876543210");
+  });
+
   it("verifies an email token once and rejects reuse", async () => {
     const context = setup();
     await registerUser(validRegistration, context.dependencies);

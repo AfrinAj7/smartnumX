@@ -150,7 +150,14 @@ export function WorkspaceShell({ role, name, children }: WorkspaceShellProps) {
             <button
               type="button"
               className="workspace-signout-btn"
-              onClick={() => signOut({ callbackUrl: "/sign-in" })}
+              onClick={async () => {
+                try {
+                  await signOut({ redirect: false });
+                } catch {
+                  // ignore error
+                }
+                window.location.href = "/sign-in";
+              }}
             >
               Sign out
             </button>

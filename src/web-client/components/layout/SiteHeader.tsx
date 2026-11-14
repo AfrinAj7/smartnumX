@@ -779,7 +779,14 @@ export function SiteHeader({
                       <button
                         type="button"
                         className="sign-out-btn"
-                        onClick={() => signOut({ callbackUrl: "/" })}
+                        onClick={async () => {
+                          try {
+                            await signOut({ redirect: false });
+                          } catch {
+                            // ignore error
+                          }
+                          window.location.href = "/";
+                        }}
                       >
                         Sign out
                       </button>

@@ -7,7 +7,8 @@ import {
   registerSchema,
   changePasswordSchema,
   resetPasswordSchema,
-  tokenSchema,
+  verifyEmailInputSchema,
+  resendVerificationSchema,
 } from "./validators";
 
 const TOKEN_TTL_MS = 30 * 60 * 1000;
@@ -67,7 +68,7 @@ export interface AuthRepository {
 }
 
 export interface AuthMailer {
-  sendVerification(email: string, name: string, token: string): Promise<void>;
+  sendVerification(email: string, name: string, token: string, otp?: string): Promise<void>;
   sendPasswordReset(email: string, name: string, token: string): Promise<void>;
 }
 
@@ -82,6 +83,19 @@ function newToken() {
   return {
     rawToken,
     tokenHash: createHash("sha256").update(rawToken).digest("hex"),
+  };
+}
+
+export function getAuthTokenHash(token: string) {
+  return createHash("sha256").update(token).digest("hex");
+}
+
+function newVerificationOtp() {
+  // Generate 6-digit cryptographically random numeric code
+  const code = Math.floor(100000 + Math.random() * 900000).toString();
+  return {
+    otp: code,
+    tokenHash: getAuthTokenHash(code),
   };
 }
 
@@ -128,30 +142,31 @@ export async function registerUser(
       !existingUser.emailVerified &&
       existingUser.status === "ACTIVE"
     ) {
-      const token = newToken();
+      const { otp, tokenHash } = newVerificationOtp();
       await dependencies.repository.replaceToken({
         userId: existingUser.id,
-        tokenHash: token.tokenHash,
+        tokenHash,
         purpose: "EMAIL_VERIFICATION",
         expiresAt: tokenExpiry(now),
       });
       await dependencies.mailer.sendVerification(
         existingUser.email,
         existingUser.name ?? data.name,
-        token.rawToken,
+        otp,
+        otp,
       );
     }
     return { ok: true };
   }
 
-  const token = newToken();
+  const { otp, tokenHash } = newVerificationOtp();
   const passwordHash = await hash(data.password, 12);
   const user = await dependencies.repository.createUserWithVerification({
     name: data.name,
     email: data.email,
     phone: data.phone || undefined,
     passwordHash,
-    tokenHash: token.tokenHash,
+    tokenHash,
     expiresAt: tokenExpiry(now),
     termsAcceptedAt: now,
     privacyPolicyVersion: process.env.PRIVACY_POLICY_VERSION || "v1",
@@ -160,7 +175,8 @@ export async function registerUser(
   await dependencies.mailer.sendVerification(
     user.email,
     user.name ?? data.name,
-    token.rawToken,
+    otp,
+    otp,
   );
   return { ok: true };
 }
@@ -169,14 +185,70 @@ export async function verifyEmail(
   input: unknown,
   dependencies: AuthDependencies,
 ) {
-  const { token } = tokenSchema.parse(input);
-  const tokenHash = createHash("sha256").update(token).digest("hex");
-  const user = await dependencies.repository.consumeToken(
+  const parsed = verifyEmailInputSchema.parse(input);
+  const now = dependencies.now?.() ?? new Date();
+
+  const codeOrToken = "code" in parsed ? parsed.code.trim() : (parsed as { token: string }).token.trim();
+  const tokenHash = getAuthTokenHash(codeOrToken);
+
+  let user = await dependencies.repository.consumeToken(
     tokenHash,
     "EMAIL_VERIFICATION",
-    dependencies.now?.() ?? new Date(),
+    now,
   );
+
+  // If email was provided with code, verify user email matches
+  if (user && "email" in parsed && parsed.email) {
+    if (user.email.toLowerCase() !== parsed.email.trim().toLowerCase()) {
+      return false;
+    }
+  }
+
+  // Fallback for composite hash ${email}:${code} if legacy
+  if (!user && "email" in parsed && parsed.email) {
+    const compositeHash = createHash("sha256").update(`${parsed.email.trim().toLowerCase()}:${codeOrToken}`).digest("hex");
+    user = await dependencies.repository.consumeToken(
+      compositeHash,
+      "EMAIL_VERIFICATION",
+      now,
+    );
+  }
+
   return Boolean(user);
+}
+
+export async function resendVerificationCode(
+  input: unknown,
+  dependencies: AuthDependencies,
+) {
+  const { email } = resendVerificationSchema.parse(input);
+  const now = dependencies.now?.() ?? new Date();
+
+  const user = await dependencies.repository.findUserByEmail(email);
+  if (!user) {
+    return { ok: true, message: "If this email is registered and unverified, a new 6-digit code has been sent." };
+  }
+
+  if (user.emailVerified) {
+    return { ok: true, message: "This email is already verified. You can sign in.", alreadyVerified: true };
+  }
+
+  const { otp, tokenHash } = newVerificationOtp();
+  await dependencies.repository.replaceToken({
+    userId: user.id,
+    tokenHash,
+    purpose: "EMAIL_VERIFICATION",
+    expiresAt: tokenExpiry(now),
+  });
+
+  await dependencies.mailer.sendVerification(
+    user.email,
+    user.name ?? "Student",
+    otp,
+    otp,
+  );
+
+  return { ok: true, message: "A new 6-digit verification code has been sent to your email." };
 }
 
 export async function requestPasswordReset(
@@ -185,22 +257,24 @@ export async function requestPasswordReset(
 ) {
   const { email } = emailSchema.parse(input);
   const user = await dependencies.repository.findUserByEmail(email);
-
-  if (user?.status === "ACTIVE" && !user.deletedAt && user.emailVerified) {
-    const now = dependencies.now?.() ?? new Date();
-    const token = newToken();
-    await dependencies.repository.replaceToken({
-      userId: user.id,
-      tokenHash: token.tokenHash,
-      purpose: "PASSWORD_RESET",
-      expiresAt: tokenExpiry(now),
-    });
-    await dependencies.mailer.sendPasswordReset(
-      user.email,
-      user.name ?? "student",
-      token.rawToken,
-    );
+  if (!user || user.status !== "ACTIVE" || user.deletedAt) {
+    return { ok: true };
   }
+
+  const token = newToken();
+  const now = dependencies.now?.() ?? new Date();
+  await dependencies.repository.replaceToken({
+    userId: user.id,
+    tokenHash: token.tokenHash,
+    purpose: "PASSWORD_RESET",
+    expiresAt: tokenExpiry(now),
+  });
+
+  await dependencies.mailer.sendPasswordReset(
+    user.email,
+    user.name ?? "Student",
+    token.rawToken,
+  );
 
   return { ok: true };
 }
@@ -210,12 +284,14 @@ export async function resetPassword(
   dependencies: AuthDependencies,
 ) {
   const data = resetPasswordSchema.parse(input);
-  const tokenHash = createHash("sha256").update(data.token).digest("hex");
+  const tokenHash = getAuthTokenHash(data.token);
+  const now = dependencies.now?.() ?? new Date();
   const passwordHash = await hash(data.password, 12);
+
   return dependencies.repository.setPasswordWithToken(
     tokenHash,
     passwordHash,
-    dependencies.now?.() ?? new Date(),
+    now,
   );
 }
 
@@ -273,8 +349,4 @@ export async function authenticateCredentials(
     role: user.role,
     status: user.status,
   };
-}
-
-export function getAuthTokenHash(token: string) {
-  return createHash("sha256").update(token).digest("hex");
 }

@@ -32,7 +32,9 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("[REGISTER ERROR]", error);
     if (error instanceof ZodError) {
-      return NextResponse.json({ error: error.flatten() }, { status: 422 });
+      const fieldErrors = error.flatten().fieldErrors;
+      const firstError = Object.values(fieldErrors).flat()[0] || error.issues[0]?.message || "Invalid registration input.";
+      return NextResponse.json({ error: { message: firstError, details: error.flatten() } }, { status: 422 });
     }
     const message = error instanceof Error ? error.message : "Registration could not be completed.";
     return NextResponse.json(

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { signIn, signOut } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { SmartNumWordmark } from "@/web-client/components/layout/SmartNumWordmark";
 
 export type AuthMode = "sign-in" | "register" | "forgot-password" | "reset-password" | "change-password";
@@ -52,12 +52,111 @@ export function AuthForm({ mode, googleEnabled = false }: { mode: AuthMode; goog
   const [error, setError] = useState("");
   const [showVerifyModal, setShowVerifyModal] = useState(false);
   const [registeredEmail, setRegisteredEmail] = useState("");
+  const [manualEmail, setManualEmail] = useState("");
+  const [otpCode, setOtpCode] = useState("");
+  const [otpVerifying, setOtpVerifying] = useState(false);
+  const [otpError, setOtpError] = useState("");
+  const [otpSuccess, setOtpSuccess] = useState("");
+  const [resendCooldown, setResendCooldown] = useState(0);
+  const [resending, setResending] = useState(false);
+
   const details = content[mode];
   const token = searchParams.get("token") ?? "";
   const callbackUrl = safeDestination(searchParams.get("callbackUrl"));
   const verifiedEmail = mode === "sign-in" && searchParams.get("verified") === "1";
   const changedPassword = mode === "sign-in" && searchParams.get("passwordChanged") === "1";
   const urlError = mode === "sign-in" && searchParams.get("error");
+
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const interval = setInterval(() => {
+      setResendCooldown((prev) => prev - 1);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [resendCooldown]);
+
+  const activeEmail = registeredEmail || manualEmail;
+
+  async function handleVerifyOtp(event?: FormEvent) {
+    if (event) event.preventDefault();
+    const cleanCode = otpCode.trim().replace(/\s+/g, "");
+    const cleanEmail = activeEmail.trim().toLowerCase();
+
+    if (!cleanEmail) {
+      setOtpError("Please enter your registered email address.");
+      return;
+    }
+    if (cleanCode.length !== 6) {
+      setOtpError("Please enter the 6-digit verification code.");
+      return;
+    }
+
+    setOtpVerifying(true);
+    setOtpError("");
+    setOtpSuccess("");
+
+    try {
+      const response = await fetch("/api/auth/verify-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: cleanEmail, code: cleanCode }),
+      });
+      const data = await response.json();
+
+      if (!response.ok || !data.ok) {
+        setOtpError(data.error || "Invalid or expired verification code.");
+        setOtpVerifying(false);
+        return;
+      }
+
+      setOtpSuccess("Email verified successfully! Redirecting to sign in…");
+      setTimeout(() => {
+        window.location.href = `/sign-in?verified=1${callbackUrl ? `&callbackUrl=${encodeURIComponent(callbackUrl)}` : ""}`;
+      }, 1200);
+    } catch (err) {
+      console.error("[VERIFY OTP ERROR]", err);
+      setOtpError("Unable to reach verification service. Please try again.");
+      setOtpVerifying(false);
+    }
+  }
+
+  async function handleResendOtp() {
+    const cleanEmail = activeEmail.trim().toLowerCase();
+    if (!cleanEmail) {
+      setOtpError("Please enter your registered email address.");
+      return;
+    }
+    if (resendCooldown > 0 || resending) return;
+
+    setResending(true);
+    setOtpError("");
+    setOtpSuccess("");
+
+    try {
+      const response = await fetch("/api/auth/resend-verification", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: cleanEmail }),
+      });
+      const data = await response.json();
+
+      if (data.alreadyVerified) {
+        setOtpSuccess("This email is already verified! Redirecting to sign in…");
+        setTimeout(() => {
+          window.location.href = "/sign-in?verified=1";
+        }, 1200);
+        return;
+      }
+
+      setOtpSuccess(data.message || "A new 6-digit verification code has been sent to your email.");
+      setResendCooldown(30);
+    } catch (err) {
+      console.error("[RESEND OTP ERROR]", err);
+      setOtpError("Failed to resend code. Please try again.");
+    } finally {
+      setResending(false);
+    }
+  }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -119,12 +218,22 @@ export function AuthForm({ mode, googleEnabled = false }: { mode: AuthMode; goog
       if (!response.ok) {
         setError(result.error?.message ?? "We couldn’t complete that request. Check the form and try again.");
       } else if (mode === "change-password") {
-        await signOut({ redirectTo: "/sign-in?passwordChanged=1" });
+        try {
+          await signOut({ redirect: false });
+        } catch {
+          // ignore error
+        }
+        window.location.href = "/sign-in?passwordChanged=1";
       } else {
         const msg = result.data?.message ?? "Your request has been received.";
         setFeedback(msg);
         if (mode === "register") {
-          setRegisteredEmail(String(result.data?.email || values.get("email") || ""));
+          const emailVal = String(result.data?.email || values.get("email") || "");
+          setRegisteredEmail(emailVal);
+          setManualEmail(emailVal);
+          setOtpCode("");
+          setOtpError("");
+          setOtpSuccess("");
           setShowVerifyModal(true);
         }
       }
@@ -225,7 +334,7 @@ export function AuthForm({ mode, googleEnabled = false }: { mode: AuthMode; goog
             </button>
 
             {feedback && <p className="auth-success" role="status">{feedback}</p>}
-            {verifiedEmail && <p className="auth-success" role="status">Email verified. You can sign in now.</p>}
+            {verifiedEmail && <p className="auth-success" role="status">Email verified! You can sign in now.</p>}
             {changedPassword && <p className="auth-success" role="status">Password updated. Please sign in again.</p>}
             {error && <p className="auth-inline-error" role="alert">{error}</p>}
             {urlError && !error && (
@@ -271,7 +380,7 @@ export function AuthForm({ mode, googleEnabled = false }: { mode: AuthMode; goog
             alignItems: "center",
             justifyContent: "center",
             padding: "1.25rem",
-            backgroundColor: "rgba(2, 6, 23, 0.8)",
+            backgroundColor: "rgba(2, 6, 23, 0.85)",
             backdropFilter: "blur(8px)",
           }}
         >
@@ -279,12 +388,12 @@ export function AuthForm({ mode, googleEnabled = false }: { mode: AuthMode; goog
             style={{
               position: "relative",
               width: "100%",
-              maxWidth: "460px",
+              maxWidth: "480px",
               background: "#081528",
               border: "1px solid rgba(56, 189, 248, 0.3)",
               borderRadius: "1.25rem",
-              padding: "2.25rem 2rem",
-              boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.7), 0 0 30px rgba(56, 189, 248, 0.15)",
+              padding: "2rem",
+              boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.8), 0 0 30px rgba(56, 189, 248, 0.15)",
               textAlign: "center",
               color: "#f8fafc",
             }}
@@ -312,16 +421,16 @@ export function AuthForm({ mode, googleEnabled = false }: { mode: AuthMode; goog
 
             <div
               style={{
-                width: "64px",
-                height: "64px",
-                margin: "0 auto 1.25rem auto",
+                width: "56px",
+                height: "56px",
+                margin: "0 auto 1rem auto",
                 borderRadius: "50%",
-                background: "rgba(249, 115, 22, 0.15)",
-                border: "2px solid rgba(249, 115, 22, 0.4)",
+                background: "rgba(56, 189, 248, 0.15)",
+                border: "2px solid rgba(56, 189, 248, 0.4)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                fontSize: "2rem",
+                fontSize: "1.75rem",
               }}
             >
               ✉️
@@ -333,87 +442,207 @@ export function AuthForm({ mode, googleEnabled = false }: { mode: AuthMode; goog
                 fontSize: "1.375rem",
                 fontWeight: 700,
                 color: "#ffffff",
-                marginBottom: "0.75rem",
+                marginBottom: "0.5rem",
                 letterSpacing: "-0.01em",
               }}
             >
-              Kindly verify your account
+              Verify Your Account
             </h2>
 
             <p
               style={{
-                fontSize: "0.975rem",
+                fontSize: "0.925rem",
                 color: "#cbd5e1",
-                lineHeight: 1.6,
-                marginBottom: "1.25rem",
+                lineHeight: 1.5,
+                marginBottom: "1rem",
               }}
             >
-              A link to verify your account has been sent on your registered email
-              {registeredEmail ? (
+              Enter the 6-digit verification code sent to your email
+              {activeEmail ? (
                 <>
-                  {" "}
+                  <br />
                   <strong style={{ color: "#38bdf8", wordBreak: "break-all" }}>
-                    ({registeredEmail})
+                    ({activeEmail})
                   </strong>
                 </>
-              ) : (
-                ""
-              )}
-              .
+              ) : null}
             </p>
 
-            <div
-              style={{
-                background: "rgba(15, 23, 42, 0.7)",
-                border: "1px solid rgba(255, 255, 255, 0.1)",
-                borderRadius: "0.625rem",
-                padding: "0.85rem 1rem",
-                fontSize: "0.825rem",
-                color: "#94a3b8",
-                textAlign: "left",
-                marginBottom: "1.5rem",
-                lineHeight: 1.5,
-              }}
-            >
-              💡 <strong>Next step:</strong> Please check your inbox (or spam folder) and click the verification link to activate your account and start your courses.
-            </div>
+            {!registeredEmail && (
+              <div style={{ marginBottom: "1rem", textAlign: "left" }}>
+                <label
+                  htmlFor="verify-manual-email"
+                  style={{ display: "block", fontSize: "0.825rem", color: "#94a3b8", marginBottom: "0.25rem" }}
+                >
+                  Registered Email Address
+                </label>
+                <input
+                  id="verify-manual-email"
+                  type="email"
+                  placeholder="e.g. name@example.com"
+                  value={manualEmail}
+                  onChange={(e) => setManualEmail(e.target.value)}
+                  style={{
+                    width: "100%",
+                    padding: "0.65rem 0.85rem",
+                    background: "rgba(15, 23, 42, 0.8)",
+                    border: "1px solid rgba(56, 189, 248, 0.4)",
+                    borderRadius: "0.5rem",
+                    color: "#ffffff",
+                    fontSize: "0.95rem",
+                  }}
+                />
+              </div>
+            )}
 
-            <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-              <Link
-                href={`/sign-in${callbackUrl ? `?callbackUrl=${encodeURIComponent(callbackUrl)}` : ""}`}
+            <form onSubmit={handleVerifyOtp} style={{ marginTop: "0.5rem" }}>
+              <div style={{ marginBottom: "1rem" }}>
+                <label
+                  htmlFor="otp-code-input"
+                  style={{
+                    display: "block",
+                    fontSize: "0.8rem",
+                    fontWeight: 600,
+                    color: "#94a3b8",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.05em",
+                    marginBottom: "0.5rem",
+                  }}
+                >
+                  6-Digit Verification Code
+                </label>
+                <input
+                  id="otp-code-input"
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  maxLength={6}
+                  value={otpCode}
+                  onChange={(e) => {
+                    const val = e.target.value.replace(/\D/g, "").slice(0, 6);
+                    setOtpCode(val);
+                  }}
+                  placeholder="••••••"
+                  autoComplete="one-time-code"
+                  autoFocus
+                  required
+                  style={{
+                    width: "100%",
+                    maxWidth: "260px",
+                    margin: "0 auto",
+                    display: "block",
+                    textAlign: "center",
+                    fontSize: "1.75rem",
+                    letterSpacing: "0.35em",
+                    padding: "0.5rem 0.75rem",
+                    background: "rgba(15, 23, 42, 0.9)",
+                    border: "2px solid #0284c7",
+                    borderRadius: "0.625rem",
+                    color: "#ffffff",
+                    fontFamily: "monospace",
+                    fontWeight: "bold",
+                    outline: "none",
+                    boxShadow: "0 0 15px rgba(2, 132, 199, 0.25)",
+                  }}
+                />
+              </div>
+
+              {otpError && (
+                <p style={{ color: "#f87171", fontSize: "0.85rem", margin: "0.5rem 0", fontWeight: 500 }}>
+                  {otpError}
+                </p>
+              )}
+              {otpSuccess && (
+                <p style={{ color: "#4ade80", fontSize: "0.85rem", margin: "0.5rem 0", fontWeight: 600 }}>
+                  {otpSuccess}
+                </p>
+              )}
+
+              <button
+                type="submit"
+                disabled={otpVerifying || otpCode.length !== 6 || !activeEmail}
                 style={{
                   display: "inline-flex",
                   width: "100%",
                   alignItems: "center",
                   justifyContent: "center",
-                  padding: "0.8rem 1.25rem",
+                  padding: "0.75rem 1.25rem",
                   borderRadius: "0.5rem",
-                  background: "linear-gradient(135deg, #ea580c, #f97316)",
+                  background:
+                    otpCode.length === 6 && activeEmail
+                      ? "linear-gradient(135deg, #0284c7, #0ea5e9)"
+                      : "rgba(2, 132, 199, 0.35)",
                   color: "#ffffff",
                   fontWeight: 600,
                   fontSize: "0.95rem",
-                  textDecoration: "none",
-                  boxShadow: "0 4px 14px rgba(234, 88, 12, 0.35)",
+                  border: "none",
+                  cursor: otpCode.length === 6 && !otpVerifying && activeEmail ? "pointer" : "not-allowed",
+                  boxShadow: "0 4px 14px rgba(2, 132, 199, 0.35)",
+                  marginTop: "0.5rem",
                 }}
               >
-                Go to Sign In →
-              </Link>
+                {otpVerifying ? "Verifying…" : "Verify Code →"}
+              </button>
+            </form>
+
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginTop: "1rem",
+                fontSize: "0.85rem",
+              }}
+            >
+              <button
+                type="button"
+                onClick={handleResendOtp}
+                disabled={resendCooldown > 0 || resending || !activeEmail}
+                style={{
+                  background: "transparent",
+                  border: "none",
+                  color: resendCooldown > 0 || !activeEmail ? "#64748b" : "#38bdf8",
+                  cursor: resendCooldown > 0 || resending || !activeEmail ? "not-allowed" : "pointer",
+                  padding: 0,
+                  textDecoration: resendCooldown > 0 || !activeEmail ? "none" : "underline",
+                }}
+              >
+                {resending
+                  ? "Sending…"
+                  : resendCooldown > 0
+                  ? `Resend code in ${resendCooldown}s`
+                  : "Resend code"}
+              </button>
 
               <button
                 type="button"
                 onClick={() => setShowVerifyModal(false)}
                 style={{
                   background: "transparent",
-                  border: "1px solid rgba(255, 255, 255, 0.15)",
-                  color: "#cbd5e1",
-                  padding: "0.6rem 1rem",
-                  borderRadius: "0.5rem",
-                  fontSize: "0.875rem",
+                  border: "none",
+                  color: "#94a3b8",
                   cursor: "pointer",
+                  padding: 0,
                 }}
               >
                 Dismiss
               </button>
+            </div>
+
+            <div
+              style={{
+                background: "rgba(15, 23, 42, 0.7)",
+                border: "1px solid rgba(255, 255, 255, 0.1)",
+                borderRadius: "0.625rem",
+                padding: "0.75rem 1rem",
+                fontSize: "0.8rem",
+                color: "#94a3b8",
+                textAlign: "left",
+                marginTop: "1.25rem",
+                lineHeight: 1.5,
+              }}
+            >
+              💡 <strong>Prefer a link?</strong> You can also activate your account by clicking the 1-click verification link sent to your inbox.
             </div>
           </div>
         </div>
