@@ -31,7 +31,7 @@ export interface QuestionListParams {
 
 export async function listQuestions(params: QuestionListParams) {
   const page = Math.max(1, params.page || 1);
-  const pageSize = Math.min(100, Math.max(1, params.pageSize || 20));
+  const pageSize = Math.min(500, Math.max(1, params.pageSize || 20));
   const skip = (page - 1) * pageSize;
 
   const where: Prisma.QuestionWhereInput = {};

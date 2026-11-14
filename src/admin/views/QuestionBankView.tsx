@@ -67,6 +67,10 @@ export function QuestionBankView() {
   const [chapterFilter, setChapterFilter] = useState("ALL");
   const [typeFilter, setTypeFilter] = useState("ALL");
   const [difficultyFilter, setDifficultyFilter] = useState("ALL");
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
+  const [totalCount, setTotalCount] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
 
   const [previewQuestion, setPreviewQuestion] = useState<QuestionItem | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -121,12 +125,18 @@ export function QuestionBankView() {
       if (chapterFilter !== "ALL") params.set("chapter", chapterFilter);
       if (typeFilter !== "ALL") params.set("type", typeFilter);
       if (difficultyFilter !== "ALL") params.set("difficulty", difficultyFilter);
+      params.set("page", page.toString());
+      params.set("pageSize", pageSize.toString());
 
       const res = await fetch(`/api/admin/questions?${params.toString()}`);
       if (!res.ok) throw new Error("Failed to load questions");
 
       const result = await res.json();
       setQuestions(result.data || []);
+      if (result.meta) {
+        setTotalCount(result.meta.total || 0);
+        setTotalPages(result.meta.totalPages || 1);
+      }
       if (result.taxonomy) {
         setSubjects(result.taxonomy.subjects || []);
         setChapters(result.taxonomy.chapters || []);
@@ -137,7 +147,7 @@ export function QuestionBankView() {
     } finally {
       setLoading(false);
     }
-  }, [search, subjectFilter, chapterFilter, typeFilter, difficultyFilter]);
+  }, [search, subjectFilter, chapterFilter, typeFilter, difficultyFilter, page, pageSize]);
 
   useEffect(() => {
     loadQuestions();
@@ -405,7 +415,7 @@ export function QuestionBankView() {
                 borderRadius: "9999px",
               }}
             >
-              {questions.length} Questions
+              {totalCount} Questions
             </span>
           </div>
           <p style={{ color: "#64748b", margin: "0.25rem 0 0", fontSize: "0.875rem" }}>
@@ -506,7 +516,10 @@ export function QuestionBankView() {
             type="text"
             placeholder="Search stem or code..."
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setPage(1);
+            }}
             style={{
               width: "100%",
               padding: "0.5rem 0.75rem",
@@ -523,7 +536,10 @@ export function QuestionBankView() {
           </label>
           <select
             value={subjectFilter}
-            onChange={(e) => setSubjectFilter(e.target.value)}
+            onChange={(e) => {
+              setSubjectFilter(e.target.value);
+              setPage(1);
+            }}
             style={{
               width: "100%",
               padding: "0.5rem 0.75rem",
@@ -548,7 +564,10 @@ export function QuestionBankView() {
           </label>
           <select
             value={chapterFilter}
-            onChange={(e) => setChapterFilter(e.target.value)}
+            onChange={(e) => {
+              setChapterFilter(e.target.value);
+              setPage(1);
+            }}
             style={{
               width: "100%",
               padding: "0.5rem 0.75rem",
@@ -573,7 +592,10 @@ export function QuestionBankView() {
           </label>
           <select
             value={typeFilter}
-            onChange={(e) => setTypeFilter(e.target.value)}
+            onChange={(e) => {
+              setTypeFilter(e.target.value);
+              setPage(1);
+            }}
             style={{
               width: "100%",
               padding: "0.5rem 0.75rem",
@@ -597,7 +619,10 @@ export function QuestionBankView() {
           </label>
           <select
             value={difficultyFilter}
-            onChange={(e) => setDifficultyFilter(e.target.value)}
+            onChange={(e) => {
+              setDifficultyFilter(e.target.value);
+              setPage(1);
+            }}
             style={{
               width: "100%",
               padding: "0.5rem 0.75rem",
@@ -770,6 +795,190 @@ export function QuestionBankView() {
                 ))}
               </tbody>
             </table>
+          </div>
+        )}
+
+        {/* Pagination Controls */}
+        {totalCount > 0 && (
+          <div
+            style={{
+              display: "flex",
+              flexWrap: "wrap",
+              alignItems: "center",
+              justifyContent: "space-between",
+              padding: "0.85rem 1.25rem",
+              backgroundColor: "#f8fafc",
+              borderTop: "1px solid #e2e8f0",
+              gap: "0.75rem",
+              fontSize: "0.875rem",
+              color: "#475569",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: "1rem", flexWrap: "wrap" }}>
+              <span>
+                Showing <strong>{Math.min((page - 1) * pageSize + 1, totalCount)}</strong> to{" "}
+                <strong>{Math.min(page * pageSize, totalCount)}</strong> of <strong>{totalCount}</strong> questions
+              </span>
+
+              <div style={{ display: "flex", alignItems: "center", gap: "0.35rem" }}>
+                <label htmlFor="qb-page-size" style={{ fontSize: "0.8rem", color: "#64748b" }}>
+                  Per page:
+                </label>
+                <select
+                  id="qb-page-size"
+                  value={pageSize}
+                  onChange={(e) => {
+                    setPageSize(Number(e.target.value));
+                    setPage(1);
+                  }}
+                  style={{
+                    padding: "0.25rem 0.5rem",
+                    borderRadius: "0.375rem",
+                    border: "1px solid #cbd5e1",
+                    fontSize: "0.8rem",
+                    backgroundColor: "#ffffff",
+                    cursor: "pointer",
+                  }}
+                >
+                  <option value={10}>10</option>
+                  <option value={20}>20</option>
+                  <option value={50}>50</option>
+                  <option value={100}>100</option>
+                  <option value={250}>250</option>
+                </select>
+              </div>
+            </div>
+
+            <div style={{ display: "flex", alignItems: "center", gap: "0.25rem", flexWrap: "wrap" }}>
+              <button
+                type="button"
+                disabled={page <= 1 || loading}
+                onClick={() => setPage(1)}
+                title="First Page"
+                style={{
+                  padding: "0.35rem 0.65rem",
+                  borderRadius: "0.375rem",
+                  border: "1px solid #cbd5e1",
+                  backgroundColor: page <= 1 ? "#f1f5f9" : "#ffffff",
+                  color: page <= 1 ? "#94a3b8" : "#1e293b",
+                  cursor: page <= 1 ? "not-allowed" : "pointer",
+                  fontWeight: 600,
+                  fontSize: "0.8rem",
+                }}
+              >
+                « First
+              </button>
+
+              <button
+                type="button"
+                disabled={page <= 1 || loading}
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                title="Previous Page"
+                style={{
+                  padding: "0.35rem 0.65rem",
+                  borderRadius: "0.375rem",
+                  border: "1px solid #cbd5e1",
+                  backgroundColor: page <= 1 ? "#f1f5f9" : "#ffffff",
+                  color: page <= 1 ? "#94a3b8" : "#1e293b",
+                  cursor: page <= 1 ? "not-allowed" : "pointer",
+                  fontWeight: 600,
+                  fontSize: "0.8rem",
+                }}
+              >
+                ‹ Prev
+              </button>
+
+              {/* Dynamic Page Buttons */}
+              {(() => {
+                const pages: (number | string)[] = [];
+                const maxButtons = 5;
+                let startPage = Math.max(1, page - 2);
+                const endPage = Math.min(totalPages, startPage + maxButtons - 1);
+                if (endPage - startPage < maxButtons - 1) {
+                  startPage = Math.max(1, endPage - maxButtons + 1);
+                }
+
+                if (startPage > 1) {
+                  pages.push(1);
+                  if (startPage > 2) pages.push("...");
+                }
+
+                for (let i = startPage; i <= endPage; i++) {
+                  pages.push(i);
+                }
+
+                if (endPage < totalPages) {
+                  if (endPage < totalPages - 1) pages.push("...");
+                  pages.push(totalPages);
+                }
+
+                return pages.map((p, idx) =>
+                  typeof p === "number" ? (
+                    <button
+                      key={p}
+                      type="button"
+                      disabled={loading}
+                      onClick={() => setPage(p)}
+                      style={{
+                        minWidth: "2rem",
+                        padding: "0.35rem 0.5rem",
+                        borderRadius: "0.375rem",
+                        border: p === page ? "1px solid #2563eb" : "1px solid #cbd5e1",
+                        backgroundColor: p === page ? "#2563eb" : "#ffffff",
+                        color: p === page ? "#ffffff" : "#1e293b",
+                        fontWeight: p === page ? 700 : 500,
+                        fontSize: "0.8rem",
+                        cursor: "pointer",
+                      }}
+                    >
+                      {p}
+                    </button>
+                  ) : (
+                    <span key={`dots-${idx}`} style={{ padding: "0 0.25rem", color: "#94a3b8" }}>
+                      …
+                    </span>
+                  )
+                );
+              })()}
+
+              <button
+                type="button"
+                disabled={page >= totalPages || loading}
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                title="Next Page"
+                style={{
+                  padding: "0.35rem 0.65rem",
+                  borderRadius: "0.375rem",
+                  border: "1px solid #cbd5e1",
+                  backgroundColor: page >= totalPages ? "#f1f5f9" : "#ffffff",
+                  color: page >= totalPages ? "#94a3b8" : "#1e293b",
+                  cursor: page >= totalPages ? "not-allowed" : "pointer",
+                  fontWeight: 600,
+                  fontSize: "0.8rem",
+                }}
+              >
+                Next ›
+              </button>
+
+              <button
+                type="button"
+                disabled={page >= totalPages || loading}
+                onClick={() => setPage(totalPages)}
+                title="Last Page"
+                style={{
+                  padding: "0.35rem 0.65rem",
+                  borderRadius: "0.375rem",
+                  border: "1px solid #cbd5e1",
+                  backgroundColor: page >= totalPages ? "#f1f5f9" : "#ffffff",
+                  color: page >= totalPages ? "#94a3b8" : "#1e293b",
+                  cursor: page >= totalPages ? "not-allowed" : "pointer",
+                  fontWeight: 600,
+                  fontSize: "0.8rem",
+                }}
+              >
+                Last »
+              </button>
+            </div>
           </div>
         )}
       </div>

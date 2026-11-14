@@ -73,6 +73,10 @@ export function TestBuilderView({ testId }: { testId: string }) {
   const [pickerLoading, setPickerLoading] = useState(false);
   const [pickerMarks, setPickerMarks] = useState("4");
   const [pickerNegMarks, setPickerNegMarks] = useState("1");
+  const [pickerPage, setPickerPage] = useState(1);
+  const [pickerPageSize, setPickerPageSize] = useState(25);
+  const [pickerTotal, setPickerTotal] = useState(0);
+  const [pickerTotalPages, setPickerTotalPages] = useState(1);
 
   // Tab & Assignments State
   const [activeTab, setActiveTab] = useState<"CURRICULUM" | "ANALYTICS" | "REEVALUATE" | "ATTEMPTS" | "ASSIGNMENTS">("CURRICULUM");
@@ -150,18 +154,23 @@ export function TestBuilderView({ testId }: { testId: string }) {
       const params = new URLSearchParams();
       if (pickerSearch) params.set("search", pickerSearch);
       if (pickerSubject !== "ALL") params.set("subject", pickerSubject);
-      params.set("pageSize", "50");
+      params.set("page", pickerPage.toString());
+      params.set("pageSize", pickerPageSize.toString());
 
       const res = await fetch(`/api/admin/questions?${params.toString()}`);
       if (!res.ok) throw new Error("Failed to fetch questions from bank");
       const data = await res.json();
       setBankQuestions(data.data || []);
+      if (data.meta) {
+        setPickerTotal(data.meta.total || 0);
+        setPickerTotalPages(data.meta.totalPages || 1);
+      }
     } catch {
       // ignore
     } finally {
       setPickerLoading(false);
     }
-  }, [pickerSearch, pickerSubject]);
+  }, [pickerSearch, pickerSubject, pickerPage, pickerPageSize]);
 
   useEffect(() => {
     if (isPickerOpen) {
@@ -171,6 +180,7 @@ export function TestBuilderView({ testId }: { testId: string }) {
 
   function openPicker(sectionId: string | null) {
     setTargetSectionId(sectionId);
+    setPickerPage(1);
     setIsPickerOpen(true);
   }
 
@@ -1232,12 +1242,18 @@ export function TestBuilderView({ testId }: { testId: string }) {
                 type="text"
                 placeholder="Search stem or code..."
                 value={pickerSearch}
-                onChange={(e) => setPickerSearch(e.target.value)}
+                onChange={(e) => {
+                  setPickerSearch(e.target.value);
+                  setPickerPage(1);
+                }}
                 style={{ flex: 1, padding: "0.5rem", borderRadius: "0.375rem", border: "1px solid #cbd5e1" }}
               />
               <select
                 value={pickerSubject}
-                onChange={(e) => setPickerSubject(e.target.value)}
+                onChange={(e) => {
+                  setPickerSubject(e.target.value);
+                  setPickerPage(1);
+                }}
                 style={{ padding: "0.5rem", borderRadius: "0.375rem", border: "1px solid #cbd5e1", backgroundColor: "#fff" }}
               >
                 <option value="ALL">All Subjects</option>
@@ -1299,6 +1315,81 @@ export function TestBuilderView({ testId }: { testId: string }) {
                     })}
                   </tbody>
                 </table>
+              </div>
+            )}
+
+            {/* Picker Pagination */}
+            {pickerTotal > 0 && (
+              <div
+                style={{
+                  display: "flex",
+                  flexWrap: "wrap",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  padding: "0.6rem 0.5rem",
+                  borderTop: "1px solid #e2e8f0",
+                  gap: "0.5rem",
+                  fontSize: "0.8rem",
+                  color: "#64748b",
+                  marginTop: "0.5rem",
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+                  <span>
+                    Showing {Math.min((pickerPage - 1) * pickerPageSize + 1, pickerTotal)}–{Math.min(pickerPage * pickerPageSize, pickerTotal)} of {pickerTotal}
+                  </span>
+                  <select
+                    value={pickerPageSize}
+                    onChange={(e) => {
+                      setPickerPageSize(Number(e.target.value));
+                      setPickerPage(1);
+                    }}
+                    style={{ padding: "0.2rem 0.4rem", borderRadius: "0.25rem", border: "1px solid #cbd5e1", fontSize: "0.75rem" }}
+                  >
+                    <option value={15}>15 / page</option>
+                    <option value={25}>25 / page</option>
+                    <option value={50}>50 / page</option>
+                    <option value={100}>100 / page</option>
+                  </select>
+                </div>
+
+                <div style={{ display: "flex", alignItems: "center", gap: "0.25rem" }}>
+                  <button
+                    type="button"
+                    disabled={pickerPage <= 1 || pickerLoading}
+                    onClick={() => setPickerPage((p) => Math.max(1, p - 1))}
+                    style={{
+                      padding: "0.25rem 0.5rem",
+                      borderRadius: "0.25rem",
+                      border: "1px solid #cbd5e1",
+                      backgroundColor: pickerPage <= 1 ? "#f1f5f9" : "#fff",
+                      cursor: pickerPage <= 1 ? "not-allowed" : "pointer",
+                      fontSize: "0.75rem",
+                      fontWeight: 600,
+                    }}
+                  >
+                    ‹ Prev
+                  </button>
+                  <span style={{ padding: "0 0.4rem", fontWeight: 700, color: "#0f172a" }}>
+                    {pickerPage} / {pickerTotalPages}
+                  </span>
+                  <button
+                    type="button"
+                    disabled={pickerPage >= pickerTotalPages || pickerLoading}
+                    onClick={() => setPickerPage((p) => Math.min(pickerTotalPages, p + 1))}
+                    style={{
+                      padding: "0.25rem 0.5rem",
+                      borderRadius: "0.25rem",
+                      border: "1px solid #cbd5e1",
+                      backgroundColor: pickerPage >= pickerTotalPages ? "#f1f5f9" : "#fff",
+                      cursor: pickerPage >= pickerTotalPages ? "not-allowed" : "pointer",
+                      fontSize: "0.75rem",
+                      fontWeight: 600,
+                    }}
+                  >
+                    Next ›
+                  </button>
+                </div>
               </div>
             )}
 
