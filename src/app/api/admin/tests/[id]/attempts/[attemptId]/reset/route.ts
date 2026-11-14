@@ -1,0 +1,51 @@
+import { NextResponse } from "next/server";
+import { auth } from "@/lib/auth";
+import { hasRole } from "@/lib/rbac";
+import { resetStudentAttempt } from "@/server/tests/reevaluation-service";
+
+async function getAdminActor() {
+  const session = await auth();
+  if (!session?.user) {
+    return NextResponse.json({ error: "Authentication required." }, { status: 401 });
+  }
+  if (session.user.status !== "ACTIVE" || !hasRole(session.user, ["SUPER_ADMIN", "INSTRUCTOR"])) {
+    return NextResponse.json({ error: "Admin permission required." }, { status: 403 });
+  }
+  return session.user;
+}
+
+export async function POST(
+  request: Request,
+  { params }: { params: Promise<{ id: string; attemptId: string }> }
+) {
+  const actor = await getAdminActor();
+  if (actor instanceof NextResponse) return actor;
+
+  const { attemptId } = await params;
+
+  try {
+    const body = await request.json();
+    const { action, extraMinutes, reason } = body;
+
+    if (!action || !reason) {
+      return NextResponse.json(
+        { error: "action and reason are required." },
+        { status: 400 }
+      );
+    }
+
+    const result = await resetStudentAttempt({
+      attemptId,
+      actorId: actor.id,
+      action,
+      extraMinutes,
+      reason,
+    });
+
+    return NextResponse.json({ data: result });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Failed to reset attempt.";
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
+}
+

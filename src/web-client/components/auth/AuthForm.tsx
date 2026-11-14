@@ -128,7 +128,8 @@ export function AuthForm({ mode, googleEnabled = false }: { mode: AuthMode; goog
           setShowVerifyModal(true);
         }
       }
-    } catch {
+    } catch (err) {
+      console.error("[AUTH SUBMIT ERROR]", err);
       setError("We couldn’t reach the service. Please try again.");
     } finally {
       setPending(false);

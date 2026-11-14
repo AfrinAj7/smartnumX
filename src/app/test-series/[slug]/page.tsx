@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { getPublicProductBySlug } from "@/server/courses/course-service";
+import { getTestSeriesTestsForStudent } from "@/server/tests/assignment-service";
 import { getHomepageContent } from "@/server/site-content/homepage";
 import { SiteFooter } from "@/web-client/components/layout/SiteFooter";
 import { SiteHeader } from "@/web-client/components/layout/SiteHeader";
@@ -49,14 +50,25 @@ export default async function TestSeriesDetailPage({
 }) {
   const { slug } = await params;
 
-  const [product, content, session] = await Promise.all([
+  const [product, content, session, testsData] = await Promise.all([
     getPublicProductBySlug(slug),
     getHomepageContent(db),
     auth(),
+    getTestSeriesTestsForStudent(slug).catch(() => null),
   ]);
 
   if (!product) {
     notFound();
+  }
+
+  // If user is logged in, resolve their specific test access and attempt states
+  let userTestsData = testsData;
+  if (session?.user?.id) {
+    userTestsData = await getTestSeriesTestsForStudent(
+      slug,
+      session.user.id,
+      session.user.role
+    ).catch(() => testsData);
   }
 
   const contact = content.contact;
@@ -83,6 +95,8 @@ export default async function TestSeriesDetailPage({
     sampleTestUrl: product.sampleTestUrl || null,
     features: product.features || [],
     inclusions: product.inclusions || [],
+    totalQuestionsCount: (product as { totalQuestionsCount?: number | null }).totalQuestionsCount || null,
+    publishedTestsCount: (product as { totalTestsCount?: number }).totalTestsCount || 0,
   };
 
   const schemaData = {
@@ -113,6 +127,9 @@ export default async function TestSeriesDetailPage({
           testSeries={detailData}
           phone={phone}
           whatsapp={whatsapp}
+          tests={userTestsData?.tests || []}
+          isEnrolled={userTestsData?.course.isEnrolled ?? false}
+          userLoggedIn={Boolean(session?.user)}
         />
       </main>
 

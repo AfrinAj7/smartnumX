@@ -24,6 +24,8 @@ const adminNavigation: NavItem[] = [
   { label: "Dashboard", href: "/admin", icon: "📊" },
   { label: "Site Content (CMS)", href: "/admin/site-content", icon: "✏️" },
   { label: "Courses & Test Series", href: "/admin/courses", icon: "📚" },
+  { label: "Tests & CBT Mocks", href: "/admin/tests", icon: "🎯" },
+  { label: "Question Bank", href: "/admin/questions", icon: "📝" },
   { label: "Coupons & Vouchers", href: "/admin/coupons", icon: "🏷️" },
   { label: "Learners & Enrolments", href: "/admin/enrollments", icon: "🎓" },
   { label: "Orders & Demo Payments", href: "/admin/orders", icon: "💳" },

@@ -99,15 +99,21 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return session;
     },
     async redirect({ url, baseUrl }) {
-      if (url.startsWith("/")) return url;
+      const base = baseUrl || process.env.NEXTAUTH_URL || process.env.AUTH_URL || "http://localhost:3000";
+      const cleanBase = base.replace(/\/$/, "");
+      if (url && url.startsWith("/")) {
+        return `${cleanBase}${url}`;
+      }
       try {
         const parsed = new URL(url);
-        // Always return relative path so redirects stay on the live/current host
-        return `${parsed.pathname}${parsed.search}${parsed.hash}` || "/";
+        const baseParsed = new URL(cleanBase);
+        if (parsed.origin === baseParsed.origin) {
+          return url;
+        }
       } catch {
-        // fallback to relative if valid
+        // fallback to cleanBase if url is not a valid absolute URL
       }
-      return url.startsWith("/") ? url : "/";
+      return cleanBase;
     },
   },
   trustHost: true,

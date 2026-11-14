@@ -71,7 +71,7 @@ export default async function MyCoursesPage() {
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))", gap: "1.5rem" }}>
           {enrollments.map((enr) => {
             const isTestSeries = enr.course.productType === "TEST_SERIES";
-            const targetUrl = isTestSeries ? `/test-series/${enr.course.slug}` : `/courses/${enr.course.slug}`;
+            const targetUrl = isTestSeries ? `/test-series/${enr.course.slug}#mock-tests` : `/courses/${enr.course.slug}`;
 
             return (
               <div

@@ -141,6 +141,10 @@ model User {
   assignedLeads     Lead[]              @relation("LeadAssignee")
   convertedLeads    Lead[]              @relation("LeadConvertedUser")
   cartItems         CartItem[]
+  attempts          Attempt[]           @relation("UserAttempts")
+  testAssignments   TestAssignment[]    @relation("UserTestAssignments")
+  createdQuestions  Question[]          @relation("QuestionCreator")
+  importJobs        ImportJob[]         @relation("AdminImportJobs")
 
   @@index([role, status])
   @@index([deletedAt])
@@ -265,6 +269,7 @@ model Course {
   orderItems            OrderItem[]
   reviews               Review[]
   cartItems             CartItem[]
+  tests                 Test[]       @relation("CourseTests")
 
   @@index([status, deletedAt])
   @@index([categoryId, status])
@@ -353,6 +358,7 @@ model Enrollment {
   order       Order?           @relation(fields: [orderId], references: [id], onDelete: SetNull)
   progress    LessonProgress[]
   certificate Certificate?
+  attempts    Attempt[]
 
   @@unique([userId, courseId])
   @@index([courseId, status])
@@ -622,4 +628,288 @@ model CartItem {
 
   @@unique([userId, courseId])
   @@index([userId])
-}
+}
+
+// ==========================================
+// TEST SERIES ENGINE ENUMS & MODELS (Phase 8)
+// ==========================================
+
+enum TestType {
+  FULL_MOCK
+  CHAPTER
+  SECTIONAL
+  DIAGNOSTIC
+}
+
+enum TestStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum QuestionType {
+  MCQ_SINGLE
+  MCQ_MULTI
+  NUMERIC
+  TRUE_FALSE
+}
+
+enum AttemptStatus {
+  IN_PROGRESS
+  SUBMITTED
+  AUTO_SUBMITTED
+}
+
+enum ResultMode {
+  INSTANT
+  AFTER_WINDOW
+  MANUAL
+}
+
+enum SolutionMode {
+  AFTER_SUBMIT
+  AFTER_WINDOW
+  NEVER
+}
+
+enum LateStartRule {
+  REDUCE_TIME
+  FULL_TIME
+}
+
+enum AssignmentSource {
+  ADMIN_GRANT
+  FREE_PREVIEW
+}
+
+enum AttemptAnswerState {
+  NOT_VISITED
+  NOT_ANSWERED
+  ANSWERED
+  MARKED
+  ANSWERED_MARKED
+}
+
+enum ViolationType {
+  TAB_BLUR
+  FULLSCREEN_EXIT
+  DEVTOOLS
+  CONCURRENT_LOGIN
+}
+
+model Test {
+  id                String           @id @default(cuid())
+  seriesId          String?
+  series            Course?          @relation("CourseTests", fields: [seriesId], references: [id], onDelete: SetNull)
+  code              String           @unique
+  title             String
+  description       String?          @db.Text
+  type              TestType         @default(FULL_MOCK)
+  status            TestStatus       @default(DRAFT)
+  durationMin       Int              @default(180)
+  totalMarks        Decimal          @default(0) @db.Decimal(10, 2)
+  passMarks         Decimal?         @db.Decimal(10, 2)
+  opensAt           DateTime?
+  closesAt          DateTime?
+  lateStartRule     LateStartRule    @default(REDUCE_TIME)
+  graceSeconds      Int              @default(10)
+  maxAttempts       Int              @default(1)
+  shuffleQuestions  Boolean          @default(false)
+  shuffleOptions    Boolean          @default(false)
+  requireFullscreen Boolean          @default(false)
+  maxViolations     Int              @default(0)
+  resultMode        ResultMode       @default(INSTANT)
+  solutionMode      SolutionMode     @default(AFTER_SUBMIT)
+  instructions      String?          @db.Text
+  isFreePreview     Boolean          @default(false)
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  deletedAt         DateTime?
+  sections          TestSection[]
+  testQuestions     TestQuestion[]
+  attempts          Attempt[]
+  assignments       TestAssignment[]
+
+  @@index([status, deletedAt])
+  @@index([seriesId, status])
+  @@index([opensAt, closesAt])
+}
+
+model TestSection {
+  id              String           @id @default(cuid())
+  testId          String
+  test            Test             @relation(fields: [testId], references: [id], onDelete: Cascade)
+  name            String
+  order           Int              @default(0)
+  durationMin     Int?
+  maxToAttempt    Int?
+  testQuestions   TestQuestion[]
+  attemptSections AttemptSection[]
+
+  @@index([testId, order])
+}
+
+model Passage {
+  id        String     @id @default(cuid())
+  title     String?
+  content   String     @db.Text
+  createdAt DateTime   @default(now())
+  questions Question[]
+}
+
+model Question {
+  id            String         @id @default(cuid())
+  code          String         @unique
+  version       Int            @default(1)
+  parentId      String?
+  parent        Question?      @relation("QuestionVersions", fields: [parentId], references: [id], onDelete: SetNull)
+  children      Question[]     @relation("QuestionVersions")
+  isLocked      Boolean        @default(false)
+  type          QuestionType   @default(MCQ_SINGLE)
+  stem          String         @db.Text
+  stemImage     String?
+  options       Json?
+  correct       Json
+  explanation   String?        @db.Text
+  solutionImage String?
+  subject       String
+  chapter       String?
+  topic         String?
+  difficulty    String?
+  passageId     String?
+  passage       Passage?       @relation(fields: [passageId], references: [id], onDelete: SetNull)
+  createdById   String?
+  creator       User?          @relation("QuestionCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  testQuestions TestQuestion[]
+  attemptAnswers AttemptAnswer[]
+
+  @@index([subject, chapter])
+  @@index([createdById])
+  @@index([isLocked])
+}
+
+model TestQuestion {
+  id             String       @id @default(cuid())
+  testId         String
+  test           Test         @relation(fields: [testId], references: [id], onDelete: Cascade)
+  sectionId      String?
+  section        TestSection? @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  questionId     String
+  question       Question     @relation(fields: [questionId], references: [id], onDelete: Restrict)
+  order          Int          @default(0)
+  marks          Decimal      @default(4) @db.Decimal(5, 2)
+  negMarks       Decimal      @default(1) @db.Decimal(5, 2)
+  partialMarking Boolean      @default(false)
+
+  @@unique([testId, questionId])
+  @@index([testId, order])
+  @@index([sectionId, order])
+}
+
+model Attempt {
+  id               String            @id @default(cuid())
+  testId           String
+  test             Test              @relation(fields: [testId], references: [id], onDelete: Restrict)
+  userId           String
+  user             User              @relation("UserAttempts", fields: [userId], references: [id], onDelete: Restrict)
+  enrollmentId     String?
+  enrollment       Enrollment?       @relation(fields: [enrollmentId], references: [id], onDelete: SetNull)
+  attemptNo        Int               @default(1)
+  status           AttemptStatus     @default(IN_PROGRESS)
+  startedAt        DateTime          @default(now())
+  deadlineAt       DateTime
+  submittedAt      DateTime?
+  extraTimeMin     Int               @default(0)
+  score            Decimal?          @db.Decimal(10, 2)
+  totalMarks       Decimal?          @db.Decimal(10, 2)
+  correctCount     Int               @default(0)
+  incorrectCount   Int               @default(0)
+  unattemptedCount Int               @default(0)
+  rank             Int?
+  percentile       Decimal?          @db.Decimal(5, 2)
+  seed             Int               @default(1)
+  violationsCount  Int               @default(0)
+  sectionStates    AttemptSection[]
+  answers          AttemptAnswer[]
+  violations       AttemptViolation[]
+
+  @@index([userId, testId, status])
+  @@index([testId, status, score, correctCount, incorrectCount])
+}
+
+model AttemptSection {
+  id          String      @id @default(cuid())
+  attemptId   String
+  attempt     Attempt     @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  sectionId   String
+  section     TestSection @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  startedAt   DateTime?
+  lockedAt    DateTime?
+  timeSpentSec Int        @default(0)
+
+  @@unique([attemptId, sectionId])
+}
+
+model AttemptAnswer {
+  id           String             @id @default(cuid())
+  attemptId    String
+  attempt      Attempt            @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  questionId   String
+  question     Question           @relation(fields: [questionId], references: [id], onDelete: Restrict)
+  state        AttemptAnswerState @default(NOT_VISITED)
+  response     Json?
+  isCorrect    Boolean?
+  marksAwarded Decimal?           @db.Decimal(5, 2)
+  timeSpentSec Int                @default(0)
+  visitedAt    DateTime?
+  answeredAt   DateTime?
+
+  @@unique([attemptId, questionId])
+  @@index([attemptId, state])
+}
+
+model AttemptViolation {
+  id        String        @id @default(cuid())
+  attemptId String
+  attempt   Attempt       @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  type      ViolationType
+  timestamp DateTime      @default(now())
+  details   String?
+
+  @@index([attemptId, timestamp])
+}
+
+model TestAssignment {
+  id          String           @id @default(cuid())
+  testId      String
+  test        Test             @relation(fields: [testId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User             @relation("UserTestAssignments", fields: [userId], references: [id], onDelete: Cascade)
+  source      AssignmentSource @default(ADMIN_GRANT)
+  grantedById String?
+  validUntil  DateTime?
+  createdAt   DateTime         @default(now())
+
+  @@unique([testId, userId])
+  @@index([userId, testId])
+}
+
+model ImportJob {
+  id           String    @id @default(cuid())
+  createdById  String
+  creator      User      @relation("AdminImportJobs", fields: [createdById], references: [id], onDelete: Restrict)
+  fileName     String
+  fileSize     Int
+  status       String    @default("PROCESSING")
+  totalRows    Int       @default(0)
+  successCount Int       @default(0)
+  errorCount   Int       @default(0)
+  errors       Json?
+  createdAt    DateTime  @default(now())
+  completedAt  DateTime?
+
+  @@index([createdById, createdAt])
+}
+

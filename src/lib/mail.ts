@@ -1,4 +1,3 @@
-import nodemailer from "nodemailer";
 import type { AuthMailer } from "@/server/auth/auth-service";
 
 function escapeHtml(value: string) {
@@ -14,7 +13,7 @@ function escapeHtml(value: string) {
   });
 }
 
-function getSmtpTransporter() {
+async function getSmtpTransporter() {
   const host = process.env.SMTP_HOST || "smtp.gmail.com";
   const port = Number(process.env.SMTP_PORT || 465);
   const user = process.env.SMTP_USER || process.env.SEED_ADMIN_EMAIL || "gosmartnum@gmail.com";
@@ -22,6 +21,9 @@ function getSmtpTransporter() {
 
   if (!rawPass || !user) return null;
   const pass = rawPass.replace(/\s+/g, "");
+
+  const nodemailerModule = await import("nodemailer");
+  const nodemailer = nodemailerModule.default || nodemailerModule;
 
   return nodemailer.createTransport({
     host,
@@ -48,7 +50,7 @@ async function sendLinkEmail(input: {
   const from = fromEmail.includes("<") ? fromEmail : `"SmartNum Learning Space" <${fromEmail}>`;
 
   // 1. Prioritize SMTP (Gmail App Password or custom SMTP server)
-  const transporter = getSmtpTransporter();
+  const transporter = await getSmtpTransporter();
   if (transporter) {
     try {
       console.info(`[SMTP] Sending "${input.subject}" to ${input.to} via Gmail SMTP...`);
@@ -174,7 +176,7 @@ export async function sendOrderReceiptEmail(input: {
 
   const itemsHtml = input.items.map((i) => `<li><strong>${escapeHtml(i)}</strong></li>`).join("");
 
-  const transporter = getSmtpTransporter();
+  const transporter = await getSmtpTransporter();
   if (transporter) {
     try {
       console.info(`[SMTP] Sending receipt for ${input.invoiceNo} to ${input.to}...`);

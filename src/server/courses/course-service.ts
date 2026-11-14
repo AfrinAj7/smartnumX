@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";
-import { CourseStatus, Prisma } from "@prisma/client";
+import { CourseStatus, Prisma, TestStatus } from "@prisma/client";
 import { z } from "zod";
 
 export const courseSchema = z.object({
@@ -584,45 +584,86 @@ export async function listPublicTestSeries(filters?: { categorySlug?: string; is
     orderBy: [{ featured: "desc" }, { createdAt: "asc" }],
     include: {
       category: { select: { id: true, name: true, slug: true, parentId: true, parent: { select: { name: true, slug: true } } } },
-    },
-  });
-
-  return testSeries.map((item) => ({
-    ...item,
-    price: Number(item.price),
-    discountPrice: item.discountPrice ? Number(item.discountPrice) : null,
-  }));
-}
-
-export async function getPublicProductBySlug(slug: string) {
-  const product = await db.course.findFirst({
-    where: {
-      slug,
-      deletedAt: null,
-      status: CourseStatus.PUBLISHED,
-    },
-    include: {
-      category: { select: { id: true, name: true, slug: true, parent: { select: { name: true, slug: true } } } },
-      centre: true,
-      instructor: { select: { id: true, name: true, image: true } },
-      modules: {
-        orderBy: { position: "asc" },
-        include: {
-          lessons: {
-            orderBy: { position: "asc" },
-            select: { id: true, title: true, duration: true, position: true, isPreview: true, type: true },
-          },
+      tests: {
+        where: { status: TestStatus.PUBLISHED, deletedAt: null },
+        select: {
+          id: true,
+          type: true,
+          _count: { select: { testQuestions: true } },
         },
       },
     },
   });
 
+  return testSeries.map((item) => {
+    const publishedTests = item.tests || [];
+    const fullMocksCount = publishedTests.filter((t) => t.type === "FULL_MOCK").length;
+    const chapterTestsCount = publishedTests.filter((t) => t.type !== "FULL_MOCK").length;
+    const totalQuestionsCount = publishedTests.reduce((acc, t) => acc + t._count.testQuestions, 0);
+
+    return {
+      ...item,
+      price: Number(item.price),
+      discountPrice: item.discountPrice ? Number(item.discountPrice) : null,
+      testCountFull: publishedTests.length > 0 ? fullMocksCount : (item.testCountFull ?? 0),
+      testCountChapter: publishedTests.length > 0 ? chapterTestsCount : (item.testCountChapter ?? 0),
+      totalTestsCount: publishedTests.length > 0 ? publishedTests.length : ((item.testCountFull ?? 0) + (item.testCountChapter ?? 0)),
+      totalQuestionsCount: totalQuestionsCount > 0 ? totalQuestionsCount : null,
+    };
+  });
+}
+
+export async function getPublicProductBySlug(slug: string) {
+  const [product, publishedTests] = await Promise.all([
+    db.course.findFirst({
+      where: {
+        slug,
+        deletedAt: null,
+        status: CourseStatus.PUBLISHED,
+      },
+      include: {
+        category: { select: { id: true, name: true, slug: true, parent: { select: { name: true, slug: true } } } },
+        centre: true,
+        instructor: { select: { id: true, name: true, image: true } },
+        modules: {
+          orderBy: { position: "asc" },
+          include: {
+            lessons: {
+              orderBy: { position: "asc" },
+              select: { id: true, title: true, duration: true, position: true, isPreview: true, type: true },
+            },
+          },
+        },
+      },
+    }),
+    db.test.findMany({
+      where: {
+        series: { slug },
+        status: TestStatus.PUBLISHED,
+        deletedAt: null,
+      },
+      select: {
+        id: true,
+        type: true,
+        _count: { select: { testQuestions: true } },
+      },
+    }),
+  ]);
+
   if (!product) return null;
+
+  const fullMocksCount = publishedTests.filter((t) => t.type === "FULL_MOCK").length;
+  const chapterTestsCount = publishedTests.filter((t) => t.type !== "FULL_MOCK").length;
+  const totalQuestionsCount = publishedTests.reduce((acc, t) => acc + t._count.testQuestions, 0);
 
   return {
     ...product,
     price: Number(product.price),
     discountPrice: product.discountPrice ? Number(product.discountPrice) : null,
+    testCountFull: publishedTests.length > 0 ? fullMocksCount : (product.testCountFull ?? 0),
+    testCountChapter: publishedTests.length > 0 ? chapterTestsCount : (product.testCountChapter ?? 0),
+    totalTestsCount: publishedTests.length > 0 ? publishedTests.length : ((product.testCountFull ?? 0) + (product.testCountChapter ?? 0)),
+    totalQuestionsCount: totalQuestionsCount > 0 ? totalQuestionsCount : null,
   };
 }
 
@@ -632,6 +673,14 @@ export async function enrollFreeProduct(userId: string, slugOrId: string) {
       OR: [{ id: slugOrId }, { slug: slugOrId }],
       deletedAt: null,
       status: CourseStatus.PUBLISHED,
+    },
+    include: {
+      tests: {
+        where: { status: TestStatus.PUBLISHED, deletedAt: null },
+        orderBy: { createdAt: "asc" },
+        select: { id: true },
+        take: 1,
+      },
     },
   });
 
@@ -644,6 +693,8 @@ export async function enrollFreeProduct(userId: string, slugOrId: string) {
     throw new Error("This is a paid product and cannot be enrolled for free.");
   }
 
+  const firstTestId = product.tests?.[0]?.id || null;
+
   // Check if user is already enrolled
   const existing = await db.enrollment.findUnique({
     where: {
@@ -655,7 +706,14 @@ export async function enrollFreeProduct(userId: string, slugOrId: string) {
   });
 
   if (existing && existing.status === "ACTIVE") {
-    return { enrollment: existing, alreadyEnrolled: true, productId: product.id, slug: product.slug };
+    return {
+      enrollment: existing,
+      alreadyEnrolled: true,
+      productId: product.id,
+      slug: product.slug,
+      isTestSeries: product.productType === "TEST_SERIES",
+      firstTestId,
+    };
   }
 
   const invoiceNo = `FREE-${Date.now().toString().slice(-6)}-${Math.floor(100 + Math.random() * 900)}`;
@@ -715,5 +773,7 @@ export async function enrollFreeProduct(userId: string, slugOrId: string) {
     alreadyEnrolled: false,
     productId: product.id,
     slug: product.slug,
+    isTestSeries: product.productType === "TEST_SERIES",
+    firstTestId,
   };
 }

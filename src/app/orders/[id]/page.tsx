@@ -39,6 +39,10 @@ export default async function OrderConfirmationPage({
   const phone = contact?.phone || "+91 99589 47774";
   const whatsapp = contact?.whatsapp || "+91 99589 47774";
 
+  const firstTestSeriesItem = order.items.find(
+    (i) => i.course?.productType === "TEST_SERIES" && i.course.slug
+  );
+
   return (
     <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", backgroundColor: "#f8fafc" }}>
       <SiteHeader phone={phone} whatsappNumber={whatsapp} user={session.user} />
@@ -235,24 +239,47 @@ export default async function OrderConfirmationPage({
         {/* Action Buttons */}
         <div style={{ display: "flex", gap: "1rem", justifyContent: "center", flexWrap: "wrap" }}>
           {order.status === "PAID" && (
-            <Link
-              href="/dashboard"
-              style={{
-                backgroundColor: "#ea580c",
-                color: "#ffffff",
-                padding: "0.875rem 1.75rem",
-                borderRadius: "0.5rem",
-                fontWeight: 700,
-                textDecoration: "none",
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "0.5rem",
-                boxShadow: "0 4px 6px -1px rgba(234, 88, 12, 0.25)",
-              }}
-            >
-              <span>Go to Student Portal &amp; Start Learning</span>
-              <span>→</span>
-            </Link>
+            <>
+              {firstTestSeriesItem && firstTestSeriesItem.course && (
+                <Link
+                  href={`/test-series/${firstTestSeriesItem.course.slug}#mock-tests`}
+                  style={{
+                    backgroundColor: "#2563eb",
+                    color: "#ffffff",
+                    padding: "0.875rem 1.75rem",
+                    borderRadius: "0.5rem",
+                    fontWeight: 700,
+                    textDecoration: "none",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "0.5rem",
+                    boxShadow: "0 4px 6px -1px rgba(37, 99, 235, 0.25)",
+                  }}
+                >
+                  <span>Attempt Test Series Now 🚀</span>
+                  <span>→</span>
+                </Link>
+              )}
+
+              <Link
+                href="/dashboard"
+                style={{
+                  backgroundColor: "#ea580c",
+                  color: "#ffffff",
+                  padding: "0.875rem 1.75rem",
+                  borderRadius: "0.5rem",
+                  fontWeight: 700,
+                  textDecoration: "none",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "0.5rem",
+                  boxShadow: "0 4px 6px -1px rgba(234, 88, 12, 0.25)",
+                }}
+              >
+                <span>Go to Student Portal</span>
+                <span>→</span>
+              </Link>
+            </>
           )}
 
           <Link

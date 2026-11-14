@@ -122,7 +122,12 @@ export function BuyButtons({
         throw new Error(json.error || "Could not enroll in free product.");
       }
 
-      if (json.data?.orderId) {
+      if (json.data?.firstTestId) {
+        router.push(`/tests/${json.data.firstTestId}/instructions`);
+      } else if (json.data?.isTestSeries || json.data?.slug) {
+        router.push(`/test-series/${json.data.slug || slug}#mock-tests`);
+        router.refresh();
+      } else if (json.data?.orderId) {
         router.push(`/orders/${json.data.orderId}`);
       } else {
         router.push("/dashboard");

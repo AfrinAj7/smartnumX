@@ -41,3 +41,183 @@
   - Added dedicated Coupon & Voucher Management (`/admin/coupons` and `CouponManagementView.tsx`) with percentage/flat discounts, minimum cart values, usage caps, product-type targeting, and expiry controls.
   - Added "Courses & Test Series" and "Coupons & Vouchers" to `adminNavigation` in `WorkspaceShell.tsx`.
   - Verified 0 TypeScript compilation errors, 0 ESLint errors, 29/29 passing unit tests, and successful Next.js production build (`next build`) generating all 47 routes.
+
+## [Phase 14] - 2026-11-08
+### Added
+- **Comprehensive Test Analytics Engine (`src/server/tests/analytics-service.ts`)**:
+  - `getTestComprehensiveAnalytics`: Computes real-time examination psychometrics including total completions, in-progress attempts, completion rate %, batch average score, topper score, lowest score, median score, standard deviation, and cutoff pass rate %.
+  - 5-bucket Score Distribution histogram (0-20%, 21-40%, 41-60%, 61-80%, 81-100%).
+  - Subject-wise and Section-wise performance benchmarks (average marks, accuracy %, average time).
+  - Question-by-Question Item Analysis (Psychometrics): Facility index (% correct / difficulty level), attempt rate %, average time spent, discrimination index (correlation between top 27% and bottom 27% cohorts), option frequency distribution, and most common mistake/distractor.
+  - Proctoring Integrity metrics: total violations, tab blurs count, fullscreen exits count, and high-risk flagged attempts.
+  - CSV Export functions: `generateTestResultsCsv` (complete leaderboard and candidate results) and `generateQuestionItemAnalysisCsv` (item difficulty and discrimination metrics).
+- **Server-Authoritative Re-Evaluation Engine (`src/server/tests/reevaluation-service.ts`)**:
+  - `reevaluateTest`: Re-evaluates all historical submitted attempts in chunks (50 attempts per batch) to respect shared hosting memory and connection constraints.
+  - Supports 4 re-evaluation actions: `KEY_CHANGE` (replace correct key), `ACCEPT_MULTIPLE` (accept alternative valid options), `BONUS_MARKS_ALL` (award full positive marks to all candidates for disputed items), and `DROP_QUESTION` (exclude question and adjust test total marks).
+  - Recalculates individual `AttemptAnswer` marks/correct status, overall `Attempt` scores, and automatically runs `calculateTestRanksAndPercentiles` to adjust ranks and percentiles.
+  - Records detailed audit logs in `AuditLog` with before/after state and mandatory reason.
+- **Candidate Attempt & Integrity Management (`src/server/tests/reevaluation-service.ts`)**:
+  - `listTestAttempts`: Paginated candidate attempts list with search, status filtering, and violation filters.
+  - `resetStudentAttempt`: Allows administrators to manage student attempts via `ALLOW_REATTEMPT` (wipes attempt for fresh retry), `REOPEN_IN_PROGRESS` (reopens attempt with compensatory minutes), and `ADD_TIME` (extends active deadline). Fully audit-logged.
+- **API Endpoints**:
+  - `GET /api/admin/tests/[id]/analytics`: Comprehensive analytics JSON payload.
+  - `GET /api/admin/tests/[id]/analytics/export`: Downloads candidate results or question analysis CSV.
+  - `POST /api/admin/tests/[id]/reevaluate`: Executes test re-evaluation.
+  - `GET /api/admin/tests/[id]/attempts`: Paginated list of attempts with proctoring violation logs.
+  - `POST /api/admin/tests/[id]/attempts/[attemptId]/reset`: Reset, reopen, or extend candidate attempt.
+- **Admin UI in Test Builder (`src/admin/views/TestBuilderView.tsx`)**:
+  - Integrated 3 new tabs: `📊 Analytics & Insights`, `⚖️ Re-evaluation Engine`, and `🛡️ Student Attempts & Integrity`.
+  - Built `TestAnalyticsView.tsx` with KPI overview, visual score distribution bars, subject benchmarks, psychometric item analysis table, and 1-click CSV download buttons.
+  - Built `TestReevaluationView.tsx` with interactive question selector, current key preview, rule selector, mandatory audit reason, and live re-evaluation summary card.
+  - Built `TestAttemptsView.tsx` with candidate attempts table, expandable violation timeline drawers (`TAB_BLUR`, `FULLSCREEN_EXIT`), and "Manage Attempt" modal.
+- **Testing & Quality Assurance**:
+  - Added unit test suites `src/server/tests/analytics-service.test.ts` and `src/server/tests/reevaluation-service.test.ts`.
+  - 13/13 test files passing, 65/65 unit tests passing.
+  - Clean TypeScript compilation (`tsc --noEmit`), 0 ESLint errors/warnings, and successful Next.js production build (`next build`) generating 53 routes.
+
+## [Phase 13] - 2026-11-08
+### Added
+- **Access Control & Automatic Entitlements Engine (`src/server/tests/assignment-service.ts`)**:
+  - `assignTestToStudent`: Upserts direct `TestAssignment` records (`ADMIN_GRANT` or `FREE_PREVIEW`) with optional validity expiry and writes audit logs.
+  - `bulkAssignTest`: Accepts lists of emails or user IDs, resolves student accounts, creates direct assignments, reports granular success/failed counts, and audits grants.
+  - `revokeTestAssignment`: Removes direct grants with audit tracking.
+  - `listTestAssignments`: Searchable admin list of directly assigned students with live attempt counts, best scores, and latest attempt states.
+  - `getTestSeriesTestsForStudent`: Resolves complete mock test curriculum for a test series with student entitlement states (`ENROLLED`, `DIRECT_ASSIGNMENT`, `FREE_PREVIEW`, or `LOCKED`) and active/submitted attempt statuses.
+- **Dynamic Real-Time Test & Question Aggregations (`src/server/courses/course-service.ts`)**:
+  - `getPublicProductBySlug` and `listPublicTestSeries` now dynamically count real `PUBLISHED` tests in PostgreSQL:
+    - Real full mocks count (`FULL_MOCK`)
+    - Real chapter drills count (`CHAPTER_TEST`, `SECTIONAL`)
+    - Real question count aggregated across all test questions
+    - Gracefully falls back to course metadata columns when no tests are authored yet.
+- **Admin Direct Grants Management UI & API (`src/admin/views/TestBuilderView.tsx` & `/api/admin/tests/[id]/assignments`)**:
+  - Added tabbed interface in Test Builder: "Sections & Questions" vs "Direct Student Grants & Access".
+  - Bulk grant form allowing administrators to paste student emails or IDs with optional expiration date and grant source.
+  - Searchable table displaying student name, email, phone, grant type, validity, attempt count, best score, and one-click revocation.
+- **Student Test Series Curriculum & Live Attempt Dashboard (`src/app/test-series/[slug]/page.tsx` & `TestSeriesDetailClient.tsx`)**:
+  - Replaced static syllabus with real published mock tests.
+  - Displays test type badges, specs (Mins, Marks, Questions), and access status (🆓 Free Preview, 🔓 Unlocked, 🔒 Locked).
+  - Contextual action buttons:
+    - "Resume Test ⏱️" for active in-progress exams (`/tests/[testId]/attempt/[attemptId]`).
+    - "Scorecard 📊" and "Solutions 💡" for submitted attempts (`/tests/[testId]/result/[attemptId]` and `/solutions/[attemptId]`).
+    - "Re-take Mock ↺" when allowed by `maxAttempts`.
+    - "Attempt Free Preview 🚀" or "Start Test 🚀" (`/tests/[testId]/instructions`).
+    - "Enroll to Unlock 🔒" / "Sign In to Unlock 🔒" with smooth scroll to pricing.
+- **Comprehensive Unit Tests (`src/server/tests/assignment-service.test.ts`)**:
+  - 7 unit tests covering single assignment, bulk assignment with invalid email handling, grant revocation, enrolled student access, free preview access, and direct grant recognition.
+
+## [Phase 12] - 2026-11-08
+### Added
+- **Automated Scoring Engine (`src/server/tests/scoring-service.ts`)**:
+  - Deterministic evaluation function `scoreQuestionResponse` supporting all question types:
+    - Single-choice MCQs (`+marks` / `-negMarks` / `0` for unattempted).
+    - Multi-choice MCQs with standard JEE Advanced partial marking (`+marks` if all correct without errors; fractional positive marks if subset of correct options chosen with `partialMarking: true`; negative marks if any incorrect option is picked).
+    - Numerical Value questions with exact matches or customizable numeric tolerance bounds (`min`/`max` or `tolerance`).
+    - True / False binary questions.
+  - Section Choice Rule Enforcement: automatically caps evaluation to `maxToAttempt` (e.g. "Attempt any 5 of 10"), scoring the first eligible questions in question order and ignoring surplus attempts.
+  - Transactional persistence: updates individual `AttemptAnswer` records (`isCorrect`, `marksAwarded`) and aggregates overall `Attempt` totals (`score`, `correctCount`, `incorrectCount`, `unattemptedCount`).
+- **Competitive Ranking & Percentile Engine (`calculateTestRanksAndPercentiles`)**:
+  - Computes competitive All-India Rank (AIR) and percentiles across all submitted attempts for each test.
+  - Standardized multi-tier tie-breaking rules:
+    1. Higher total score
+    2. Fewer negative marks (lower incorrect count / higher accuracy)
+    3. Higher subject priority score (Mathematics > Physics > Chemistry)
+    4. Lower total time spent
+    5. Earlier submission timestamp
+- **Student Performance Analytics (`/tests/[testId]/result/[attemptId]`)**:
+  - `ExamResultView.tsx`: Displays candidate score, max marks, percentage, pass/fail status, AIR rank, percentile, overall accuracy %, and time spent.
+  - Comparative Peer Benchmarking: Student score vs Batch Average score vs Batch Topper score.
+  - Subject-wise performance table: Questions count, Attempted, Correct, Incorrect, Marks Scored, Max Marks, Accuracy %, and Time spent per subject.
+  - AI-ready Topic Insights: Categorizes topics into Strong Areas (&ge; 70% accuracy) and Weak / Focus Topics (< 50% accuracy).
+- **Detailed Step-by-Step Solutions (`/tests/[testId]/solutions/[attemptId]`)**:
+  - `ExamSolutionsView.tsx`: Interactive question-by-question review interface.
+  - Status filters: `All`, `Correct`, `Incorrect`, and `Unattempted`.
+  - Rich question cards showing candidate response, verified correct key, step-by-step LaTeX explanation (`MathText`), and solution diagram graphics.
+  - Visibility controls respecting test `resultMode` (`IMMEDIATE`, `AFTER_WINDOW`, `MANUAL`) and `solutionMode` (`IMMEDIATE`, `AFTER_WINDOW`, `NEVER`).
+- **REST APIs**:
+  - `GET /api/tests/[testId]/attempt/[attemptId]/result`
+  - `GET /api/tests/[testId]/attempt/[attemptId]/solutions`
+- **Testing & Verification**:
+  - Comprehensive unit test suite `src/server/tests/scoring-service.test.ts` verifying all scoring algorithms and tie-breaking rank calculations (48/48 unit tests passing across 10 test suites).
+  - 0 TypeScript compiler errors (`tsc --noEmit`), 0 ESLint errors/warnings (`next lint`), and successful Next.js production build (`next build`) generating 53 routes.
+
+## [Phase 11] - 2026-11-08
+### Added
+- **Student CBT Exam Player & Server-Authoritative Timer (`/tests/[testId]/attempt/[attemptId]`)**:
+  - Full NTA / JEE-style Computer-Based Testing user interface (`CbtPlayerView.tsx`).
+  - Top examination header with Test Code, Test Title, candidate details, server countdown clock (HH:MM:SS), and Submit Exam trigger.
+  - Multi-subject / section tabs (e.g. Physics, Chemistry, Mathematics, Aptitude) with question counts.
+  - Question rendering panel powered by `MathText` (KaTeX LaTeX formulas) and optional diagram support.
+  - Interactive inputs tailored to question type: single-choice radio options, multi-select checkboxes, numerical value input, and True/False toggles.
+  - Standard CBT navigation actions: "Save & Next" (Green), "Mark for Review & Next" (Purple), "Clear Response", "Previous", and "Next".
+  - Right-side Question Palette with live counts across all 5 official NTA states:
+    - `ANSWERED` (Green)
+    - `NOT_ANSWERED` (Orange/Red)
+    - `MARKED` (Purple)
+    - `NOT_VISITED` (Gray)
+    - `ANSWERED_MARKED` (Purple with green evaluated indicator)
+  - Interactive number grid allowing instant jumping to any question within the active section.
+  - Examination Summary & Submission Confirmation Modal displaying section-by-section breakdown (Total, Answered, Unanswered, Marked, Not Visited).
+  - Post-submission candidate confirmation view with test summary and navigation links.
+- **Pre-Exam Instructions & Candidate Declaration (`/tests/[testId]/instructions`)**:
+  - `ExamInstructionsView.tsx`: Displays official examination rules, duration, markings, negative markings, test series lock status, and candidate details.
+  - Interactive mandatory candidate declaration checkbox before unlocking the "Start Examination" button.
+- **Backend Exam Engine (`src/server/tests/exam-service.ts`)**:
+  - `checkTestAccess`: Strict enrollment gating verifying active purchase in the parent test series or free preview permission.
+  - `startOrResumeAttempt`: Server-authoritative timer logic calculating exact deadlines according to `lateStartRule` (`FULL_TIME` vs `REDUCE_TIME`) and auto-resuming existing active attempts.
+  - `getAttemptExamBundle`: Critical security measure that sanitizes the question payload, strictly omitting `correct` answers, `explanation`, and `solutionImage`.
+  - `saveStudentAnswer`: Real-time optimistic response persistence with auto-submit protection on deadline expiry.
+  - `logViolation`: Records integrity breaches (`TAB_BLUR`, `FULLSCREEN_EXIT`) and auto-submits upon exceeding `maxViolations`.
+  - `submitExamAttempt`: Concludes the attempt and marks all participating questions as `isLocked = true` to preserve historical integrity.
+- **Testing & Verification**:
+  - Unit tests in `src/server/tests/exam-service.test.ts` verifying access control, question sanitization, violation tracking, and immutability locking (37/37 passing).
+  - 0 TypeScript compilation errors (`tsc --noEmit`), 0 ESLint errors (`next lint`), and clean Next.js production build (`next build`) generating 53 routes.
+
+## [Phase 10] - 2026-11-07
+### Added
+- **Excel & CSV Bulk Question Importer (`/admin/questions`)**:
+  - Downloadable official spreadsheet template (`public/templates/Question_Import_Template.xlsx`) with `Tests`, `Sections`, and `Questions` sheets.
+  - Multi-sheet and single-sheet CSV/Excel parser supporting batch creation of tests, sections, and questions in a single upload.
+  - Optional ZIP archive upload for question diagrams and solution graphics, with zip-slip prevention and secure image extraction.
+  - Dry-Run Validation Engine (`/api/admin/questions/import/dry-run`): validates row-by-row syntax, question types, MCQ option sets, numeric tolerance ranges, and returns an interactive error report with exact row numbers and fix advice.
+  - Immutability & Ownership Enforcement: protects questions with student attempts by automatically creating a branched version (`v2`) on re-import.
+  - One-click Ingestion Execution (`/api/admin/questions/import/execute`): logs import metadata in `ImportJob` table, creates questions, maps them to tests/sections, and automatically recalculates test total marks.
+- **Unit Testing**:
+  - Added comprehensive test suite `src/server/tests/import-service.test.ts` (31/31 unit tests passing across all suites).
+
+## [Phase 9] - 2026-11-07
+### Added
+- **Question Bank View & Management (`/admin/questions`)**:
+  - Full Question Bank UI with real-time search, taxonomy filters (Subject, Chapter, Type, Difficulty), and KaTeX LaTeX mathematical rendering.
+  - Question Preview Drawer showing rendered stems, options, correct keys, and step-by-step explanations.
+  - Manual Question Authoring & Editing Modal with live KaTeX preview, support for single-choice MCQs, multi-choice MCQs, numerical tolerances (min/max), and True/False.
+  - Enforced Question Versioning: locked questions or questions with submitted student attempts automatically branch to a new version row (`v2`) with `parentId` linkage.
+- **Test Management & CBT Builder (`/admin/tests` & `/admin/tests/[id]`)**:
+  - Test list view with duration, marks, pass marks, attempt limits, late start rules, and publishing status.
+  - Section builder with section timers and choice rules (`maxToAttempt`, e.g. "Attempt any 5 of 10").
+  - Question Bank Picker: search and allocate questions directly from the question bank into sections with custom marks and negative marks.
+- **Admin Navigation**:
+  - Added "Question Bank" (`/admin/questions`) and "Tests & CBT Mocks" (`/admin/tests`) to the Admin Workspace navigation.
+- **Backend Services & APIs**:
+  - `src/server/tests/question-service.ts` & `src/server/tests/test-service.ts`
+  - REST endpoints: `GET/POST /api/admin/questions`, `GET/PUT/DELETE /api/admin/questions/[id]`, `GET/POST /api/admin/tests`, `GET/PUT/DELETE /api/admin/tests/[id]`, sections & test-questions handlers.
+- **Math & LaTeX Rendering**:
+  - Installed `katex` and built `MathText.tsx` for inline `$formula$` and display `$$formula$$` rendering.
+
+## [Phase 8] - 2026-11-07
+### Added
+- **Test Series Architecture & Specification (`docs/TEST_SERIES_SPEC.md`)**:
+  - Implemented all 11 user design refinements: question versioning, section timer tracking (`AttemptSection`), exact deadline formulas with `REDUCE_TIME` and `FULL_TIME`, partial unique index on active attempts, lean violation logging, graceful iOS fullscreen degradation, tie-break ranking rules, and dev-only DRAFT seeding.
+- **Database Schema Models & Enums (`prisma/schema.prisma`)**:
+  - Added enums: `TestType`, `TestStatus`, `QuestionType`, `AttemptStatus`, `ResultMode`, `SolutionMode`, `LateStartRule`, `AssignmentSource`, `AttemptAnswerState`, `ViolationType`.
+  - Added models: `Test`, `TestSection`, `Question`, `Passage`, `TestQuestion`, `Attempt`, `AttemptSection`, `AttemptAnswer`, `AttemptViolation`, `TestAssignment`, `ImportJob`.
+  - Added relations linking `User`, `Course`, `Enrollment`, and the new test series models.
+- **Safe Database Migration**:
+  - Executed safe, additive database sync without `--accept-data-loss`.
+  - Created raw SQL partial unique index `unique_active_attempt` on `Attempt(testId, userId) WHERE status = 'IN_PROGRESS'`.
+- **Phase 8 Seed Data (`prisma/seed-tests.mjs`)**:
+  - Seeded sample tests marked as `DRAFT` in development:
+    - `JEE-MOCK-01`: JEE Main Full Mock 1 (10 questions across Section A MCQ and Section B Numeric with choice rule).
+    - `CH-ALG-01`: Quadratic Equations Chapter Test (5 questions with LaTeX expressions).
+    - `DIAG-01`: Diagnostic Mock with Free Preview (`isFreePreview = true`).
+  - Guarded seeding to skip in production environments.
+
