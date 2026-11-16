@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+- **Archived Courses & Test Series Discovery & 1-Click Restore**:
+  - Identified soft-deleted and archived courses in PostgreSQL (`deletedAt != null` or `status = ARCHIVED`).
+  - Added dedicated `📦 Archived` tab to `/admin/courses` displaying total archived counts and items.
+  - Implemented `restoreCourse(id)` service and `POST /api/admin/courses/[id]/restore` endpoint that resets `deletedAt: null` and restores course status to `DRAFT`.
+  - Added green `↺ Restore to Draft` action button to restore any archived course/test series with a single click.
+- **Negative Marking & Flexible Marking Scheme Management**:
+  - Added negative marking configuration to the admin Test Builder (`/admin/tests/[id]`).
+  - Implemented `⚙️ Marking Scheme & Negative Marks` modal allowing admins to bulk configure positive marks and toggle negative marking ON/OFF (setting 0 penalty for Board exams or custom negative penalty like -1 for JEE).
+  - Added scope selection to apply marking scheme changes across the entire test or a specific section.
+  - Added inline question marks editor allowing instant click-to-edit for any question's marks and negative penalty.
+  - Updated backend scoring engine (`scoreQuestionResponse`), recalculating total test marks dynamically upon marks adjustment.
 - **Batches Navigation & Catalog Restructuring**:
   - Replaced "Courses" dropdown in the desktop and mobile navigation with a unified "Batches" dropdown mega menu.
   - Added prominent "View all batches" CTA in the Batches dropdown header, spotlight card, and mobile drawer.
