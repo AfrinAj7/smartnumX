@@ -283,7 +283,7 @@ export default async function OrderConfirmationPage({
           )}
 
           <Link
-            href="/courses"
+            href="/batches"
             style={{
               backgroundColor: "#ffffff",
               color: "#334155",
@@ -294,7 +294,7 @@ export default async function OrderConfirmationPage({
               textDecoration: "none",
             }}
           >
-            Explore More Courses
+            Explore More Batches
           </Link>
 
           <Link

@@ -17,7 +17,7 @@ const FALLBACK_TESTIMONIALS: Testimonial[] = [
   {
     name: "Jaydeep Kumar Verma",
     quote:
-      "The Magician Of Mathematics, How Easily sweta mam teaches us just look so smooth.",
+      "The Magician Of Mathematics, How Easily Shweta mam teaches us just look so smooth.",
     learnerClass: "Class 12th Board",
     relation: "Student",
     approved: true,

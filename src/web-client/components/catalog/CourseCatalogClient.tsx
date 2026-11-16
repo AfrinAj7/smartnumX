@@ -35,9 +35,10 @@ export interface CourseItem {
 
 interface CourseCatalogClientProps {
   courses: CourseItem[];
+  basePath?: string;
 }
 
-export function CourseCatalogClient({ courses }: CourseCatalogClientProps) {
+export function CourseCatalogClient({ courses, basePath = "/batches" }: CourseCatalogClientProps) {
   const [selectedClass, setSelectedClass] = useState<string>("ALL");
   const [selectedMode, setSelectedMode] = useState<string>("ALL");
   const [selectedExam, setSelectedExam] = useState<string>("ALL");
@@ -126,9 +127,9 @@ export function CourseCatalogClient({ courses }: CourseCatalogClientProps) {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search courses by subject, grade, or exam..."
+                placeholder="Search batches by subject, grade, or exam..."
                 className="catalog-search-input"
-                aria-label="Search courses"
+                aria-label="Search batches"
               />
               {searchQuery && (
                 <button
@@ -216,7 +217,7 @@ export function CourseCatalogClient({ courses }: CourseCatalogClientProps) {
         <div className="course-container">
           <div className="results-header-row">
             <span className="results-count-badge">
-              Showing <strong>{filteredCourses.length}</strong> {filteredCourses.length === 1 ? "course" : "courses"}
+              Showing <strong>{filteredCourses.length}</strong> {filteredCourses.length === 1 ? "batch" : "batches"}
             </span>
 
             {(selectedClass !== "ALL" || selectedMode !== "ALL" || selectedExam !== "ALL" || searchQuery) && (
@@ -237,8 +238,8 @@ export function CourseCatalogClient({ courses }: CourseCatalogClientProps) {
 
           {filteredCourses.length === 0 ? (
             <div className="catalog-empty-state">
-              <div className="empty-icon">📚</div>
-              <h3>No courses matched your filters</h3>
+              <div className="empty-icon">🎓</div>
+              <h3>No batches matched your filters</h3>
               <p>Try clearing your search terms or picking a different grade/mode.</p>
               <button
                 type="button"
@@ -250,7 +251,7 @@ export function CourseCatalogClient({ courses }: CourseCatalogClientProps) {
                 }}
                 className="btn-empty-reset"
               >
-                Show All Courses
+                Show All Batches
               </button>
             </div>
           ) : (
@@ -282,7 +283,7 @@ export function CourseCatalogClient({ courses }: CourseCatalogClientProps) {
 
                     {/* Title & Tagline */}
                     <h3 className="product-card-title">
-                      <Link href={`/courses/${course.slug}`}>{course.title}</Link>
+                      <Link href={`${basePath}/${course.slug}`}>{course.title}</Link>
                     </h3>
                     <p className="product-card-desc">{course.description}</p>
 
@@ -361,7 +362,7 @@ export function CourseCatalogClient({ courses }: CourseCatalogClientProps) {
                         layout="card"
                       />
 
-                      <Link href={`/courses/${course.slug}`} className="btn-view-details">
+                      <Link href={`${basePath}/${course.slug}`} className="btn-view-details">
                         View Syllabus, Timings &amp; Options →
                       </Link>
                     </div>

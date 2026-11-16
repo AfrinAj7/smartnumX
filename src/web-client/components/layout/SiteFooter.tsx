@@ -17,14 +17,12 @@ type SiteFooterProps = {
 export function SiteFooter({
   contact,
   email = contact?.email || "gosmartnum@gmail.com",
-  phone = contact?.phone || "+91 99589 47774",
-  secondaryPhone = contact?.secondaryPhone || "+91 88004 05640",
-  whatsappNumber = contact?.whatsapp || "+91 99589 47774",
+  phone = contact?.phone || "+91 99589 66823",
+  whatsappNumber = contact?.whatsapp || "+91 99589 66823",
   address = contact?.address || "04224, ATS Advantage, Indirapuram, Ghaziabad, UP - 201014",
 }: SiteFooterProps) {
   const number = whatsappNumber?.replace(/\D/g, "");
   const phoneDigits = phone.replace(/[^+\d]/g, "");
-  const secondaryPhoneDigits = secondaryPhone.replace(/[^+\d]/g, "");
 
   const instagramUrl = contact?.instagramUrl || "https://www.instagram.com/smartnumofficial/";
   const facebookUrl = contact?.facebookUrl || "https://www.facebook.com/profile.php?id=61594903500934";
@@ -219,17 +217,17 @@ export function SiteFooter({
           <Link className="footer-link-item" href="/#contact">Contact &amp; Directions</Link>
         </div>
 
-        {/* Column 3: Learn & Practice */}
+        {/* Column 3: Academic Batches */}
         <div className="footer-link-group">
-          <h2>LEARN &amp; PRACTICE</h2>
-          <Link className="footer-link-item" href="/courses/class-9-maths-science-tuition">Class 9 Tuition (Maths &amp; Science)</Link>
-          <Link className="footer-link-item" href="/courses/class-10-board-excellence">Class 10 Board Excellence</Link>
-          <Link className="footer-link-item" href="/courses/class-11-foundation-and-boards">Class 11 Foundation &amp; Boards</Link>
-          <Link className="footer-link-item" href="/courses/class-12-board-mastery">Class 12 Board Mastery</Link>
-          <Link className="footer-link-item" href="/courses/iit-jee-mains-preparation">IIT-JEE Mains Preparation</Link>
-          <Link className="footer-link-item" href="/courses/iit-jee-advanced-mentorship">JEE Advanced Mentorship</Link>
-          <Link className="footer-link-item" href="/courses/maths-science-olympiads">Math &amp; Science Olympiads</Link>
-          <Link className="footer-link-item" href="/courses/self-paced-recorded-modules">Self-Paced Recorded Modules</Link>
+          <h2>ACADEMIC BATCHES</h2>
+          <Link className="footer-link-item" href="/batches/class-9-maths-science-tuition">Class 9 Tuition (Maths &amp; Science)</Link>
+          <Link className="footer-link-item" href="/batches/class-10-board-excellence">Class 10 Board Excellence</Link>
+          <Link className="footer-link-item" href="/batches/class-11-foundation-and-boards">Class 11 Foundation &amp; Boards</Link>
+          <Link className="footer-link-item" href="/batches/class-12-board-mastery">Class 12 Board Mastery</Link>
+          <Link className="footer-link-item" href="/batches/iit-jee-mains-preparation">IIT-JEE Mains Preparation</Link>
+          <Link className="footer-link-item" href="/batches/iit-jee-advanced-mentorship">JEE Advanced Mentorship</Link>
+          <Link className="footer-link-item" href="/batches/maths-science-olympiads">Math &amp; Science Olympiads</Link>
+          <Link className="footer-link-item" href="/batches">View All Batches →</Link>
         </div>
 
         {/* Column 4: Boards & Curricula */}
@@ -251,14 +249,7 @@ export function SiteFooter({
               <span className="footer-contact-icon" aria-hidden="true">📞</span>
               <span>{phone}</span>
             </a>
-          )}
-          {secondaryPhone && (
-            <a className="footer-contact-item" href={`tel:${secondaryPhoneDigits}`}>
-              <span className="footer-contact-icon" aria-hidden="true">📞</span>
-              <span>{secondaryPhone}</span>
-            </a>
-          )}
-          {email && (
+          )}{email && (
             <a className="footer-contact-item" href={`mailto:${email}`}>
               <span className="footer-contact-icon" aria-hidden="true">✉️</span>
               <span>{email}</span>

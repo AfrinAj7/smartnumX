@@ -27,7 +27,7 @@ function getYoutubeEmbedUrl(value: string) {
 
 const DEFAULT_COMPANION_FACULTY: Faculty[] = [
   {
-    name: "Dr. Sweta Agrawal",
+    name: "Dr. Shweta Agrawal",
     subject: "Higher Mathematics & Competitive Exams",
     qualification: "Ph.D. | M.Sc in Mathematics | Assistant Professor | Lead Educator",
     experience:
@@ -194,7 +194,7 @@ export function FacultyCarousel({
       {/* 2. HORIZONTAL SCROLL CAROUSEL TRACK */}
       <div className="faculty-carousel-track" ref={trackRef}>
         {facultyList.map((person, idx) => {
-          const isLead = person.name.toLowerCase().includes("sweta");
+          const isLead = person.name.toLowerCase().includes("Shweta");
 
           return (
             <article
@@ -294,7 +294,7 @@ export function FacultyCarousel({
             <div className="demo-video-dialog-head">
               <div className="dialog-title-wrap">
                 <span className="dialog-class-tag">
-                  {activeVideoModal.subject} · {activeVideoModal.classLabel} · Taught by Dr. Sweta Agrawal
+                  {activeVideoModal.subject} · {activeVideoModal.classLabel} · Taught by Dr. Shweta Agrawal
                 </span>
                 <strong className="dialog-video-title">{activeVideoModal.title}</strong>
               </div>

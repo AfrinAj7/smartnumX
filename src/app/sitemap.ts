@@ -8,7 +8,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticRoutes: MetadataRoute.Sitemap = [
     "",
     "/about",
-    "/courses",
+    "/batches",
+    "/test-series",
     "/policies/terms",
     "/policies/privacy",
     "/policies/refund",
@@ -17,11 +18,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     url: `${siteUrl}${route}`,
     lastModified: new Date(),
     changeFrequency: "weekly" as const,
-    priority: route === "" ? 1.0 : route === "/courses" ? 0.9 : 0.8,
+    priority: route === "" ? 1.0 : route === "/batches" ? 0.9 : 0.8,
   }));
 
   const courseRoutes: MetadataRoute.Sitemap = courseSlugs.map((slug) => ({
-    url: `${siteUrl}/courses/${slug}`,
+    url: `${siteUrl}/batches/${slug}`,
     lastModified: new Date(),
     changeFrequency: "weekly" as const,
     priority: 0.9,

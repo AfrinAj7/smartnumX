@@ -36,7 +36,7 @@ describe("homepage content", () => {
       ...DEFAULT_HOMEPAGE_CONTENT,
       faculty: [
         {
-          name: "Dr. Sweta Agrawal",
+          name: "Dr. Shweta Agrawal",
           subject: "Mathematics & Statistics",
           qualification: "Ph.D. in Mathematics, Assistant Professor with extensive international research publications in statistics, reliability theory, and quality control",
           experience: "Over 12 years of impactful teaching and intellectual exploration across CBSE, ICSE, and IIT-JEE students",

@@ -517,7 +517,7 @@ export const COURSES: CourseData[] = [
         { days: "Sunday", time: "1:30 PM – 3:00 PM", focus: "Step-Marking Review & Individual Doubt Clinic" },
       ],
     },
-    whySmartnum: "Class 12 is stressful enough. Our job is to make the plan clear and the workload realistic. We tell you honestly where you stand every few weeks, and work relentlessly on the specific steps where you lose marks. Guided by Dr. Sweta Agrawal and expert mentors, we make mathematics clear and dependable.",
+    whySmartnum: "Class 12 is stressful enough. Our job is to make the plan clear and the workload realistic. We tell you honestly where you stand every few weeks, and work relentlessly on the specific steps where you lose marks. Guided by Dr. Shweta Agrawal and expert mentors, we make mathematics clear and dependable.",
     batchInfo: {
       size: "Maximum 12–15 students per batch",
       timing: "Afternoon & Evening batches (4:30 PM – 8:00 PM)",
@@ -764,7 +764,7 @@ export const COURSES: CourseData[] = [
         { days: "Wednesday", time: "6:00 PM – 8:00 PM", focus: "1-on-1 Proof Review & Paper Analysis Clinic" },
       ],
     },
-    whySmartnum: "Advanced preparation needs a mentor who will say 'this solution works, but here is a cleaner, faster way' and ask for a second approach. Led by Dr. Sweta Agrawal, Ph.D. in Mathematics, we teach you how to think like a problem-setter rather than just memorizing formulas.",
+    whySmartnum: "Advanced preparation needs a mentor who will say 'this solution works, but here is a cleaner, faster way' and ask for a second approach. Led by Dr. Shweta Agrawal, Ph.D. in Mathematics, we teach you how to think like a problem-setter rather than just memorizing formulas.",
     batchInfo: {
       size: "Strictly limited to 8–10 students per group",
       timing: "Weekend Intensive & Evening Masterclasses",

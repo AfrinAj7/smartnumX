@@ -128,7 +128,7 @@ export function AdminDashboardView() {
           <span className="info-icon" aria-hidden="true">📞</span>
           <div>
             <strong>Contact Phones</strong>
-            <span>+91 99589 47774 / +91 88004 05640</span>
+            <span>+91 99589 66823</span>
           </div>
         </div>
         <div className="info-card">

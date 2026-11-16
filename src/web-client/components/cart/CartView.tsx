@@ -224,7 +224,7 @@ export function CartView() {
         </p>
         <div style={{ display: "flex", gap: "1rem", justifyContent: "center", flexWrap: "wrap" }}>
           <Link
-            href="/courses"
+            href="/batches"
             style={{
               backgroundColor: "#ea580c",
               color: "#ffffff",
@@ -286,7 +286,7 @@ export function CartView() {
         <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
           {cart.items.map((item) => {
             const isTestSeries = item.productType === "TEST_SERIES";
-            const detailHref = isTestSeries ? `/test-series/${item.slug}` : `/courses/${item.slug}`;
+            const detailHref = isTestSeries ? `/test-series/${item.slug}` : `/batches/${item.slug}`;
 
             return (
               <div
@@ -454,7 +454,7 @@ export function CartView() {
 
           <div style={{ display: "flex", gap: "1.5rem", flexWrap: "wrap", marginTop: "0.5rem" }}>
             <Link
-              href="/courses"
+              href="/batches"
               style={{
                 color: "#2563eb",
                 fontSize: "0.875rem",
@@ -664,7 +664,7 @@ export function CartView() {
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
                 <span>📞</span>
-                <span>Admission helpline: +91 99589 47774 / +91 88004 05640</span>
+                <span>Admission helpline: +91 99589 66823</span>
               </div>
             </div>
           </div>

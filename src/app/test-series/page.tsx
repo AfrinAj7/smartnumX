@@ -70,16 +70,16 @@ export default async function TestSeriesIndexPage({
           <div className="course-container">
             <div className="assessment-card">
               <div className="assessment-text">
-                <span className="assessment-eyebrow">SCHOLARSHIP &amp; DIAGNOSTIC</span>
-                <h2 className="assessment-title">Take the Free Diagnostic Mock Today</h2>
+                <span className="assessment-eyebrow">PRACTICE &amp; DIAGNOSTIC</span>
+                <h2 className="assessment-title">Take a Free Practice Mock Today</h2>
                 <p className="assessment-desc">
-                  Pinpoint your exact weak spots across Algebra, Geometry, and Mechanics in 30 minutes with instant evaluation and no payment required.
+                  Experience our full CBT exam environment with instant evaluation, detailed step-by-step solutions, and performance breakdown.
                 </p>
               </div>
 
               <div className="assessment-actions">
-                <Link href="/test-series/free-diagnostic-mock-test" className="btn-assessment-demo">
-                  Attempt Free Diagnostic Mock →
+                <Link href="/test-series?free=true" className="btn-assessment-demo">
+                  Explore Free Test Series →
                 </Link>
               </div>
             </div>

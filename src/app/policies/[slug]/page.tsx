@@ -96,9 +96,9 @@ export default async function PolicyPage({ params }: { params: Promise<{ slug: s
 
   const address = contact?.address || "04224, ATS Advantage, Indirapuram, Ghaziabad, UP – 201014";
   const phone = contact?.phone || "+91 99589 47774";
-  const secondaryPhone = contact?.secondaryPhone || "+91 88004 05640";
+  const secondaryPhone = contact?.secondaryPhone || "+91 99589 66823";
   const email = contact?.email || "gosmartnum@gmail.com";
-  const whatsapp = contact?.whatsapp || "+91 99589 47774";
+  const whatsapp = contact?.whatsapp;
 
   const entityString = gstin ? `${legalEntityName} (GSTIN: ${gstin})` : legalEntityName;
 
@@ -328,7 +328,7 @@ export default async function PolicyPage({ params }: { params: Promise<{ slug: s
                     <div className="policy-contact-box">
                       <p><strong>{entityString}</strong></p>
                       <p>Centre: {address}</p>
-                      <p>Phone / WhatsApp: <a href={`tel:${phone}`}>{phone}</a>, <a href={`tel:${secondaryPhone}`}>{secondaryPhone}</a></p>
+                      <p>Phone / WhatsApp: <a href={`tel:${phone}`}>{phone}</a></p>
                       <p>Email: <a href={`mailto:${email}`}>{email}</a></p>
                     </div>
                   </section>
@@ -496,7 +496,7 @@ export default async function PolicyPage({ params }: { params: Promise<{ slug: s
                       <p><strong>{grievanceOfficerName}</strong></p>
                       <p>{grievanceOfficerRole}</p>
                       <p>SmartNum, {address}</p>
-                      <p>Phone / WhatsApp: <a href={`tel:${phone}`}>{phone}</a>, <a href={`tel:${secondaryPhone}`}>{secondaryPhone}</a></p>
+                      <p>Phone / WhatsApp: <a href={`tel:${phone}`}>{phone}</a></p>
                       <p>Email: <a href={`mailto:${email}`}>{email}</a></p>
                     </div>
                   </section>
@@ -616,7 +616,7 @@ export default async function PolicyPage({ params }: { params: Promise<{ slug: s
                     <div className="policy-contact-box">
                       <p><strong>SmartNum Accounts & Admissions</strong></p>
                       <p>Centre: {address}</p>
-                      <p>Phone / WhatsApp: <a href={`tel:${phone}`}>{phone}</a>, <a href={`tel:${secondaryPhone}`}>{secondaryPhone}</a></p>
+                      <p>Phone / WhatsApp: <a href={`tel:${phone}`}>{phone}</a></p>
                       <p>Email: <a href={`mailto:${email}`}>{email}</a></p>
                     </div>
                   </section>
@@ -740,7 +740,7 @@ export default async function PolicyPage({ params }: { params: Promise<{ slug: s
                           <p><strong>{childSafetyOfficerName}</strong></p>
                           <p>{childSafetyOfficerRole}</p>
                           <p>SmartNum Centre, {address}</p>
-                          <p>Direct Phone / WhatsApp: <a href={`tel:${phone}`}>{phone}</a>, <a href={`tel:${secondaryPhone}`}>{secondaryPhone}</a></p>
+                          <p>Direct Phone / WhatsApp: <a href={`tel:${phone}`}>{phone}</a></p>
                           <p>Confidential Email: <a href={`mailto:${email}`}>{email}</a></p>
                         </div>
                       </li>

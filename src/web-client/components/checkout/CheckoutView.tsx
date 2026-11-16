@@ -251,7 +251,7 @@ export function CheckoutView({
           Your cart is currently empty. Please select a tuition course or test series package before proceeding.
         </p>
         <Link
-          href="/courses"
+          href="/batches"
           style={{
             display: "inline-block",
             backgroundColor: "#ea580c",
@@ -262,7 +262,7 @@ export function CheckoutView({
             textDecoration: "none",
           }}
         >
-          Browse Courses &amp; Test Series →
+          Browse Batches &amp; Test Series →
         </Link>
       </div>
     );

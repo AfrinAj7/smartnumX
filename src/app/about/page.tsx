@@ -150,7 +150,7 @@ export default async function AboutPage() {
       {
         "@type": "Person",
         "@id": "https://smartnumx.com/#founder",
-        name: "Dr. Sweta Agrawal",
+        name: "Dr. Shweta Agrawal",
         alternateName: "Shweta Agarwal",
         jobTitle: "Assistant Professor of Mathematics & Founder",
         alumniOf: "Ph.D. in Mathematics",
@@ -288,7 +288,7 @@ export default async function AboutPage() {
                 </p>
 
                 <p className="about-prose-p founding-note">
-                  Founded by <strong>Dr. Sweta Agrawal</strong> in Indirapuram, Ghaziabad, SmartNum was built to combine rigorous academic methods with modern clarity, creating an encouraging sanctuary where learners rediscover analytical confidence.
+                  Founded by <strong>Dr. Shweta Agrawal</strong> in Indirapuram, Ghaziabad, SmartNum was built to combine rigorous academic methods with modern clarity, creating an encouraging sanctuary where learners rediscover analytical confidence.
                 </p>
               </div>
 
@@ -374,7 +374,7 @@ export default async function AboutPage() {
                 <div className="founder-portrait-frame">
                   <Image
                     src="/images/editorial/Confident Mathematics Teacher Portrait.png"
-                    alt="Portrait of Dr. Sweta Agrawal in classroom environment"
+                    alt="Portrait of Dr. Shweta Agrawal in classroom environment"
                     fill
                     sizes="(max-width: 900px) 100vw, 420px"
                     className="editorial-photo"
@@ -388,7 +388,7 @@ export default async function AboutPage() {
                   <span className="caption-handwriting">
                     &ldquo;Try it your way first, then we&apos;ll compare.&rdquo;
                   </span>
-                  <strong className="founder-name">Dr. Sweta Agrawal</strong>
+                  <strong className="founder-name">Dr. Shweta Agrawal</strong>
                   <span className="founder-credentials">
                     Ph.D. in Mathematics · Assistant Professor of Mathematics · Founder &amp; Lead Mentor
                   </span>
@@ -427,7 +427,7 @@ export default async function AboutPage() {
 
                 <div className="bio-paragraphs">
                   <p>
-                    I&apos;m Sweta, and I teach mathematics because I&apos;ve never managed to stop being curious about it.
+                    I&apos;m Shweta, and I teach mathematics because I&apos;ve never managed to stop being curious about it.
                   </p>
                   <p>
                     I have a Ph.D. in Mathematics and I work as an Assistant Professor. My research sits where statistics meets reliability: how do you judge whether something will keep working, and how sure can you really be about that? It sounds far from a Class 12 classroom, but it trains the same habit I try to pass on to every student. Ask what is actually being claimed. Then check it properly.

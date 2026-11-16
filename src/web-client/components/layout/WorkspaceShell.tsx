@@ -37,7 +37,7 @@ const learnerNavigation: NavItem[] = [
   { label: "My Purchases & Access", href: "/dashboard", icon: "🎓" },
   { label: "Tuition Programmes", href: "/dashboard/my-courses", icon: "📐" },
   { label: "Order History & Invoices", href: "/dashboard/orders", icon: "🧾" },
-  { label: "Explore Courses", href: "/courses", icon: "📚" },
+  { label: "Explore Batches", href: "/batches", icon: "🎓" },
   { label: "Explore Test Series", href: "/test-series", icon: "📝" },
   { label: "1-on-1 Doubts", href: null, icon: "❓", badge: "Soon" },
   { label: "My Attendance", href: null, icon: "📅", badge: "Soon" },

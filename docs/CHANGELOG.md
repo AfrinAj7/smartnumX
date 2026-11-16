@@ -2,6 +2,21 @@
 
 ## Unreleased
 
+- **Batches Navigation & Catalog Restructuring**:
+  - Replaced "Courses" dropdown in the desktop and mobile navigation with a unified "Batches" dropdown mega menu.
+  - Added prominent "View all batches" CTA in the Batches dropdown header, spotlight card, and mobile drawer.
+  - Created first-class `/batches` catalog page and dynamic `/batches/[slug]` detail page with full schema.org metadata and batch enrollment flows.
+  - Added clean Next.js server redirects from `/courses` -> `/batches` and `/courses/[slug]` -> `/batches/[slug]`.
+  - Updated all cart, checkout, dashboard, orders, and footer links to point to `/batches`.
+- **Demo Test Series & Tests Cleanup**:
+  - Purged all seeded demo mock tests and test series from the database while preserving real user test series and questions.
+  - Cleaned seed scripts (`seed-products.mjs` and `seed-tests.mjs`) to prevent demo test series from re-populating.
+  - Updated Test Series navigation menus and catalog CTAs to point only to active test series.
+- **Question Bank Pagination & Verification**:
+  - Added 20-item-per-page pagination with jump-to-page, prev/next, and total count to the admin Question Bank view.
+  - Fixed phone schema regex and default contact number validation.
+
+
 - Started Phase 1 with a Next.js App Router and TypeScript scaffold.
 - Added the initial PostgreSQL/Prisma domain schema and shared role-check helpers.
 - Added baseline SmartNum brand tokens and implementation phase tracking.
@@ -12,7 +27,7 @@
 - Added five-attempt credential lockout tests, forced first-login password change, and server-side role/status refresh.
 - Upgraded Vitest to the compatible patched release and pinned patched PostCSS; documented remaining upstream dependency advisories.
 - Comprehensive SmartNum marketing landing page complete with sticky navigation, mathematics hero carousel, interactive Why SmartNum tabs/mobile accordion, programmes & curricula cards, YouTube facade video gallery, demo lead capture, FAQ accordion with JSON-LD schema, and dedicated Indirapuram Visit Us location block with Google Maps embed.
-- Full SmartNum branding and contact integration: Indirapuram address (04224, ATS Advantage, Indirapuram, Ghaziabad, UP - 201014), phones (+91 99589 47774, +91 88004 05640), email (gosmartnum@gmail.com), WhatsApp, Instagram, Facebook, YouTube, and LinkedIn profiles.
+- Full SmartNum branding and contact integration: Indirapuram address (04224, ATS Advantage, Indirapuram, Ghaziabad, UP - 201014), phones (9958966823), email (gosmartnum@gmail.com), WhatsApp, Instagram, Facebook, YouTube, and LinkedIn profiles.
 - Admin Panel Site Content Editor (`/admin/site-content`) with S3 presigned upload support for hero images, curriculum images, tutor photos, and MP4 demo videos. S3 variables (`S3_ENDPOINT`, `S3_PUBLIC_URL`) documented in `.env.example` and `ARCHITECTURE.md`.
 - Buy Flow Phase 2: Extended Prisma schema with `ProductType` (`COURSE`, `TEST_SERIES`), `ProductMode` (`ONLINE`, `PHYSICAL`, `BOTH`), `Centre` model for physical coaching centers, hierarchical `Category` tree with parent-child relations, and extended course product metadata (seat caps, real-time seats left, test series counts, validity, free flag, syllabus/mock inclusions). Seeded full product catalog and coupons.
 - Buy Flow Phase 3: Redesigned header with categorized Courses dropdown (School & Board Tuition vs Competitive Pathways) and interactive two-column Test Series Mega-Menu (left category tabs, dynamic right flyout, badges, mobile accordion, no NEET entries). Added "My Purchases & Access" to user dropdown.

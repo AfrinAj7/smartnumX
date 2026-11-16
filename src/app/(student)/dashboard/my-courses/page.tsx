@@ -53,7 +53,7 @@ export default async function MyCoursesPage() {
             You have not enrolled in any SmartNum tuition or competitive programs yet. Explore our curriculum catalog to get started.
           </p>
           <Link
-            href="/courses"
+            href="/batches"
             style={{
               display: "inline-block",
               backgroundColor: "#2563eb",
@@ -64,14 +64,14 @@ export default async function MyCoursesPage() {
               textDecoration: "none",
             }}
           >
-            Explore Courses Catalog →
+            Explore Batches Catalog →
           </Link>
         </div>
       ) : (
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))", gap: "1.5rem" }}>
           {enrollments.map((enr) => {
             const isTestSeries = enr.course.productType === "TEST_SERIES";
-            const targetUrl = isTestSeries ? `/test-series/${enr.course.slug}#mock-tests` : `/courses/${enr.course.slug}`;
+            const targetUrl = isTestSeries ? `/test-series/${enr.course.slug}#mock-tests` : `/batches/${enr.course.slug}`;
 
             return (
               <div

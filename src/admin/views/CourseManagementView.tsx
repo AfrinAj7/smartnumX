@@ -470,7 +470,7 @@ export function CourseManagementView() {
             <tbody>
               {filteredCourses.map((c) => {
                 const isTest = c.productType === "TEST_SERIES";
-                const publicUrl = isTest ? `/test-series/${c.slug}` : `/courses/${c.slug}`;
+                const publicUrl = isTest ? `/test-series/${c.slug}` : `/batches/${c.slug}`;
 
                 return (
                   <tr key={c.id} style={{ borderBottom: "1px solid #f1f5f9" }}>

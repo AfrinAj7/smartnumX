@@ -3,10 +3,8 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 async function seedTests() {
-  if (process.env.NODE_ENV === "production") {
-    console.log("Skipping sample test seeding in production environment.");
-    return;
-  }
+  console.log("Skipping sample demo tests seeding (demo test series removed).");
+  return;
 
   console.log("Seeding sample CBT tests (status: DRAFT) for Phase 8...");
 

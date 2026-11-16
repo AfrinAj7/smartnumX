@@ -247,7 +247,7 @@ export function EnrollmentManagementView() {
                   </td>
                   <td style={{ padding: "1rem", color: "#334155" }}>
                     <Link
-                      href={`/courses/${enr.course.slug}`}
+                      href={`/batches/${enr.course.slug}`}
                       target="_blank"
                       style={{ color: "#2563eb", fontWeight: 600, textDecoration: "none" }}
                     >

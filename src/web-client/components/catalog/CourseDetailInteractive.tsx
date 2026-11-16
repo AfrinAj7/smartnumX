@@ -73,7 +73,7 @@ export function CourseDetailInteractive({
           <nav className="course-breadcrumb" aria-label="Breadcrumb">
             <Link href="/">Home</Link>
             <span className="course-breadcrumb-sep">›</span>
-            <Link href="/courses">Courses</Link>
+            <Link href="/batches">Batches</Link>
             <span className="course-breadcrumb-sep">›</span>
             <span className="course-breadcrumb-current">{course.shortTitle}</span>
           </nav>
@@ -287,7 +287,7 @@ export function CourseDetailInteractive({
                     <span className="faculty-badge-icon">🎓</span>
                     <div>
                       <strong>Led by Ph.D. Faculty</strong>
-                      <p>Academic Director: Dr. Sweta Agrawal</p>
+                      <p>Academic Director: Dr. Shweta Agrawal</p>
                     </div>
                   </div>
                 </div>

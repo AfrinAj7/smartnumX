@@ -64,8 +64,8 @@ export function StudentDashboardView({
     filterTab === "COURSE"
       ? courseEnrollments
       : filterTab === "TEST_SERIES"
-      ? testSeriesEnrollments
-      : enrollments;
+        ? testSeriesEnrollments
+        : enrollments;
 
   return (
     <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "1.5rem" }}>
@@ -210,7 +210,7 @@ export function StudentDashboardView({
             </p>
             <div style={{ display: "flex", gap: "0.75rem", justifyContent: "center", flexWrap: "wrap" }}>
               <Link
-                href="/courses"
+                href="/batches"
                 style={{
                   backgroundColor: "#ea580c",
                   color: "#ffffff",
@@ -221,7 +221,7 @@ export function StudentDashboardView({
                   textDecoration: "none",
                 }}
               >
-                Browse Courses →
+                Browse Batches →
               </Link>
               <Link
                 href="/test-series"
@@ -244,7 +244,7 @@ export function StudentDashboardView({
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(350px, 1fr))", gap: "1.5rem" }}>
             {displayedEnrollments.map((enr) => {
               const isTestSeries = enr.course.productType === "TEST_SERIES";
-              const targetUrl = isTestSeries ? `/test-series/${enr.course.slug}#mock-tests` : `/courses/${enr.course.slug}`;
+              const targetUrl = isTestSeries ? `/test-series/${enr.course.slug}#mock-tests` : `/batches/${enr.course.slug}`;
 
               return (
                 <div
@@ -501,7 +501,7 @@ export function StudentDashboardView({
 
         <div style={{ display: "flex", gap: "0.75rem" }}>
           <a
-            href="https://wa.me/919958947774"
+            href="https://wa.me/919958966823"
             target="_blank"
             rel="noopener noreferrer"
             style={{

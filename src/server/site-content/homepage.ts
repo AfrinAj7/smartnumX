@@ -289,7 +289,7 @@ export const DEFAULT_HOMEPAGE_CONTENT: HomepageContent = {
   ],
   faculty: [
     {
-      name: "Dr. Sweta Agrawal",
+      name: "Dr. Shweta Agrawal",
       subject: "Higher Mathematics & Competitive Exams",
       qualification: "Ph.D. | M.Sc in Mathematics | Assistant Professor | Lead Educator",
       experience:
@@ -329,7 +329,7 @@ export const DEFAULT_HOMEPAGE_CONTENT: HomepageContent = {
     {
       name: "Jaydeep Kumar Verma",
       quote:
-        "The Magician Of Mathematics, How Easily sweta mam teaches us just look so smooth.",
+        "The Magician Of Mathematics, How Easily Shweta mam teaches us just look so smooth.",
       approved: true,
       relation: "Student",
       learnerClass: "12",
@@ -366,7 +366,7 @@ export const DEFAULT_HOMEPAGE_CONTENT: HomepageContent = {
     { question: "Are one-to-one doubt sessions available?", answer: "Yes! Students can book dedicated 1-on-1 doubt clearing sessions with our faculty before exams or weekly tests.", published: true },
     { question: "Is self-paced learning available?", answer: "Yes, students get access to recorded class modules and learning paths so they can review complex topics at their own pace.", published: true },
     { question: "How do batch sizes work at SmartNum?", answer: "We maintain small batch sizes to ensure every student receives personalized attention and teacher interaction.", published: true },
-    { question: "Where is SmartNum located and how can I book a free demo?", answer: "We are located at 04224, ATS Advantage, Indirapuram, Ghaziabad, UP - 201014. You can book a free demo class by submitting our online form or calling +91 99589 47774 / +91 88004 05640.", published: true },
+    { question: "Where is SmartNum located and how can I book a free demo?", answer: "We are located at 04224, ATS Advantage, Indirapuram, Ghaziabad, UP - 201014. You can book a free demo class by submitting our online form or calling +91 99589 66823", published: true },
   ],
   demoVideos: [
     {
@@ -401,9 +401,9 @@ export const DEFAULT_HOMEPAGE_CONTENT: HomepageContent = {
     address: "04224, ATS Advantage, Indirapuram, Ghaziabad, UP - 201014",
     mapsUrl: "https://share.google/8gHRuZQQxRuYAkqVd",
     phone: "+91 99589 47774",
-    secondaryPhone: "+91 88004 05640",
+    secondaryPhone: "+91 99589 66823",
     email: "gosmartnum@gmail.com",
-    whatsapp: "+91 99589 47774",
+    whatsapp: "+91 99589 66823",
     instagramUrl: "https://www.instagram.com/smartnumofficial/",
     facebookUrl: "https://www.facebook.com/profile.php?id=61594903500934",
     youtubeUrl: "https://www.youtube.com/@GoSmartNum",

@@ -20,23 +20,23 @@ type SiteHeaderProps = {
   user?: NavUser;
 };
 
-const coursesMegaMenu = [
+const batchesMegaMenu = [
   {
     title: "School & Board Tuition (Classes 9–12)",
     items: [
-      { label: "Class 9th Coaching (Maths & Science)", href: "/courses/class-9-maths-science-tuition", badge: "CBSE & ICSE", mode: "Online | Physical" },
-      { label: "Class 10th Board Excellence", href: "/courses/class-10-board-excellence", badge: "Board Prep", mode: "Online | Physical" },
-      { label: "Class 11th Foundation & Boards", href: "/courses/class-11-foundation-and-boards", badge: "Foundation", mode: "Online | Physical" },
-      { label: "Class 12th Board Mastery", href: "/courses/class-12-board-mastery", badge: "Board + Prep", mode: "Online | Physical" },
+      { label: "Class 9th Coaching (Maths & Science)", href: "/batches/class-9-maths-science-tuition", badge: "CBSE & ICSE", mode: "Online | Physical" },
+      { label: "Class 10th Board Excellence", href: "/batches/class-10-board-excellence", badge: "Board Prep", mode: "Online | Physical" },
+      { label: "Class 11th Foundation & Boards", href: "/batches/class-11-foundation-and-boards", badge: "Foundation", mode: "Online | Physical" },
+      { label: "Class 12th Board Mastery", href: "/batches/class-12-board-mastery", badge: "Board + Prep", mode: "Online | Physical" },
     ],
   },
   {
     title: "Competitive Pathways & Olympiads",
     items: [
-      { label: "IIT-JEE (Main) Intensive Prep", href: "/courses/iit-jee-mains-preparation", badge: "Popular", mode: "Online | Physical" },
-      { label: "IIT-JEE (Main + Advanced) Mentorship", href: "/courses/iit-jee-advanced-mentorship", badge: "Intensive", mode: "Online | Physical" },
-      { label: "Math & Science Olympiads", href: "/courses/maths-science-olympiads", badge: "National", mode: "Online | Physical" },
-      { label: "Self-Paced Recorded Modules", href: "/courses/self-paced-recorded-modules", badge: "Online", mode: "Digital Only" },
+      { label: "IIT-JEE (Main) Intensive Prep", href: "/batches/iit-jee-mains-preparation", badge: "Popular", mode: "Online | Physical" },
+      { label: "IIT-JEE (Main + Advanced) Mentorship", href: "/batches/iit-jee-advanced-mentorship", badge: "Intensive", mode: "Online | Physical" },
+      { label: "Math & Science Olympiads", href: "/batches/maths-science-olympiads", badge: "National", mode: "Online | Physical" },
+      { label: "Self-Paced Recorded Modules", href: "/batches/self-paced-recorded-modules", badge: "Online", mode: "Digital Only" },
     ],
   },
 ];
@@ -63,75 +63,12 @@ export interface TestSeriesNavItem {
 
 const testSeriesNavCategories: TestSeriesNavItem[] = [
   {
-    id: "ts-iit-jee-main-advanced",
-    name: "IIT JEE (Main + Advanced)",
-    slug: "ts-iit-jee-main-advanced",
-    badge: "Advanced",
-    desc: "Rigorous dual-paper mock series with multi-pattern questions & all-India percentile prediction.",
-    subcategories: [
-      { label: "Class 11th", href: "/test-series?category=ts-jee-adv-class-11" },
-      { label: "Class 12th", href: "/test-series?category=ts-jee-adv-class-12" },
-      { label: "Class 12th Plus (Droppers)", href: "/test-series?category=ts-jee-adv-droppers" },
-    ],
-    featuredTests: [
-      {
-        title: "IIT-JEE Advanced Full Mock Challenge",
-        href: "/test-series/iit-jee-advanced-full-mock-challenge",
-        badge: "Popular",
-        stats: "15 Dual Papers · 30 Chapter Tests",
-        price: "₹2,499",
-        discountPrice: "₹1,499",
-      },
-      {
-        title: "IIT-JEE Mains Full Mocks",
-        href: "/test-series/iit-jee-mains-full-mocks",
-        badge: "High Yield",
-        badgeType: "highlight",
-        stats: "20 Full Mocks · 40 Chapter Tests",
-        price: "₹1,999",
-        discountPrice: "₹999",
-      },
-    ],
-  },
-  {
-    id: "ts-iit-jee-main",
-    name: "IIT JEE Main",
-    slug: "ts-iit-jee-main",
-    badge: "High Yield",
-    badgeType: "highlight",
-    desc: "Computer-Based Test (CBT) mock exam series strictly matching the latest NTA exam pattern.",
-    subcategories: [
-      { label: "Class 11th", href: "/test-series?category=ts-jee-main-class-11" },
-      { label: "Class 12th", href: "/test-series?category=ts-jee-main-class-12" },
-      { label: "Class 12th Plus (Droppers)", href: "/test-series?category=ts-jee-main-droppers" },
-    ],
-    featuredTests: [
-      {
-        title: "IIT-JEE Mains Full Mocks (High Yield)",
-        href: "/test-series/iit-jee-mains-full-mocks",
-        badge: "High Yield",
-        badgeType: "highlight",
-        stats: "20 Full Mocks · NTA CBT Engine",
-        price: "₹1,999",
-        discountPrice: "₹999",
-      },
-      {
-        title: "Free Diagnostic Mock Test",
-        href: "/test-series/free-diagnostic-mock-test",
-        badge: "Free",
-        badgeType: "free",
-        stats: "30-Min Rapid Test · Instant Scorecard",
-        price: "Free",
-        isFree: true,
-      },
-    ],
-  },
-  {
     id: "ts-class-9-12",
     name: "Class 9–12",
     slug: "ts-class-9-12",
-    badge: "Boards",
-    desc: "Board-focused mock papers with official step-by-step scoring rubric and topper model solutions.",
+    badge: "Active",
+    badgeType: "highlight",
+    desc: "Board and annual exam focused test series with CBT questions and step-by-step solutions.",
     subcategories: [
       { label: "Class 9", href: "/test-series?category=ts-school-class-9" },
       { label: "Class 10 (Board)", href: "/test-series?category=ts-school-class-10" },
@@ -140,50 +77,81 @@ const testSeriesNavCategories: TestSeriesNavItem[] = [
     ],
     featuredTests: [
       {
-        title: "Class 10 Board Mock Series",
-        href: "/test-series/class-10-board-mock-series",
-        badge: "New",
-        stats: "10 Full Board Mocks · 25 Topic Tests",
-        price: "₹1,299",
-        discountPrice: "₹699",
-      },
-      {
-        title: "Class 12 Board Mock Papers",
-        href: "/test-series/class-12-board-mock-papers",
-        badge: "2026 Batch",
-        badgeType: "highlight",
-        stats: "12 Full Board Mocks · 30 Sectional Mocks",
-        price: "₹1,499",
-        discountPrice: "₹799",
-      },
-    ],
-  },
-  {
-    id: "ts-popular-exams",
-    name: "Popular Exams",
-    slug: "ts-popular-exams",
-    badge: "Diagnostic",
-    desc: "National aptitude benchmarks and comprehensive scholarship diagnostic evaluations.",
-    subcategories: [
-      { label: "Annual Scholarship Assessment", href: "/test-series/annual-scholarship-assessment" },
-      { label: "Free Diagnostic Mock Test", href: "/test-series/free-diagnostic-mock-test" },
-    ],
-    featuredTests: [
-      {
-        title: "Annual Scholarship Assessment",
-        href: "/test-series/annual-scholarship-assessment",
-        badge: "Up to 50% Off",
-        badgeType: "highlight",
-        stats: "60-Min Test · Tuition Scholarship",
+        title: "Class 9th Physics & Chemistry Mock Test",
+        href: "/test-series/class-9th-physics-chemistry-mock-test",
+        badge: "Free",
+        badgeType: "free",
+        stats: "Practice Set · Instant CBT Evaluation",
         price: "Free",
         isFree: true,
       },
       {
-        title: "Free Diagnostic Mock Test",
-        href: "/test-series/free-diagnostic-mock-test",
+        title: "Class 9th Important Question | Annual Exam",
+        href: "/test-series/class-9th-important-question-annual-exam",
+        badge: "High Yield",
+        badgeType: "highlight",
+        stats: "Annual Exam Pack · Comprehensive Solutions",
+        price: "₹499",
+        discountPrice: "₹299",
+      },
+    ],
+  },
+  {
+    id: "ts-iit-jee-main-advanced",
+    name: "IIT JEE (Main + Advanced)",
+    slug: "ts-iit-jee-main-advanced",
+    badge: "Advanced",
+    desc: "Rigorous mock tests with multi-pattern questions & all-India percentile prediction.",
+    subcategories: [
+      { label: "Class 11th", href: "/test-series?category=ts-jee-adv-class-11" },
+      { label: "Class 12th", href: "/test-series?category=ts-jee-adv-class-12" },
+      { label: "Class 12th Plus (Droppers)", href: "/test-series?category=ts-jee-adv-droppers" },
+    ],
+    featuredTests: [
+      {
+        title: "Explore JEE Main & Advanced Series",
+        href: "/test-series?category=ts-iit-jee-main-advanced",
+        badge: "Explore",
+        badgeType: "highlight",
+        stats: "NTA-Pattern CBT Test Series",
+        price: "View All",
+      },
+      {
+        title: "View All Test Series",
+        href: "/test-series",
+        badge: "Catalog",
+        stats: "Browse All Assessments",
+        price: "Explore",
+      },
+    ],
+  },
+  {
+    id: "ts-iit-jee-main",
+    name: "IIT JEE Main",
+    slug: "ts-iit-jee-main",
+    badge: "CBT",
+    badgeType: "highlight",
+    desc: "Computer-Based Test (CBT) mock exam series matching the latest NTA exam pattern.",
+    subcategories: [
+      { label: "Class 11th", href: "/test-series?category=ts-jee-main-class-11" },
+      { label: "Class 12th", href: "/test-series?category=ts-jee-main-class-12" },
+      { label: "Class 12th Plus (Droppers)", href: "/test-series?category=ts-jee-main-droppers" },
+    ],
+    featuredTests: [
+      {
+        title: "JEE Main Exam Simulation",
+        href: "/test-series?category=ts-iit-jee-main",
+        badge: "CBT Mocks",
+        badgeType: "highlight",
+        stats: "Chapter Tests & Full Mock Drills",
+        price: "View All",
+      },
+      {
+        title: "Class 9th Physics & Chemistry Mock",
+        href: "/test-series/class-9th-physics-chemistry-mock-test",
         badge: "Free",
         badgeType: "free",
-        stats: "30-Min Rapid Test · Weak Spot Analysis",
+        stats: "Instant Score & Solution Key",
         price: "Free",
         isFree: true,
       },
@@ -195,30 +163,28 @@ const testSeriesNavCategories: TestSeriesNavItem[] = [
     slug: "ts-free-test-series",
     badge: "FREE",
     badgeType: "free",
-    desc: "Explore 100% free diagnostic and scholarship test series with zero payment required.",
+    desc: "Explore free practice assessments with instant automated evaluation and step-by-step solutions.",
     subcategories: [
-      { label: "Free Diagnostic Mock", href: "/test-series/free-diagnostic-mock-test" },
-      { label: "Scholarship Assessment", href: "/test-series/annual-scholarship-assessment" },
+      { label: "Class 9 Physics & Chemistry", href: "/test-series/class-9th-physics-chemistry-mock-test" },
       { label: "View All Free Tests", href: "/test-series?free=true" },
     ],
     featuredTests: [
       {
-        title: "Free Diagnostic Mock Test",
-        href: "/test-series/free-diagnostic-mock-test",
+        title: "Class 9th Physics & Chemistry Mock Test",
+        href: "/test-series/class-9th-physics-chemistry-mock-test",
         badge: "Free",
         badgeType: "free",
-        stats: "Instant Evaluation · Weak Area Heatmap",
+        stats: "Instant Evaluation · Complete Solutions",
         price: "₹0 Free",
         isFree: true,
       },
       {
-        title: "Annual Scholarship Assessment",
-        href: "/test-series/annual-scholarship-assessment",
-        badge: "Up to 50% Off",
+        title: "Explore All Test Series",
+        href: "/test-series",
+        badge: "Full Catalog",
         badgeType: "highlight",
-        stats: "Benchmark Score · 50% Fee Waiver",
-        price: "₹0 Free",
-        isFree: true,
+        stats: "Browse All Exam Series",
+        price: "View All",
       },
     ],
   },
@@ -256,7 +222,7 @@ export function SiteHeader({
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [activeTestCategory, setActiveTestCategory] = useState<string>("ts-iit-jee-main-advanced");
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
-  const [mobileAccordion, setMobileAccordion] = useState<string | null>("courses");
+  const [mobileAccordion, setMobileAccordion] = useState<string | null>("batches");
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const headerRef = useRef<HTMLElement>(null);
   const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -366,35 +332,35 @@ export function SiteHeader({
               Home
             </Link>
 
-            {/* Courses Dropdown */}
+            {/* Batches Dropdown Mega Menu */}
             <div
-              className={`nav-dropdown-wrapper ${activeDropdown === "courseMenu" ? "is-open" : ""}`}
-              onMouseEnter={() => handleDropdownEnter("courseMenu")}
+              className={`nav-dropdown-wrapper ${activeDropdown === "batches" ? "is-open" : ""}`}
+              onMouseEnter={() => handleDropdownEnter("batches")}
               onMouseLeave={handleDropdownLeave}
             >
               <div style={{ display: "inline-flex", alignItems: "center" }}>
                 <Link
-                  className={`nav-link ${pathname === "/courses" ? "is-active" : ""}`}
-                  href="/courses"
+                  className={`nav-link ${pathname.startsWith("/batches") ? "is-active" : ""}`}
+                  href="/batches"
                 >
-                  Courses
+                  Batches
                 </Link>
                 <button
                   type="button"
                   className="nav-link nav-dropdown-trigger"
                   style={{ paddingLeft: "0.15rem", marginLeft: "-0.3rem" }}
-                  onClick={() => toggleDropdownClick("courseMenu")}
-                  aria-expanded={activeDropdown === "courseMenu"}
+                  onClick={() => toggleDropdownClick("batches")}
+                  aria-expanded={activeDropdown === "batches"}
                   aria-haspopup="true"
-                  aria-label="Toggle courses menu"
+                  aria-label="Toggle batches menu"
                 >
                   <span className="dropdown-chevron" aria-hidden="true" />
                 </button>
               </div>
 
-              <div className="nav-dropdown-panel courses-dropdown-panel" role="region" aria-label="Courses directory">
-                <div className="mega-columns-grid" style={{ gridTemplateColumns: "1fr 1fr" }}>
-                  {coursesMegaMenu.map((group) => (
+              <div className="nav-mega-panel courses-panel" role="region" aria-label="Batches directory">
+                <div className="mega-columns-grid">
+                  {batchesMegaMenu.map((group) => (
                     <div key={group.title} className="mega-column">
                       <h3 className="mega-heading">{group.title}</h3>
                       <ul className="mega-list">
@@ -420,77 +386,45 @@ export function SiteHeader({
                       </ul>
                     </div>
                   ))}
-                </div>
-
-                <div className="courses-panel-banner">
-                  <span className="courses-banner-text">
-                    📍 Indirapuram Campus + Live Interactive Online Mode available for every course
-                  </span>
-                  <Link
-                    href="/courses"
-                    onClick={() => setActiveDropdown(null)}
-                    className="courses-banner-link"
-                  >
-                    View All Courses &amp; Batches →
-                  </Link>
-                </div>
-              </div>
-            </div>
-
-            {/* Batches 2027 Mega Menu */}
-            <div
-              className={`nav-dropdown-wrapper ${activeDropdown === "batches" ? "is-open" : ""}`}
-              onMouseEnter={() => handleDropdownEnter("batches")}
-              onMouseLeave={handleDropdownLeave}
-            >
-              <button
-                type="button"
-                className="nav-link nav-dropdown-trigger"
-                onClick={() => toggleDropdownClick("batches")}
-                aria-expanded={activeDropdown === "batches"}
-                aria-haspopup="true"
-              >
-                <span>Batches 2027</span>
-                <span className="dropdown-chevron" aria-hidden="true" />
-              </button>
-
-              <div className="nav-mega-panel courses-panel" role="region" aria-label="Batches 2027 menu">
-                <div className="mega-columns-grid">
-                  {coursesMegaMenu.map((group) => (
-                    <div key={group.title} className="mega-column">
-                      <h3 className="mega-heading">{group.title}</h3>
-                      <ul className="mega-list">
-                        {group.items.map((item) => (
-                          <li key={item.label}>
-                            <Link
-                              href={item.href}
-                              onClick={() => setActiveDropdown(null)}
-                              className="mega-item-link"
-                            >
-                              <span>{item.label}</span>
-                              {item.badge && <span className="nav-badge">{item.badge}</span>}
-                            </Link>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  ))}
 
                   {/* Mega Menu Spotlight Card */}
                   <div className="mega-spotlight">
                     <div className="spotlight-card">
-                      <span className="spotlight-tag">Free Assessment</span>
-                      <h4>Not sure which batch fits?</h4>
-                      <p>Book a diagnostic session with our academic director.</p>
+                      <span className="spotlight-tag">2026–27 Batches</span>
+                      <h4>Looking for specific batch timings?</h4>
+                      <p>Small 15-student cohorts led by Ph.D. faculty. Explore all batch schedules &amp; syllabus.</p>
+                      <Link
+                        className="spotlight-btn"
+                        href="/batches"
+                        onClick={() => setActiveDropdown(null)}
+                        style={{ display: "block", marginBottom: "0.5rem", textAlign: "center", background: "#f97316", color: "#fff", fontWeight: 700 }}
+                      >
+                        View all batches →
+                      </Link>
                       <Link
                         className="spotlight-btn"
                         href="/#book-demo"
                         onClick={() => setActiveDropdown(null)}
+                        style={{ display: "block", textAlign: "center" }}
                       >
                         Book Free Demo ↗
                       </Link>
                     </div>
                   </div>
+                </div>
+
+                <div className="courses-panel-banner">
+                  <span className="courses-banner-text">
+                    📍 Indirapuram Campus + Live Interactive Online Batches (Max 15 students per batch)
+                  </span>
+                  <Link
+                    href="/batches"
+                    onClick={() => setActiveDropdown(null)}
+                    className="courses-banner-link"
+                    style={{ fontWeight: 700 }}
+                  >
+                    View all batches →
+                  </Link>
                 </div>
               </div>
             </div>
@@ -761,11 +695,11 @@ export function SiteHeader({
                         My Purchases &amp; Access
                       </Link>
                       <Link
-                        href="/courses"
+                        href="/batches"
                         role="menuitem"
                         onClick={() => setUserMenuOpen(false)}
                       >
-                        Explore Courses
+                        Explore Batches
                       </Link>
                       <Link
                         href="/test-series"
@@ -887,28 +821,39 @@ export function SiteHeader({
             🏠 Home
           </Link>
 
-          <Link
-            href="/courses"
-            className={`mobile-nav-root-link ${pathname === "/courses" ? "is-active" : ""}`}
-            onClick={() => setMobileDrawerOpen(false)}
-          >
-            📚 Courses
-          </Link>
-
-          {/* Batches 2027 Accordion */}
+          {/* Batches Accordion */}
           <div className="mobile-accordion-group">
             <button
               type="button"
               className="accordion-header"
-              onClick={() => toggleAccordion("courses")}
-              aria-expanded={mobileAccordion === "courses"}
+              onClick={() => toggleAccordion("batches")}
+              aria-expanded={mobileAccordion === "batches"}
             >
-              <span>🎓 Batches 2027</span>
-              <span className={`accordion-icon ${mobileAccordion === "courses" ? "is-open" : ""}`}>▾</span>
+              <span>🎓 Batches</span>
+              <span className={`accordion-icon ${mobileAccordion === "batches" ? "is-open" : ""}`}>▾</span>
             </button>
-            {mobileAccordion === "courses" && (
+            {mobileAccordion === "batches" && (
               <div className="accordion-content">
-                {coursesMegaMenu.flatMap((g) => g.items).map((item) => (
+                <Link
+                  href="/batches"
+                  onClick={() => setMobileDrawerOpen(false)}
+                  className="accordion-sublink"
+                  style={{
+                    fontWeight: 700,
+                    color: "#0284c7",
+                    borderBottom: "1px solid #e2e8f0",
+                    paddingBottom: "0.6rem",
+                    marginBottom: "0.4rem",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  }}
+                >
+                  <span>View all batches ↗</span>
+                  <span className="nav-badge highlight">All Batches</span>
+                </Link>
+
+                {batchesMegaMenu.flatMap((g) => g.items).map((item) => (
                   <Link
                     key={item.label}
                     href={item.href}

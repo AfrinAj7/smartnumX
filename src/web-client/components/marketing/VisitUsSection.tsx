@@ -4,10 +4,9 @@ type ContactDetails = HomepageContent["contact"];
 
 export function VisitUsSection({ contact }: { contact: ContactDetails }) {
   const address = contact.address || "04224, ATS Advantage, Indirapuram, Ghaziabad, UP - 201014";
-  const primaryPhone = contact.phone || "+91 99589 47774";
-  const secondaryPhone = contact.secondaryPhone || "+91 88004 05640";
+  const primaryPhone = contact.phone || "+91 99589 66823";
   const email = contact.email || "gosmartnum@gmail.com";
-  const whatsapp = contact.whatsapp || "+91 99589 47774";
+  const whatsapp = contact.whatsapp || "+91 99589 66823";
   const whatsappDigits = whatsapp.replace(/\D/g, "");
 
   const encodedAddress = encodeURIComponent(address);
@@ -45,8 +44,6 @@ export function VisitUsSection({ contact }: { contact: ContactDetails }) {
               <h3>Phone &amp; WhatsApp</h3>
               <p>
                 <a href={`tel:${primaryPhone.replace(/[^+\d]/g, "")}`}>{primaryPhone}</a>
-                <br />
-                <a href={`tel:${secondaryPhone.replace(/[^+\d]/g, "")}`}>{secondaryPhone}</a>
               </p>
               {whatsappDigits && (
                 <a
