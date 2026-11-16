@@ -78,6 +78,23 @@ export function TestBuilderView({ testId }: { testId: string }) {
   const [pickerTotal, setPickerTotal] = useState(0);
   const [pickerTotalPages, setPickerTotalPages] = useState(1);
 
+  // Marking Scheme Configuration State
+  const [isMarkingModalOpen, setIsMarkingModalOpen] = useState(false);
+  const [markingPositive, setMarkingPositive] = useState("4");
+  const [markingNegativeEnabled, setMarkingNegativeEnabled] = useState(true);
+  const [markingNegativeDeduction, setMarkingNegativeDeduction] = useState("1");
+  const [markingTargetSection, setMarkingTargetSection] = useState<string>("ALL");
+  const [markingSubmitting, setMarkingSubmitting] = useState(false);
+
+  // Individual Question Marks Editing State
+  const [editingQuestionMarks, setEditingQuestionMarks] = useState<{
+    questionId: string;
+    code: string;
+    marks: string;
+    negMarks: string;
+  } | null>(null);
+  const [savingIndividualMarks, setSavingIndividualMarks] = useState(false);
+
   // Tab & Assignments State
   const [activeTab, setActiveTab] = useState<"CURRICULUM" | "ANALYTICS" | "REEVALUATE" | "ATTEMPTS" | "ASSIGNMENTS">("CURRICULUM");
   const [assignments, setAssignments] = useState<Array<{
@@ -224,6 +241,68 @@ export function TestBuilderView({ testId }: { testId: string }) {
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Error removing question";
       setActionError(msg);
+    }
+  }
+
+  async function handleApplyMarkingScheme(e: React.FormEvent) {
+    e.preventDefault();
+    setActionError(null);
+    setActionSuccess(null);
+    setMarkingSubmitting(true);
+    try {
+      const marks = parseFloat(markingPositive) || 4;
+      const negMarks = markingNegativeEnabled ? (parseFloat(markingNegativeDeduction) || 0) : 0;
+      const sectionId = markingTargetSection === "ALL" ? undefined : markingTargetSection;
+
+      const res = await fetch(`/api/admin/tests/${testId}/questions`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          bulk: true,
+          marks,
+          negMarks,
+          sectionId,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to update marking scheme");
+
+      setActionSuccess(`Updated marking scheme (+${marks} / -${negMarks}) across questions.`);
+      setIsMarkingModalOpen(false);
+      loadTest();
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Error applying marking scheme";
+      setActionError(msg);
+    } finally {
+      setMarkingSubmitting(false);
+    }
+  }
+
+  async function handleSaveIndividualMarks(e: React.FormEvent) {
+    e.preventDefault();
+    if (!editingQuestionMarks) return;
+    setSavingIndividualMarks(true);
+    setActionError(null);
+    try {
+      const res = await fetch(`/api/admin/tests/${testId}/questions`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          questionId: editingQuestionMarks.questionId,
+          marks: parseFloat(editingQuestionMarks.marks) || 0,
+          negMarks: parseFloat(editingQuestionMarks.negMarks) || 0,
+        }),
+      });
+      if (!res.ok) throw new Error("Failed to update question marks");
+      setActionSuccess(`Updated marks for "${editingQuestionMarks.code}".`);
+      setEditingQuestionMarks(null);
+      loadTest();
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Error updating question marks";
+      setActionError(msg);
+    } finally {
+      setSavingIndividualMarks(false);
     }
   }
 
@@ -592,26 +671,48 @@ export function TestBuilderView({ testId }: { testId: string }) {
       {activeTab === "CURRICULUM" && (
         <>
           {/* Sections and Questions Builder */}
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem", flexWrap: "wrap", gap: "0.5rem" }}>
             <h2 style={{ fontSize: "1.25rem", fontWeight: 800, color: "#0f172a", margin: 0 }}>
               Sections &amp; Assigned Questions
             </h2>
-        <button
-          onClick={() => setIsSectionModalOpen(true)}
-          style={{
-            backgroundColor: "#ffffff",
-            color: "#2563eb",
-            border: "1px solid #2563eb",
-            padding: "0.5rem 1rem",
-            borderRadius: "0.375rem",
-            fontSize: "0.875rem",
-            fontWeight: 700,
-            cursor: "pointer",
-          }}
-        >
-          + Add Section
-        </button>
-      </div>
+            <div style={{ display: "flex", gap: "0.5rem" }}>
+              <button
+                type="button"
+                onClick={() => setIsMarkingModalOpen(true)}
+                style={{
+                  backgroundColor: "#f0fdf4",
+                  color: "#166534",
+                  border: "1px solid #86efac",
+                  padding: "0.5rem 1rem",
+                  borderRadius: "0.375rem",
+                  fontSize: "0.875rem",
+                  fontWeight: 700,
+                  cursor: "pointer",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "0.35rem",
+                }}
+              >
+                <span>⚙️ Marking Scheme &amp; Negative Marks</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsSectionModalOpen(true)}
+                style={{
+                  backgroundColor: "#ffffff",
+                  color: "#2563eb",
+                  border: "1px solid #2563eb",
+                  padding: "0.5rem 1rem",
+                  borderRadius: "0.375rem",
+                  fontSize: "0.875rem",
+                  fontWeight: 700,
+                  cursor: "pointer",
+                }}
+              >
+                + Add Section
+              </button>
+            </div>
+          </div>
 
       {test.sections && test.sections.length > 0 ? (
         test.sections.map((sec, idx) => (
@@ -719,8 +820,35 @@ export function TestBuilderView({ testId }: { testId: string }) {
                         </div>
                       </td>
                       <td style={{ padding: "0.75rem 1rem" }}>
-                        <span style={{ color: "#166534", fontWeight: 700 }}>+{tq.marks}</span> /{" "}
-                        <span style={{ color: "#991b1b" }}>-{tq.negMarks}</span>
+                        <div style={{ display: "inline-flex", alignItems: "center", gap: "0.35rem" }}>
+                          <span style={{ color: "#166534", fontWeight: 700 }}>+{tq.marks}</span>
+                          <span>/</span>
+                          <span style={{ color: Number(tq.negMarks) > 0 ? "#991b1b" : "#64748b", fontWeight: 700 }}>
+                            {Number(tq.negMarks) > 0 ? `-${tq.negMarks}` : "0 (No neg)"}
+                          </span>
+                          <button
+                            type="button"
+                            title="Edit marks and negative marking for this question"
+                            onClick={() =>
+                              setEditingQuestionMarks({
+                                questionId: tq.questionId,
+                                code: tq.question.code,
+                                marks: String(tq.marks),
+                                negMarks: String(tq.negMarks),
+                              })
+                            }
+                            style={{
+                              marginLeft: "0.25rem",
+                              background: "none",
+                              border: "none",
+                              cursor: "pointer",
+                              fontSize: "0.85rem",
+                              opacity: 0.8,
+                            }}
+                          >
+                            ✏️
+                          </button>
+                        </div>
                       </td>
                       <td style={{ padding: "0.75rem 1rem", textAlign: "right" }}>
                         <button
@@ -1402,6 +1530,252 @@ export function TestBuilderView({ testId }: { testId: string }) {
                 Done
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Bulk Marking Scheme Modal */}
+      {isMarkingModalOpen && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            backgroundColor: "rgba(15, 23, 42, 0.6)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "1rem",
+            zIndex: 60,
+          }}
+          onClick={() => setIsMarkingModalOpen(false)}
+        >
+          <div
+            style={{
+              backgroundColor: "#ffffff",
+              borderRadius: "0.75rem",
+              maxWidth: "520px",
+              width: "100%",
+              padding: "1.5rem",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
+              <h3 style={{ fontSize: "1.25rem", fontWeight: 800, color: "#0f172a", margin: 0 }}>
+                Configure Marking Scheme &amp; Negative Marks
+              </h3>
+              <button
+                type="button"
+                onClick={() => setIsMarkingModalOpen(false)}
+                style={{ background: "none", border: "none", fontSize: "1.25rem", cursor: "pointer", color: "#64748b" }}
+              >
+                ✕
+              </button>
+            </div>
+
+            <p style={{ fontSize: "0.85rem", color: "#64748b", marginBottom: "1.25rem" }}>
+              Set positive marks for correct answers and enable or disable negative marking across questions in this test series.
+            </p>
+
+            <form onSubmit={handleApplyMarkingScheme}>
+              {/* Positive Marks */}
+              <div style={{ marginBottom: "1rem" }}>
+                <label style={{ display: "block", fontSize: "0.8125rem", fontWeight: 700, color: "#334155", marginBottom: "0.35rem" }}>
+                  Correct Answer Marks (+ve):
+                </label>
+                <input
+                  type="number"
+                  step="0.5"
+                  required
+                  value={markingPositive}
+                  onChange={(e) => setMarkingPositive(e.target.value)}
+                  style={{ width: "100%", padding: "0.5rem", borderRadius: "0.375rem", border: "1px solid #cbd5e1", fontSize: "0.9rem" }}
+                  placeholder="e.g. 4"
+                />
+              </div>
+
+              {/* Negative Marks Mode */}
+              <div style={{ marginBottom: "1.25rem", padding: "1rem", backgroundColor: "#f8fafc", borderRadius: "0.5rem", border: "1px solid #e2e8f0" }}>
+                <label style={{ display: "block", fontSize: "0.8125rem", fontWeight: 700, color: "#334155", marginBottom: "0.5rem" }}>
+                  Negative Marking System:
+                </label>
+                <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem" }}>
+                  <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", cursor: "pointer", fontSize: "0.875rem" }}>
+                    <input
+                      type="radio"
+                      name="negativeMarkingToggle"
+                      checked={markingNegativeEnabled}
+                      onChange={() => setMarkingNegativeEnabled(true)}
+                    />
+                    <span style={{ fontWeight: 600, color: "#b91c1c" }}>
+                      Enable Negative Marking (Deduct on Wrong Answer)
+                    </span>
+                  </label>
+
+                  {markingNegativeEnabled && (
+                    <div style={{ marginLeft: "1.5rem", display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                      <span style={{ fontSize: "0.8125rem", color: "#64748b" }}>Penalty per wrong answer: -</span>
+                      <input
+                        type="number"
+                        step="0.25"
+                        min="0"
+                        value={markingNegativeDeduction}
+                        onChange={(e) => setMarkingNegativeDeduction(e.target.value)}
+                        style={{ width: "5rem", padding: "0.3rem 0.5rem", borderRadius: "0.25rem", border: "1px solid #cbd5e1" }}
+                      />
+                      <span style={{ fontSize: "0.8125rem", color: "#64748b" }}>marks (e.g. 1 for JEE, 0.25 for NEET)</span>
+                    </div>
+                  )}
+
+                  <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", cursor: "pointer", fontSize: "0.875rem" }}>
+                    <input
+                      type="radio"
+                      name="negativeMarkingToggle"
+                      checked={!markingNegativeEnabled}
+                      onChange={() => setMarkingNegativeEnabled(false)}
+                    />
+                    <span style={{ fontWeight: 600, color: "#15803d" }}>
+                      Disable Negative Marking (0 penalty &mdash; CBSE / Board Mock pattern)
+                    </span>
+                  </label>
+                </div>
+              </div>
+
+              {/* Target Scope */}
+              <div style={{ marginBottom: "1.25rem" }}>
+                <label style={{ display: "block", fontSize: "0.8125rem", fontWeight: 700, color: "#334155", marginBottom: "0.35rem" }}>
+                  Apply To:
+                </label>
+                <select
+                  value={markingTargetSection}
+                  onChange={(e) => setMarkingTargetSection(e.target.value)}
+                  style={{ width: "100%", padding: "0.5rem", borderRadius: "0.375rem", border: "1px solid #cbd5e1", backgroundColor: "#fff" }}
+                >
+                  <option value="ALL">Entire Test (All Sections &amp; Questions)</option>
+                  {test.sections?.map((sec) => (
+                    <option key={sec.id} value={sec.id}>
+                      {sec.name} ({sec.testQuestions?.length || 0} Questions)
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div style={{ display: "flex", justifyContent: "flex-end", gap: "0.75rem" }}>
+                <button
+                  type="button"
+                  onClick={() => setIsMarkingModalOpen(false)}
+                  style={{ padding: "0.5rem 1rem", borderRadius: "0.375rem", border: "1px solid #cbd5e1", backgroundColor: "#fff", cursor: "pointer" }}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={markingSubmitting}
+                  style={{
+                    padding: "0.5rem 1.25rem",
+                    borderRadius: "0.375rem",
+                    border: "none",
+                    backgroundColor: "#16a34a",
+                    color: "#fff",
+                    fontWeight: 700,
+                    cursor: markingSubmitting ? "not-allowed" : "pointer",
+                  }}
+                >
+                  {markingSubmitting ? "Applying..." : "Apply Marking Scheme"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Individual Question Marks Edit Modal */}
+      {editingQuestionMarks && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            backgroundColor: "rgba(15, 23, 42, 0.6)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "1rem",
+            zIndex: 70,
+          }}
+          onClick={() => setEditingQuestionMarks(null)}
+        >
+          <div
+            style={{
+              backgroundColor: "#ffffff",
+              borderRadius: "0.75rem",
+              maxWidth: "400px",
+              width: "100%",
+              padding: "1.5rem",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 style={{ fontSize: "1.125rem", fontWeight: 800, color: "#0f172a", marginBottom: "0.25rem" }}>
+              Edit Question Marking
+            </h3>
+            <p style={{ fontSize: "0.8125rem", color: "#64748b", marginBottom: "1rem" }}>
+              Question: <strong>{editingQuestionMarks.code}</strong>
+            </p>
+
+            <form onSubmit={handleSaveIndividualMarks}>
+              <div style={{ marginBottom: "0.75rem" }}>
+                <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: "#475569", marginBottom: "0.25rem" }}>
+                  Positive Marks (+ve)
+                </label>
+                <input
+                  type="number"
+                  step="0.5"
+                  required
+                  value={editingQuestionMarks.marks}
+                  onChange={(e) => setEditingQuestionMarks({ ...editingQuestionMarks, marks: e.target.value })}
+                  style={{ width: "100%", padding: "0.5rem", borderRadius: "0.375rem", border: "1px solid #cbd5e1" }}
+                />
+              </div>
+
+              <div style={{ marginBottom: "1.25rem" }}>
+                <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: "#475569", marginBottom: "0.25rem" }}>
+                  Negative Marks Penalty (-ve, set 0 for no negative marking)
+                </label>
+                <input
+                  type="number"
+                  step="0.25"
+                  min="0"
+                  required
+                  value={editingQuestionMarks.negMarks}
+                  onChange={(e) => setEditingQuestionMarks({ ...editingQuestionMarks, negMarks: e.target.value })}
+                  style={{ width: "100%", padding: "0.5rem", borderRadius: "0.375rem", border: "1px solid #cbd5e1" }}
+                />
+                <span style={{ fontSize: "0.75rem", color: "#64748b" }}>Set 0 to disable negative marking on this question.</span>
+              </div>
+
+              <div style={{ display: "flex", justifyContent: "flex-end", gap: "0.5rem" }}>
+                <button
+                  type="button"
+                  onClick={() => setEditingQuestionMarks(null)}
+                  style={{ padding: "0.4rem 0.85rem", borderRadius: "0.375rem", border: "1px solid #cbd5e1", backgroundColor: "#fff", cursor: "pointer" }}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={savingIndividualMarks}
+                  style={{
+                    padding: "0.4rem 1rem",
+                    borderRadius: "0.375rem",
+                    border: "none",
+                    backgroundColor: "#2563eb",
+                    color: "#fff",
+                    fontWeight: 700,
+                    cursor: savingIndividualMarks ? "not-allowed" : "pointer",
+                  }}
+                >
+                  {savingIndividualMarks ? "Saving..." : "Save Marks"}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

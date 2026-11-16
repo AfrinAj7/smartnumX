@@ -297,6 +297,55 @@ export async function removeQuestionFromTest(testId: string, questionId: string)
   return { ok: true };
 }
 
+export async function updateTestQuestionMarks(input: {
+  testId: string;
+  questionId: string;
+  marks?: number;
+  negMarks?: number;
+}) {
+  const data: Prisma.TestQuestionUpdateInput = {};
+  if (input.marks !== undefined) data.marks = new Prisma.Decimal(input.marks);
+  if (input.negMarks !== undefined) data.negMarks = new Prisma.Decimal(input.negMarks);
+
+  const updated = await db.testQuestion.update({
+    where: {
+      testId_questionId: {
+        testId: input.testId,
+        questionId: input.questionId,
+      },
+    },
+    data,
+  });
+
+  await recalculateTotalMarks(input.testId);
+  return updated;
+}
+
+export async function bulkUpdateMarkingScheme(input: {
+  testId: string;
+  sectionId?: string | null;
+  marks: number;
+  negMarks: number;
+}) {
+  const where: Prisma.TestQuestionWhereInput = {
+    testId: input.testId,
+  };
+  if (input.sectionId) {
+    where.sectionId = input.sectionId;
+  }
+
+  const result = await db.testQuestion.updateMany({
+    where,
+    data: {
+      marks: new Prisma.Decimal(input.marks),
+      negMarks: new Prisma.Decimal(input.negMarks),
+    },
+  });
+
+  await recalculateTotalMarks(input.testId);
+  return result;
+}
+
 async function recalculateTotalMarks(testId: string) {
   const allQuestions = await db.testQuestion.findMany({
     where: { testId },
