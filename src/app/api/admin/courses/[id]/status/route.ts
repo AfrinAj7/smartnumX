@@ -22,7 +22,7 @@ export async function PATCH(
   }
 
   const { id } = await params;
-  const existing = await getCourseById(id);
+  const existing = await getCourseById(id, true);
   if (!existing) {
     return NextResponse.json({ error: "Course not found." }, { status: 404 });
   }

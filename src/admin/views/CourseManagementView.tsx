@@ -40,6 +40,7 @@ interface CourseItem {
   categoryId: string | null;
   category?: { id: string; name: string } | null;
   validityDays: number | null;
+  deletedAt?: string | null;
   _count: {
     modules: number;
     enrollments: number;
@@ -54,7 +55,8 @@ export function CourseManagementView() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
-  const [productTypeTab, setProductTypeTab] = useState<"ALL" | "COURSE" | "TEST_SERIES">("ALL");
+  const [productTypeTab, setProductTypeTab] = useState<"ALL" | "COURSE" | "TEST_SERIES" | "ARCHIVED">("ALL");
+  const [archivedCount, setArchivedCount] = useState<number>(0);
 
   const [selectedCourse, setSelectedCourse] = useState<CourseItem | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -102,6 +104,7 @@ export function CourseManagementView() {
       setCourses(json.data || []);
       if (json.meta?.categories) setCategories(json.meta.categories);
       if (json.meta?.centres) setCentres(json.meta.centres);
+      if (typeof json.meta?.archivedCount === "number") setArchivedCount(json.meta.archivedCount);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Failed to fetch courses.";
       setActionError(msg);
@@ -225,6 +228,23 @@ export function CourseManagementView() {
     }
   }
 
+  async function handleRestoreCourse(course: CourseItem) {
+    setActionError(null);
+    try {
+      const res = await fetch(`/api/admin/courses/${course.id}/restore`, {
+        method: "POST",
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || "Failed to restore course");
+      }
+      loadCourses();
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Failed to restore course";
+      setActionError(msg);
+    }
+  }
+
   async function handleFormSubmit(e: React.FormEvent) {
     e.preventDefault();
     setActionError(null);
@@ -344,13 +364,16 @@ export function CourseManagementView() {
       )}
 
       {/* Tabs Row */}
-      <div style={{ display: "flex", gap: "0.5rem", marginBottom: "1.25rem", backgroundColor: "#f1f5f9", padding: "0.25rem", borderRadius: "0.5rem", width: "fit-content" }}>
+      <div style={{ display: "flex", gap: "0.5rem", marginBottom: "1.25rem", backgroundColor: "#f1f5f9", padding: "0.25rem", borderRadius: "0.5rem", width: "fit-content", flexWrap: "wrap" }}>
         <button
           type="button"
-          onClick={() => setProductTypeTab("ALL")}
+          onClick={() => {
+            setProductTypeTab("ALL");
+            if (statusFilter === "ARCHIVED") setStatusFilter("ALL");
+          }}
           style={{
-            backgroundColor: productTypeTab === "ALL" ? "#ffffff" : "transparent",
-            color: productTypeTab === "ALL" ? "#0f172a" : "#64748b",
+            backgroundColor: productTypeTab === "ALL" && statusFilter !== "ARCHIVED" ? "#ffffff" : "transparent",
+            color: productTypeTab === "ALL" && statusFilter !== "ARCHIVED" ? "#0f172a" : "#64748b",
             fontWeight: 700,
             fontSize: "0.8125rem",
             padding: "0.4rem 0.85rem",
@@ -359,14 +382,17 @@ export function CourseManagementView() {
             cursor: "pointer",
           }}
         >
-          All Items ({courses.length})
+          All Active Items ({statusFilter === "ARCHIVED" ? 0 : courses.length})
         </button>
         <button
           type="button"
-          onClick={() => setProductTypeTab("COURSE")}
+          onClick={() => {
+            setProductTypeTab("COURSE");
+            if (statusFilter === "ARCHIVED") setStatusFilter("ALL");
+          }}
           style={{
-            backgroundColor: productTypeTab === "COURSE" ? "#ffffff" : "transparent",
-            color: productTypeTab === "COURSE" ? "#0f172a" : "#64748b",
+            backgroundColor: productTypeTab === "COURSE" && statusFilter !== "ARCHIVED" ? "#ffffff" : "transparent",
+            color: productTypeTab === "COURSE" && statusFilter !== "ARCHIVED" ? "#0f172a" : "#64748b",
             fontWeight: 700,
             fontSize: "0.8125rem",
             padding: "0.4rem 0.85rem",
@@ -375,14 +401,17 @@ export function CourseManagementView() {
             cursor: "pointer",
           }}
         >
-          Tuition Courses ({courses.filter((c) => c.productType === "COURSE").length})
+          Tuition Courses ({courses.filter((c) => c.productType === "COURSE" && c.status !== "ARCHIVED").length})
         </button>
         <button
           type="button"
-          onClick={() => setProductTypeTab("TEST_SERIES")}
+          onClick={() => {
+            setProductTypeTab("TEST_SERIES");
+            if (statusFilter === "ARCHIVED") setStatusFilter("ALL");
+          }}
           style={{
-            backgroundColor: productTypeTab === "TEST_SERIES" ? "#ffffff" : "transparent",
-            color: productTypeTab === "TEST_SERIES" ? "#0f172a" : "#64748b",
+            backgroundColor: productTypeTab === "TEST_SERIES" && statusFilter !== "ARCHIVED" ? "#ffffff" : "transparent",
+            color: productTypeTab === "TEST_SERIES" && statusFilter !== "ARCHIVED" ? "#0f172a" : "#64748b",
             fontWeight: 700,
             fontSize: "0.8125rem",
             padding: "0.4rem 0.85rem",
@@ -391,7 +420,29 @@ export function CourseManagementView() {
             cursor: "pointer",
           }}
         >
-          Test Series Packs ({courses.filter((c) => c.productType === "TEST_SERIES").length})
+          Test Series Packs ({courses.filter((c) => c.productType === "TEST_SERIES" && c.status !== "ARCHIVED").length})
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            setProductTypeTab("ARCHIVED");
+            setStatusFilter("ARCHIVED");
+          }}
+          style={{
+            backgroundColor: productTypeTab === "ARCHIVED" || statusFilter === "ARCHIVED" ? "#ffffff" : "transparent",
+            color: productTypeTab === "ARCHIVED" || statusFilter === "ARCHIVED" ? "#dc2626" : "#64748b",
+            fontWeight: 700,
+            fontSize: "0.8125rem",
+            padding: "0.4rem 0.85rem",
+            borderRadius: "0.375rem",
+            border: "none",
+            cursor: "pointer",
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "0.35rem",
+          }}
+        >
+          <span>📦 Archived ({archivedCount})</span>
         </button>
       </div>
 
@@ -430,7 +481,15 @@ export function CourseManagementView() {
           <label style={{ fontSize: "0.875rem", color: "#475569", fontWeight: 500 }}>Status:</label>
           <select
             value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
+            onChange={(e) => {
+              const val = e.target.value;
+              setStatusFilter(val);
+              if (val === "ARCHIVED") {
+                setProductTypeTab("ARCHIVED");
+              } else if (productTypeTab === "ARCHIVED") {
+                setProductTypeTab("ALL");
+              }
+            }}
             style={{
               padding: "0.5rem 0.875rem",
               borderRadius: "0.375rem",
@@ -439,10 +498,10 @@ export function CourseManagementView() {
               backgroundColor: "#ffffff",
             }}
           >
-            <option value="ALL">All Statuses</option>
+            <option value="ALL">All Active Statuses</option>
             <option value="PUBLISHED">Published</option>
             <option value="DRAFT">Draft</option>
-            <option value="ARCHIVED">Archived</option>
+            <option value="ARCHIVED">📦 Archived ({archivedCount})</option>
           </select>
         </div>
       </div>
@@ -555,76 +614,130 @@ export function CourseManagementView() {
                           borderRadius: "9999px",
                           fontSize: "0.75rem",
                           fontWeight: 700,
-                          backgroundColor: c.status === "PUBLISHED" ? "#dcfce7" : c.status === "DRAFT" ? "#fef3c7" : "#f1f5f9",
-                          color: c.status === "PUBLISHED" ? "#15803d" : c.status === "DRAFT" ? "#b45309" : "#475569",
+                          backgroundColor:
+                            c.status === "ARCHIVED" || c.deletedAt
+                              ? "#f1f5f9"
+                              : c.status === "PUBLISHED"
+                              ? "#dcfce7"
+                              : "#fef3c7",
+                          color:
+                            c.status === "ARCHIVED" || c.deletedAt
+                              ? "#64748b"
+                              : c.status === "PUBLISHED"
+                              ? "#15803d"
+                              : "#b45309",
+                          border:
+                            c.status === "ARCHIVED" || c.deletedAt
+                              ? "1px solid #cbd5e1"
+                              : "none",
                         }}
                       >
-                        {c.status}
+                        {c.status === "ARCHIVED" || c.deletedAt ? "📦 ARCHIVED" : c.status}
                       </span>
                     </td>
 
                     <td style={{ padding: "1rem", textAlign: "right" }}>
                       <div style={{ display: "inline-flex", gap: "0.35rem" }}>
-                        <Link
-                          href={publicUrl}
-                          target="_blank"
-                          style={{
-                            padding: "0.35rem 0.65rem",
-                            borderRadius: "0.375rem",
-                            border: "1px solid #cbd5e1",
-                            color: "#334155",
-                            textDecoration: "none",
-                            fontSize: "0.75rem",
-                            fontWeight: 600,
-                          }}
-                        >
-                          View ↗
-                        </Link>
-                        <button
-                          onClick={() => handleToggleStatus(c)}
-                          style={{
-                            padding: "0.35rem 0.65rem",
-                            borderRadius: "0.375rem",
-                            border: "1px solid #cbd5e1",
-                            backgroundColor: "#fff",
-                            color: c.status === "PUBLISHED" ? "#b45309" : "#15803d",
-                            fontSize: "0.75rem",
-                            fontWeight: 600,
-                            cursor: "pointer",
-                          }}
-                        >
-                          {c.status === "PUBLISHED" ? "Unpublish" : "Publish"}
-                        </button>
-                        <button
-                          onClick={() => openEditModal(c)}
-                          style={{
-                            padding: "0.35rem 0.65rem",
-                            borderRadius: "0.375rem",
-                            border: "1px solid #cbd5e1",
-                            backgroundColor: "#fff",
-                            color: "#2563eb",
-                            fontSize: "0.75rem",
-                            fontWeight: 600,
-                            cursor: "pointer",
-                          }}
-                        >
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => handleDeleteCourse(c)}
-                          style={{
-                            padding: "0.35rem 0.65rem",
-                            borderRadius: "0.375rem",
-                            border: "1px solid #fecaca",
-                            backgroundColor: "#fff5f5",
-                            color: "#dc2626",
-                            fontSize: "0.75rem",
-                            fontWeight: 600,
-                            cursor: "pointer",
-                          }}
-                        >
-                          Archive
-                        </button>
+                        {c.status === "ARCHIVED" || c.deletedAt ? (
+                          <>
+                            <button
+                              onClick={() => handleRestoreCourse(c)}
+                              style={{
+                                padding: "0.35rem 0.75rem",
+                                borderRadius: "0.375rem",
+                                border: "1px solid #86efac",
+                                backgroundColor: "#f0fdf4",
+                                color: "#16a34a",
+                                fontSize: "0.75rem",
+                                fontWeight: 700,
+                                cursor: "pointer",
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: "0.25rem",
+                              }}
+                            >
+                              ↺ Restore to Draft
+                            </button>
+                            <button
+                              onClick={() => openEditModal(c)}
+                              style={{
+                                padding: "0.35rem 0.65rem",
+                                borderRadius: "0.375rem",
+                                border: "1px solid #cbd5e1",
+                                backgroundColor: "#fff",
+                                color: "#2563eb",
+                                fontSize: "0.75rem",
+                                fontWeight: 600,
+                                cursor: "pointer",
+                              }}
+                            >
+                              Edit
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            <Link
+                              href={publicUrl}
+                              target="_blank"
+                              style={{
+                                padding: "0.35rem 0.65rem",
+                                borderRadius: "0.375rem",
+                                border: "1px solid #cbd5e1",
+                                color: "#334155",
+                                textDecoration: "none",
+                                fontSize: "0.75rem",
+                                fontWeight: 600,
+                              }}
+                            >
+                              View ↗
+                            </Link>
+                            <button
+                              onClick={() => handleToggleStatus(c)}
+                              style={{
+                                padding: "0.35rem 0.65rem",
+                                borderRadius: "0.375rem",
+                                border: "1px solid #cbd5e1",
+                                backgroundColor: "#fff",
+                                color: c.status === "PUBLISHED" ? "#b45309" : "#15803d",
+                                fontSize: "0.75rem",
+                                fontWeight: 600,
+                                cursor: "pointer",
+                              }}
+                            >
+                              {c.status === "PUBLISHED" ? "Unpublish" : "Publish"}
+                            </button>
+                            <button
+                              onClick={() => openEditModal(c)}
+                              style={{
+                                padding: "0.35rem 0.65rem",
+                                borderRadius: "0.375rem",
+                                border: "1px solid #cbd5e1",
+                                backgroundColor: "#fff",
+                                color: "#2563eb",
+                                fontSize: "0.75rem",
+                                fontWeight: 600,
+                                cursor: "pointer",
+                              }}
+                            >
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => handleDeleteCourse(c)}
+                              style={{
+                                padding: "0.35rem 0.65rem",
+                                borderRadius: "0.375rem",
+                                border: "1px solid #fecaca",
+                                backgroundColor: "#fff5f5",
+                                color: "#dc2626",
+                                fontSize: "0.75rem",
+                                fontWeight: 600,
+                                cursor: "pointer",
+                              }}
+                            >
+                              Archive
+                            </button>
+                          </>
+                        )}
                       </div>
                     </td>
                   </tr>

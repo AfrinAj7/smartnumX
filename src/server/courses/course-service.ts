@@ -39,7 +39,7 @@ export const courseSchema = z.object({
 export type CourseInput = z.infer<typeof courseSchema>;
 
 export interface CourseListFilters {
-  status?: CourseStatus | "ALL";
+  status?: CourseStatus | "ALL" | "ARCHIVED";
   categoryId?: string;
   search?: string;
   page?: number;
@@ -51,27 +51,44 @@ export async function listAdminCourses(filters: CourseListFilters = {}) {
   const pageSize = Math.min(100, Math.max(1, filters.pageSize ?? 20));
   const skip = (page - 1) * pageSize;
 
-  const where: Prisma.CourseWhereInput = {
-    deletedAt: null,
-  };
+  const isArchivedQuery = (filters.status as string) === "ARCHIVED";
 
-  if (filters.status && filters.status !== "ALL") {
-    where.status = filters.status;
-  }
+  const where: Prisma.CourseWhereInput = isArchivedQuery
+    ? {
+        OR: [
+          { status: CourseStatus.ARCHIVED },
+          { deletedAt: { not: null } },
+        ],
+      }
+    : filters.status && filters.status !== "ALL"
+    ? {
+        status: filters.status,
+        deletedAt: null,
+      }
+    : {
+        deletedAt: null,
+        status: { not: CourseStatus.ARCHIVED },
+      };
 
   if (filters.categoryId) {
     where.categoryId = filters.categoryId;
   }
 
   if (filters.search) {
-    where.OR = [
-      { title: { contains: filters.search, mode: "insensitive" } },
-      { slug: { contains: filters.search, mode: "insensitive" } },
-      { description: { contains: filters.search, mode: "insensitive" } },
+    const searchConditions = [
+      { title: { contains: filters.search, mode: "insensitive" as const } },
+      { slug: { contains: filters.search, mode: "insensitive" as const } },
+      { description: { contains: filters.search, mode: "insensitive" as const } },
     ];
+    if (where.OR) {
+      where.AND = [{ OR: where.OR }, { OR: searchConditions }];
+      delete where.OR;
+    } else {
+      where.OR = searchConditions;
+    }
   }
 
-  const [total, courses] = await Promise.all([
+  const [total, courses, archivedCount] = await Promise.all([
     db.course.count({ where }),
     db.course.findMany({
       where,
@@ -91,6 +108,14 @@ export async function listAdminCourses(filters: CourseListFilters = {}) {
         },
       },
     }),
+    db.course.count({
+      where: {
+        OR: [
+          { status: CourseStatus.ARCHIVED },
+          { deletedAt: { not: null } },
+        ],
+      },
+    }),
   ]);
 
   return {
@@ -104,13 +129,18 @@ export async function listAdminCourses(filters: CourseListFilters = {}) {
       pageSize,
       total,
       totalPages: Math.ceil(total / pageSize),
+      archivedCount,
     },
   };
 }
 
-export async function getCourseById(id: string) {
+export async function getCourseById(id: string, includeArchived = false) {
+  const where: Prisma.CourseWhereInput = { id };
+  if (!includeArchived) {
+    where.deletedAt = null;
+  }
   const course = await db.course.findFirst({
-    where: { id, deletedAt: null },
+    where,
     include: {
       category: true,
       instructor: { select: { id: true, name: true, email: true } },
@@ -327,26 +357,30 @@ export async function updateCourse(id: string, input: Partial<CourseInput>, acto
 
 export async function updateCourseStatus(id: string, status: CourseStatus, actorId: string, ip?: string) {
   const existing = await db.course.findFirst({
-    where: { id, deletedAt: null },
+    where: { id },
   });
 
   if (!existing) {
     throw new Error("Course not found");
   }
 
+  const isArchived = status === CourseStatus.ARCHIVED;
   const updated = await db.course.update({
     where: { id },
-    data: { status },
+    data: {
+      status,
+      deletedAt: isArchived ? (existing.deletedAt || new Date()) : null,
+    },
   });
 
   await db.auditLog.create({
     data: {
       actorId,
-      action: `COURSE_STATUS_${status}`,
+      action: isArchived ? "COURSE_ARCHIVED" : `COURSE_STATUS_${status}`,
       entityType: "Course",
       entityId: id,
-      before: { status: existing.status },
-      after: { status: updated.status },
+      before: { status: existing.status, deletedAt: existing.deletedAt },
+      after: { status: updated.status, deletedAt: updated.deletedAt },
       ip: ip || null,
     },
   });
@@ -356,6 +390,10 @@ export async function updateCourseStatus(id: string, status: CourseStatus, actor
     price: Number(updated.price),
     discountPrice: updated.discountPrice ? Number(updated.discountPrice) : null,
   };
+}
+
+export async function restoreCourse(id: string, actorId: string, ip?: string) {
+  return updateCourseStatus(id, CourseStatus.DRAFT, actorId, ip);
 }
 
 export async function deleteCourse(id: string, actorId: string, ip?: string) {
